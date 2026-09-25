@@ -5,6 +5,7 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.scratch221171.simpletoolbelt.common.registry.STDataComponents;
 import net.scratch221171.simpletoolbelt.common.registry.STItems;
+import net.scratch221171.simpletoolbelt.common.registry.STMenus;
 import net.scratch221171.simpletoolbelt.config.ModConfigs;
 import net.scratch221171.simpletoolbelt.mdk.config.PlatformConfigRegistrar;
 import net.scratch221171.simpletoolbelt.mdk.config.VersionedConfigSpec;
@@ -17,5 +18,8 @@ public class SimpleToolbelt {
 
         STDataComponents.register(modEventBus);
         STItems.register(modEventBus);
+        STMenus.register(modEventBus);
+        // STPayloads and STKeyMappings/STClientEvents are @EventBusSubscriber-annotated and are
+        // picked up automatically by NeoForge's classpath scan — no explicit registration needed here.
     }
 }
