@@ -75,7 +75,7 @@ IntelliJ IDEAまたはGradleでプロジェクトを開いたりインポート�
 2. テンプレートの更新を継続して取り込みたい場合は、通常の開発を始める前に[上流への追従](#上流への追従)を実施します。
 3. `settings.gradle.kts`を編集し、使用しない`include(...)`行をコメントアウトして、Gradleの設定時間とキャッシュ使用量を減らします。
 4. `gradle.properties`でMod ID、名前、グループ、ライセンス、作者、URL、Fabricエントリーポイントを編集し、`version.txt`でModバージョンを編集します。
-5. 他のModとの競合を避けるため、共有設定システム内のものを含む、すべてのJavaパッケージ名を変更します。`Constants`、エントリーポイント、Mixin設定名、refmap名、言語アセット内の`examplemod`をMod IDに置き換えてください。
+5. 他のModとの競合を避けるため、共有設定システム内のものを含む、すべてのJavaパッケージ名を変更します。`ST`、エントリーポイント、Mixin設定名、refmap名、言語アセット内の`examplemod`をMod IDに置き換えてください。
 6. Mod用のルート`README.md`と`LICENSE`を作成します。将来のテンプレート更新をきれいにマージしたい場合は、`docs/*.md`を変更せずに維持してください。
 
 ## 生成されるメタデータ
@@ -148,7 +148,7 @@ Windowsでは次を実行します。
 通常のバージョン要求には`req(version)`を使用し、Gradleに他の選択バージョンをすべて拒否させる必要がある場合に限り`pin(version)`を使用します。
 
 ```kotlin
-import net.meatwo310.mdk.build.req
+import net.scratch221171.mdk.build.req
 
 val modmenuVersion: String by project
 
@@ -259,11 +259,11 @@ Fabric 1.18.2～1.19.2では、独立したcommonアーティファクトを持�
 ビルダーは、プリミティブ値、範囲付き数値、文字列、リスト、enum、ネストしたセクションをサポートします。連続した`comment(...)`呼び出しは改行で結合され、次のエントリーまたはカテゴリーに適用されます。カテゴリーパスに関係なく、次のエントリーまたはカテゴリーへ正確な翻訳キーを割り当てるには`translation(...)`を使用します。すべてのプラットフォームでエントリーに`worldRestart()`を、NeoForgeでは`gameRestart()`を指定できます。Forge Config APIを使うプラットフォームでは`gameRestart()`が無視されます。階層的な設定には、`category(...)`とネストしたクラスを推奨します。`push(...)`、`pop()`、`pop(int count)`は、低レベルのアダプター処理や特殊な移行処理に使用してください。
 
 ```java
-package net.meatwo310.examplemod.config;
+package net.scratch221171.simpletoolbelt.config;
 
-import net.meatwo310.examplemod.mdk.config.ConfigEntries;
-import net.meatwo310.examplemod.mdk.config.ConfigEntry;
-import net.meatwo310.examplemod.mdk.config.ConfigEntryBuilder;
+import net.scratch221171.simpletoolbelt.mdk.config.ConfigEntries;
+import net.scratch221171.simpletoolbelt.mdk.config.ConfigEntry;
+import net.scratch221171.simpletoolbelt.mdk.config.ConfigEntryBuilder;
 
 import java.util.List;
 
@@ -466,7 +466,7 @@ Publishワークフローの実行手順は次のとおりです。
 両方のサービスで同じslugを使う場合は、1つのslugを渡します。slugが異なる場合、または一方のサービスだけに関連付ける場合は、設定ブロックを使用します。
 
 ```kotlin
-import net.meatwo310.mdk.build.platformArtifacts
+import net.scratch221171.mdk.build.platformArtifacts
 
 platformArtifacts {
     publishingDependencies {

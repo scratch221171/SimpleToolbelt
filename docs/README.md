@@ -78,7 +78,7 @@ Before opening or importing the project in IntelliJ IDEA or Gradle, trim `settin
    [Receiving Upstream Updates](#receiving-upstream-updates) before regular development.
 3. Edit `settings.gradle.kts` and comment out unused `include(...)` lines to reduce Gradle configuration time and cache usage.
 4. Edit `gradle.properties` for your mod id, name, group, license, authors, URLs, and Fabric entry points, and edit `version.txt` for your mod version.
-5. Rename ALL Java package names (including those in the shared configuration system) to avoid conflicts with other mods. Update `Constants`, entry points, mixin config names, refmap names, and language assets from `examplemod` to your mod id.
+5. Rename ALL Java package names (including those in the shared configuration system) to avoid conflicts with other mods. Update `ST`, entry points, mixin config names, refmap names, and language assets from `examplemod` to your mod id.
 6. Create a root `README.md` and `LICENSE` for your mod. Keep `docs/*.md` unchanged if you want future template updates to merge cleanly.
 
 ## Generated Metadata
@@ -158,7 +158,7 @@ Use `req(version)` for normal version requests and `pin(version)` only when
 Gradle must reject any other selected version:
 
 ```kotlin
-import net.meatwo310.mdk.build.req
+import net.scratch221171.mdk.build.req
 
 val modmenuVersion: String by project
 
@@ -300,11 +300,11 @@ config; keep `push(...)`, `pop()`, and `pop(int count)` for low-level adapter
 work or unusual migration cases.
 
 ```java
-package net.meatwo310.examplemod.config;
+package net.scratch221171.simpletoolbelt.config;
 
-import net.meatwo310.examplemod.mdk.config.ConfigEntries;
-import net.meatwo310.examplemod.mdk.config.ConfigEntry;
-import net.meatwo310.examplemod.mdk.config.ConfigEntryBuilder;
+import net.scratch221171.simpletoolbelt.mdk.config.ConfigEntries;
+import net.scratch221171.simpletoolbelt.mdk.config.ConfigEntry;
+import net.scratch221171.simpletoolbelt.mdk.config.ConfigEntryBuilder;
 
 import java.util.List;
 
@@ -539,7 +539,7 @@ Pass one slug when both services use the same value. Use a configuration block
 when the slugs differ or the relation applies to only one service:
 
 ```kotlin
-import net.meatwo310.mdk.build.platformArtifacts
+import net.scratch221171.mdk.build.platformArtifacts
 
 platformArtifacts {
     publishingDependencies {

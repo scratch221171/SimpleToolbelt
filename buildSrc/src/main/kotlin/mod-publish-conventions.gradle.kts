@@ -3,11 +3,11 @@ import me.modmuss50.mpp.PublishModTask
 import me.modmuss50.mpp.ReleaseType
 import me.modmuss50.mpp.platforms.curseforge.CurseforgeOptions
 import me.modmuss50.mpp.platforms.modrinth.ModrinthOptions
-import net.meatwo310.mdk.build.DownloadGitHubRelease
-import net.meatwo310.mdk.build.ModPublishingExtension
-import net.meatwo310.mdk.build.PublishedDependency
-import net.meatwo310.mdk.build.PublishedDependencyType
-import net.meatwo310.mdk.build.platformArtifacts
+import net.scratch221171.mdk.build.DownloadGitHubRelease
+import net.scratch221171.mdk.build.ModPublishingExtension
+import net.scratch221171.mdk.build.PublishedDependency
+import net.scratch221171.mdk.build.PublishedDependencyType
+import net.scratch221171.mdk.build.platformArtifacts
 
 plugins {
     id("me.modmuss50.mod-publish-plugin")

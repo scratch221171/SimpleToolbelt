@@ -89,7 +89,7 @@ This file maps repository locations to responsibilities.
 
 `src/client/java`
 
-- Fabric client source set, including Fabric `ModClient`.
+- Fabric client source set, including Fabric `SimpleToolbeltClient`.
 
 `src/config/java`
 

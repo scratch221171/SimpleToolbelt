@@ -1,6 +1,6 @@
 import groovy.json.JsonOutput
-import net.meatwo310.mdk.build.platformArtifacts
-import net.meatwo310.mdk.build.supportsGameTestServer
+import net.scratch221171.mdk.build.platformArtifacts
+import net.scratch221171.mdk.build.supportsGameTestServer
 import org.gradle.plugins.ide.idea.model.IdeaModel
 
 plugins {
@@ -10,6 +10,12 @@ plugins {
     id("net.neoforged.moddev") apply false
     id("net.neoforged.moddev.legacyforge") apply false
     id("mod-publish-conventions")
+
+    id("com.diffplug.spotless") version "8.7.0"
+}
+
+repositories {
+    mavenCentral()
 }
 
 modPublishing {
@@ -237,5 +243,18 @@ subprojects {
                 isDownloadJavadoc = true
             }
         }
+    }
+}
+
+spotless {
+    java {
+        target("**/src/main/java/net/scratch221171/simpletoolbelt/**/*.java")
+        palantirJavaFormat()
+
+        formatAnnotations()
+        importOrder()
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
     }
 }

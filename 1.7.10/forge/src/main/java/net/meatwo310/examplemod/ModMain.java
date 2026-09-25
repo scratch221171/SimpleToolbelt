@@ -1,4 +1,4 @@
-package net.meatwo310.examplemod;
+package net.scratch221171.simpletoolbelt;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

@@ -1,4 +1,4 @@
-import net.meatwo310.mdk.build.*
+import net.scratch221171.mdk.build.*
 import net.minecraftforge.gradle.ForgeGradleExtension
 import net.minecraftforge.gradle.MinecraftExtensionForProject
 import org.gradle.api.file.DuplicatesStrategy

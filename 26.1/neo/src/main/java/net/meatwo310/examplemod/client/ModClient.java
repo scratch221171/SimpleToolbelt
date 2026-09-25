@@ -1,7 +1,7 @@
-package net.meatwo310.examplemod.client;
+package net.scratch221171.simpletoolbelt.client;
 
-import net.meatwo310.examplemod.Constants;
-import net.meatwo310.examplemod.client.mdk.config.KeyedConfigScreen;
+import net.scratch221171.simpletoolbelt.Constants;
+import net.scratch221171.simpletoolbelt.client.mdk.config.KeyedConfigScreen;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
