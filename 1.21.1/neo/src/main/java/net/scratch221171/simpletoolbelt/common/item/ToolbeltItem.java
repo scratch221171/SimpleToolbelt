@@ -8,7 +8,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.scratch221171.simpletoolbelt.common.component.StoredItem;
+import net.scratch221171.simpletoolbelt.common.component.ToolbeltContents;
 import net.scratch221171.simpletoolbelt.common.menu.ToolbeltMenu;
 import net.scratch221171.simpletoolbelt.common.registry.STDataComponents;
 import org.jspecify.annotations.NonNull;
@@ -20,12 +20,14 @@ public class ToolbeltItem extends Item {
     }
 
     @Override
-    public @NonNull InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public @NonNull InteractionResultHolder<ItemStack> use(Level level, Player player, @NonNull InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         if (!level.isClientSide) {
-            player.openMenu(new SimpleMenuProvider(
-                    (containerId, inventory, p) -> ToolbeltMenu.forHeldItem(containerId, inventory, stack, hand),
-                    Component.translatable(this.getDescriptionId(stack))));
+            player.openMenu(
+                    new SimpleMenuProvider(
+                            (containerId, inventory, p) -> ToolbeltMenu.forHeldItem(containerId, inventory, stack),
+                            Component.translatable(this.getDescriptionId(stack))),
+                    buf -> buf.writeEnum(hand)); // ← 追加データとしてhandだけ書き込む
         }
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
     }
@@ -36,7 +38,7 @@ public class ToolbeltItem extends Item {
     }
 
     /** Convenience accessor used by client code (wheel overlay, etc.). */
-    public static StoredItem getStored(ItemStack stack) {
-        return stack.getOrDefault(STDataComponents.STORED_ITEM.get(), StoredItem.DEFAULT);
+    public static ToolbeltContents getContent(ItemStack stack) {
+        return stack.getOrDefault(STDataComponents.TOOLBELT_CONTENTS.get(), ToolbeltContents.DEFAULT);
     }
 }

@@ -22,7 +22,7 @@ public final class Const {
         public static final class DataComponent {
             private DataComponent() {}
 
-            public static final String STORED_ITEM = "stored_item";
+            public static final String TOOLBELT_CONTENTS = "toolbelt_contents";
         }
     }
 }
