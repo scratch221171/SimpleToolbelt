@@ -1,11 +1,15 @@
 package net.scratch221171.simpletoolbelt.client.gui;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
+import net.scratch221171.simpletoolbelt.Const;
+import net.scratch221171.simpletoolbelt.STUtils;
 import net.scratch221171.simpletoolbelt.client.STClientEvents;
 import net.scratch221171.simpletoolbelt.client.STKeyMappings;
 import net.scratch221171.simpletoolbelt.common.component.ToolbeltContents;
@@ -13,28 +17,22 @@ import net.scratch221171.simpletoolbelt.common.item.ToolbeltItem;
 import net.scratch221171.simpletoolbelt.common.network.SelectBeltSlotPayload;
 import org.jspecify.annotations.NonNull;
 
-/**
- * Client-only "screen" that appears while R is held. Deliberately NOT tied to a menu/container —
- * it just reads the belt's current contents off the client player's own (already-synced)
- * inventory stack and renders them. All actual mutation happens server-side once a selection or
- * stow is sent.
- * <p>
- * KNOWN LIMITATION: because this is a Screen, vanilla will not process movement (WASD) input while
- * it's open — the player is frozen in place for the duration of the hold. Good enough for a first
- * working pass; smoother "look/move while the wheel is open" behavior would need a Mixin-based
- * approach (e.g. intercepting MouseHandler) instead of a Screen, which is a reasonable follow-up.
- */
 public class ToolbeltWheelScreen extends Screen {
 
     private static final float WHEEL_RADIUS = 70f;
+    private static final float INNER_DEADZONE_RADIUS = 30f;
+    private static final float OUTER_STOW_ZONE_RADIUS = 150f;
+
     private static final int ICON_SIZE = 16;
 
-    private static final float INNER_DEADZONE = 20f; // Createの5px相当より少し広め
+    private static final ResourceLocation SELECTED_FRAME_SPRITE = STUtils.id("textures/hud/wheel_selected_frame.png");
+    private static final ResourceLocation FRAME_SPRITE = STUtils.id("textures/hud/wheel_frame.png");
+    private static final ResourceLocation EMPTY_SPRITE = STUtils.id("textures/hud/wheel_empty.png");
 
     private HoverState hoverState = HoverState.noAction();
 
     public ToolbeltWheelScreen() {
-        super(Component.translatable("gui.simpletoolbelt.wheel"));
+        super(Component.translatable(Const.LangKey.WHEEL_SCREEN));
     }
 
     @Override
@@ -55,10 +53,13 @@ public class ToolbeltWheelScreen extends Screen {
         }
         ItemStack belt = STClientEvents.findToolbeltInInventory(mc);
         if (belt.isEmpty()) {
-            // belt vanished mid-hold (dropped, etc.) — bail out quietly
             this.onClose();
             return;
         }
+
+        //        renderMenuBackground(guiGraphics);
+        renderBackground(guiGraphics, mouseX, mouseY, partialTick);
+
         ToolbeltContents stored = ToolbeltItem.getContent(belt);
 
         int centerX = this.width / 2;
@@ -67,11 +68,11 @@ public class ToolbeltWheelScreen extends Screen {
         float dx = mouseX - centerX;
         float dy = mouseY - centerY;
         float distance = (float) Math.sqrt(dx * dx + dy * dy);
-        float stowThreshold = Math.min(this.width, this.height) * 0.45f;
+        float stowThreshold = Math.min(OUTER_STOW_ZONE_RADIUS, Math.min(this.width, this.height) * 0.45f);
 
         if (distance > stowThreshold) {
             hoverState = HoverState.stow();
-        } else if (distance < INNER_DEADZONE) {
+        } else if (distance < INNER_DEADZONE_RADIUS) {
             hoverState = HoverState.noAction();
         } else {
             double angleDeg = Math.toDegrees(Math.atan2(dx, -dy));
@@ -84,17 +85,48 @@ public class ToolbeltWheelScreen extends Screen {
             double angleRad = Math.toRadians(i * 45.0);
             int x = centerX + (int) (WHEEL_RADIUS * Math.sin(angleRad)) - ICON_SIZE / 2;
             int y = centerY - (int) (WHEEL_RADIUS * Math.cos(angleRad)) - ICON_SIZE / 2;
+            boolean isSelected = hoverState.action() == HoverState.HoverAction.SELECT && i == hoverState.index();
+            ItemStack initialStack = stored.ring().initial().getStack(i);
+            ItemStack currentStack = stored.ring().current().getStack(i);
 
-            boolean isHovered = hoverState.action() == HoverState.HoverAction.SELECT && i == hoverState.index();
-            int bgColor = isHovered ? 0xAAFFFFFF : 0x55000000;
-            int margin = isHovered ? 6 : 4;
-            guiGraphics.fill(x - margin, y - margin, x + ICON_SIZE + margin, y + ICON_SIZE + margin, bgColor);
-
-            ItemStack slotStack = stored.ring().current().getStack(i);
-            if (!slotStack.isEmpty()) {
-                guiGraphics.renderItem(slotStack, x, y);
-                guiGraphics.renderItemDecorations(this.font, slotStack, x, y);
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+            if (currentStack.isEmpty()) {
+                if (initialStack.isEmpty()) {
+                    guiGraphics.blit(
+                            EMPTY_SPRITE, x - (10 - ICON_SIZE) / 2, y - (10 - ICON_SIZE) / 2, 0, 0, 10, 10, 10, 10);
+                } else {
+                    guiGraphics.blit(
+                            FRAME_SPRITE, x - (22 - ICON_SIZE) / 2, y - (22 - ICON_SIZE) / 2, 0, 0, 22, 22, 22, 22);
+                    guiGraphics.fill(x, y, x + ICON_SIZE, y + ICON_SIZE, 0x80202020);
+                    guiGraphics.renderItem(initialStack, x, y);
+                    guiGraphics.pose().pushPose();
+                    guiGraphics.pose().translate(0.0F, 0.0F, 200.0F);
+                    guiGraphics.drawString(font, "0", x + 17 - font.width("0"), y + 9, 16777215, true);
+                    guiGraphics.pose().popPose();
+                }
+            } else {
+                guiGraphics.blit(
+                        FRAME_SPRITE, x - (22 - ICON_SIZE) / 2, y - (22 - ICON_SIZE) / 2, 0, 0, 22, 22, 22, 22);
+                if (isSelected) {
+                    guiGraphics.blit(
+                            SELECTED_FRAME_SPRITE,
+                            x - (24 - ICON_SIZE) / 2,
+                            y - (24 - ICON_SIZE) / 2,
+                            0,
+                            0,
+                            24,
+                            24,
+                            24,
+                            24);
+                }
+                guiGraphics.renderItem(currentStack, x, y);
+                guiGraphics.renderItemDecorations(this.font, currentStack, x, y);
+                if (isSelected) {
+                    guiGraphics.renderTooltip(this.font, currentStack, mouseX, mouseY);
+                }
             }
+            RenderSystem.disableBlend();
         }
 
         int centerColor = hoverState.action() == HoverState.HoverAction.STOW ? 0xAAFFFFFF : 0x55FFFFFF;

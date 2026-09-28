@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": {
+      "item": "minecraft:leather"
+    },
+    ",": {
+      "item": "minecraft:gold_nugget"
+    }
+  },
+  "pattern": [
+    "#,#"
+  ],
+  "result": {
+    "count": 1,
+    "id": "simpletoolbelt:toolbelt"
+  }
+}

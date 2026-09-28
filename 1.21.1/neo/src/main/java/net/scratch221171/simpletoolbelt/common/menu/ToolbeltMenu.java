@@ -142,7 +142,7 @@ public class ToolbeltMenu extends AbstractContainerMenu {
         for (int i = 0; i < BELT_SLOTS; i++) {
             ItemStack stack = this.beltContainer.getItem(i).copy();
             modified.add(stack);
-            if (!STUtils.isSame(stack, current.getStack(i))) {
+            if (!stack.isEmpty() && !STUtils.isSame(stack, current.getStack(i))) {
                 updatedInitial = updatedInitial.withStack(i, stack);
             }
         }

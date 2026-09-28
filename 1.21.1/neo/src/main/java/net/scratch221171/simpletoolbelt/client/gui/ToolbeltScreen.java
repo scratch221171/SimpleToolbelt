@@ -8,6 +8,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.scratch221171.simpletoolbelt.Const;
+import net.scratch221171.simpletoolbelt.STUtils;
 import net.scratch221171.simpletoolbelt.common.component.ToolbeltContents;
 import net.scratch221171.simpletoolbelt.common.item.ToolbeltItem;
 import net.scratch221171.simpletoolbelt.common.menu.ToolbeltMenu;
@@ -15,13 +16,13 @@ import org.jspecify.annotations.NonNull;
 
 public class ToolbeltScreen extends AbstractContainerScreen<ToolbeltMenu> {
 
-    private static final ResourceLocation TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(Const.MOD_ID, "textures/gui/toolbelt.png");
+    private static final ResourceLocation TEXTURE = STUtils.id("textures/gui/toolbelt.png");
 
     public ToolbeltScreen(ToolbeltMenu menu, Inventory playerInventory, Component title) {
-        super(menu, playerInventory, title);
+        super(menu, playerInventory, Component.translatable(Const.LangKey.TOOLBELT_SCREEN));
         this.imageWidth = 176;
-        this.imageHeight = 166;
+        this.imageHeight = 133;
+        this.inventoryLabelY = this.imageHeight - 94;
     }
 
     @Override
@@ -37,8 +38,12 @@ public class ToolbeltScreen extends AbstractContainerScreen<ToolbeltMenu> {
             if (!slot.hasItem() && !initialStack.isEmpty()) {
                 int itemX = x + slot.x;
                 int itemY = y + slot.y;
-                guiGraphics.renderItem(initialStack, itemX, itemY);
                 guiGraphics.fill(itemX, itemY, itemX + 16, itemY + 16, 0x80202020);
+                guiGraphics.renderItem(initialStack, itemX, itemY);
+                guiGraphics.pose().pushPose();
+                guiGraphics.pose().translate(0.0F, 0.0F, 200.0F);
+                guiGraphics.drawString(font, "0", itemX + 17 - font.width("0"), itemY + 9, 16777215, true);
+                guiGraphics.pose().popPose();
             }
         }
     }

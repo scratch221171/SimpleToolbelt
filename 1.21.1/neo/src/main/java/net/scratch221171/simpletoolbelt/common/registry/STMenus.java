@@ -14,7 +14,7 @@ public class STMenus {
             DeferredRegister.create(Registries.MENU, Const.MOD_ID);
 
     public static final DeferredHolder<MenuType<?>, MenuType<ToolbeltMenu>> TOOLBELT =
-            REGISTRAR.register("toolbelt", () -> IMenuTypeExtension.create(ToolbeltMenu::new));
+            REGISTRAR.register(Const.ID.Menu.TOOLBELT, () -> IMenuTypeExtension.create(ToolbeltMenu::new));
 
     public static void register(IEventBus eventBus) {
         REGISTRAR.register(eventBus);

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import net.minecraft.world.item.ItemStack;
+import net.scratch221171.simpletoolbelt.STUtils;
 
 /**
  * Toolbeltの中身を管理するためのデータコンポーネント
@@ -42,6 +43,21 @@ public record ToolbeltContents(Ring ring) {
             List<ItemStack> copy = new ArrayList<>(stacks);
             copy.set(index, stack);
             return new StackGroup(copy);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (!(obj instanceof StackGroup(List<ItemStack> stacks1))) return false;
+            if (stacks.size() != stacks1.size()) return false;
+
+            for (int i = 0; i < stacks.size(); i++) {
+                if (!STUtils.isSame(stacks.get(i), stacks1.get(i))) {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

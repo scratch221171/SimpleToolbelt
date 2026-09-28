@@ -24,5 +24,19 @@ public final class Const {
 
             public static final String TOOLBELT_CONTENTS = "toolbelt_contents";
         }
+
+        public static final class Menu {
+            private Menu() {}
+
+            public static final String TOOLBELT = "toolbelt";
+        }
+    }
+
+    public static final class LangKey {
+        private LangKey() {}
+
+        public static final String MOD_MENU = "modmenu.descriptionTranslation." + MOD_ID,
+                TOOLBELT_SCREEN = "gui." + MOD_ID + "." + ID.Menu.TOOLBELT,
+                WHEEL_SCREEN = "gui." + MOD_ID + ".wheel";
     }
 }

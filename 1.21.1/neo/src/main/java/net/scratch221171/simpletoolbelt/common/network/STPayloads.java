@@ -50,9 +50,12 @@ public class STPayloads {
 
         if (requestedSlot == SelectBeltSlotPayload.STOW_INDEX) {
             for (int i = 0; i < initial.stacks().size(); i++) {
-                if (!initial.stacks().get(i).isEmpty() && current.stacks().get(i).isEmpty()) {
+                if (!initial.stacks().get(i).isEmpty()
+                        && current.stacks().get(i).isEmpty()) {
                     for (int j = 0; j < Inventory.INVENTORY_SIZE; j++) {
-                        if (STUtils.isSame(player.getInventory().getItem(j), initial.stacks().get(i))) {
+                        if (STUtils.isSame(
+                                player.getInventory().getItem(j),
+                                initial.stacks().get(i))) {
                             current = current.withStack(i, player.getInventory().getItem(j));
                             player.getInventory().setItem(j, ItemStack.EMPTY);
                             break;

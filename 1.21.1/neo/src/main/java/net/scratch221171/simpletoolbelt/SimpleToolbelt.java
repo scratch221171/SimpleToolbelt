@@ -1,8 +1,12 @@
 package net.scratch221171.simpletoolbelt;
 
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.Items;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.scratch221171.simpletoolbelt.common.registry.STDataComponents;
 import net.scratch221171.simpletoolbelt.common.registry.STItems;
 import net.scratch221171.simpletoolbelt.common.registry.STMenus;
@@ -19,7 +23,18 @@ public class SimpleToolbelt {
         STDataComponents.register(modEventBus);
         STItems.register(modEventBus);
         STMenus.register(modEventBus);
-        // STPayloads and STKeyMappings/STClientEvents are @EventBusSubscriber-annotated and are
-        // picked up automatically by NeoForge's classpath scan — no explicit registration needed here.
+
+        modEventBus.addListener(SimpleToolbelt::buildCreativeTabContents);
+    }
+
+    public static void buildCreativeTabContents(BuildCreativeModeTabContentsEvent event) {
+        if (event.getTabKey() != CreativeModeTabs.TOOLS_AND_UTILITIES) {
+            return;
+        }
+
+        event.insertAfter(
+                Items.LEAD.getDefaultInstance(),
+                STItems.TOOLBELT.toStack(),
+                CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
     }
 }
