@@ -19,7 +19,7 @@ public class ToolbeltScreen extends AbstractContainerScreen<ToolbeltMenu> {
     private static final ResourceLocation TEXTURE = STUtils.id("textures/gui/toolbelt.png");
 
     public ToolbeltScreen(ToolbeltMenu menu, Inventory playerInventory, Component title) {
-        super(menu, playerInventory, Component.translatable(Const.LangKey.TOOLBELT_SCREEN));
+        super(menu, playerInventory, Component.translatable(Const.LangKey.TOOLBELT_SCREEN_TITLE));
         this.imageWidth = 176;
         this.imageHeight = 133;
         this.inventoryLabelY = this.imageHeight - 94;

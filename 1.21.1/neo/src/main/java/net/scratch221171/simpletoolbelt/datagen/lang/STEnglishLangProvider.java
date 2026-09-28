@@ -12,13 +12,14 @@ public class STEnglishLangProvider extends STLangProvider {
 
     @Override
     protected void addTranslations() {
-        add(Const.LangKey.MOD_MENU, "シンプルなツールベルトを追加します。");
+        add(Const.LangKey.MOD_MENU, "Adds a simple tool belt.");
 
         // アイテム
-        addItem(STItems.TOOLBELT, "ツールベルト");
+        addItem(STItems.TOOLBELT, "Toolbelt");
 
         // メニュー
-        add(Const.LangKey.TOOLBELT_SCREEN, "ツールベルト");
-        add(Const.LangKey.WHEEL_SCREEN, "ホイール");
+        add(Const.LangKey.TOOLBELT_SCREEN_TITLE, "Toolbelt");
+        add(Const.LangKey.WHEEL_SCREEN_TITLE, "Wheel");
+        add(Const.LangKey.WHEEL_TOOLTIP_STOW, "Stow All");
     }
 }

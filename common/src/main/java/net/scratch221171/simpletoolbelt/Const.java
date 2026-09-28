@@ -36,7 +36,8 @@ public final class Const {
         private LangKey() {}
 
         public static final String MOD_MENU = "modmenu.descriptionTranslation." + MOD_ID,
-                TOOLBELT_SCREEN = "gui." + MOD_ID + "." + ID.Menu.TOOLBELT,
-                WHEEL_SCREEN = "gui." + MOD_ID + ".wheel";
+                TOOLBELT_SCREEN_TITLE = "gui." + MOD_ID + "." + ID.Menu.TOOLBELT + ".title",
+                WHEEL_SCREEN_TITLE = "gui." + MOD_ID + ".wheel.title",
+                WHEEL_TOOLTIP_STOW = "gui." + MOD_ID + ".wheel.tooltip.stow";
     }
 }

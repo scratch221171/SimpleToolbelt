@@ -18,7 +18,8 @@ public class STJapaneseLangProvider extends STLangProvider {
         addItem(STItems.TOOLBELT, "ツールベルト");
 
         // メニュー
-        add(Const.LangKey.TOOLBELT_SCREEN, "ツールベルト");
-        add(Const.LangKey.WHEEL_SCREEN, "ホイール");
+        add(Const.LangKey.TOOLBELT_SCREEN_TITLE, "ツールベルト");
+        add(Const.LangKey.WHEEL_SCREEN_TITLE, "ホイール");
+        add(Const.LangKey.WHEEL_TOOLTIP_STOW, "取り出したアイテムを片付ける");
     }
 }

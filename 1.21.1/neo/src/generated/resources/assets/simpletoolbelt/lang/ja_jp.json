@@ -1,6 +1,7 @@
 {
-  "gui.simpletoolbelt.toolbelt": "ツールベルト",
-  "gui.simpletoolbelt.wheel": "ホイール",
+  "gui.simpletoolbelt.toolbelt.title": "ツールベルト",
+  "gui.simpletoolbelt.wheel.title": "ホイール",
+  "gui.simpletoolbelt.wheel.tooltip.stow": "取り出したアイテムを片付ける",
   "item.simpletoolbelt.toolbelt": "ツールベルト",
   "modmenu.descriptionTranslation.simpletoolbelt": "シンプルなツールベルトを追加します。"
 }

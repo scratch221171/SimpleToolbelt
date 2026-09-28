@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.Container;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -34,11 +33,11 @@ public class ToolbeltMenu extends AbstractContainerMenu {
                 containerId,
                 playerInventory,
                 new SimpleContainer(BELT_SLOTS),
-                playerInventory.player.getItemInHand(extraData.readEnum(InteractionHand.class)));
+                playerInventory.getItem(extraData.readVarInt()));
     }
 
     /** Server-side constructor */
-    public static ToolbeltMenu forHeldItem(int containerId, Inventory playerInventory, ItemStack beltStack) {
+    public static ToolbeltMenu forBeltStack(int containerId, Inventory playerInventory, ItemStack beltStack) {
         ToolbeltContents contents = ToolbeltItem.getContent(beltStack);
         SimpleContainer container = new SimpleContainer(BELT_SLOTS);
         for (int i = 0; i < BELT_SLOTS; i++) {
@@ -92,11 +91,11 @@ public class ToolbeltMenu extends AbstractContainerMenu {
                 return ItemStack.EMPTY;
             }
         } finally {
-            quickMoveContext = false; // 例外時も必ず戻す
+            quickMoveContext = false;
         }
 
         if (original.getCount() == copy.getCount()) {
-            return ItemStack.EMPTY; // 何も動かなかった
+            return ItemStack.EMPTY;
         }
         if (original.isEmpty()) {
             slot.set(ItemStack.EMPTY);
