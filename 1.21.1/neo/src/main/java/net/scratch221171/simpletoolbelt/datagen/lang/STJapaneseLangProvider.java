@@ -16,10 +16,17 @@ public class STJapaneseLangProvider extends STLangProvider {
 
         // アイテム
         addItem(STItems.TOOLBELT, "ツールベルト");
+        add(Const.LangKey.Item.INITIALIZING_UUID, "初期化中...");
+        add(Const.LangKey.Item.SHIFT_FOR_MORE_INFO, "[%s]を押してさらに表示");
 
         // メニュー
-        add(Const.LangKey.TOOLBELT_SCREEN_TITLE, "ツールベルト");
-        add(Const.LangKey.WHEEL_SCREEN_TITLE, "ホイール");
-        add(Const.LangKey.WHEEL_TOOLTIP_STOW, "取り出したアイテムを片付ける");
+        add(Const.LangKey.Screen.TOOLBELT_SCREEN_TITLE, "ツールベルト");
+        add(Const.LangKey.Screen.WHEEL_SCREEN_TITLE, "ホイール");
+        add(Const.LangKey.Screen.WHEEL_TOOLTIP_STOW, "アイテムを片付ける");
+
+        // コマンド
+        add(Const.LangKey.Commands.NOT_FOUND, "ベルトが見つかりません");
+        add(Const.LangKey.Commands.PRINT_ALL, "以下のUUIDが保存されています: %s");
+        add(Const.LangKey.Commands.RESTORED, "以下のUUIDのベルトを復元しました: %s");
     }
 }

@@ -1,15 +1,18 @@
-package net.scratch221171.simpletoolbelt.common.component;
+package net.scratch221171.simpletoolbelt.common.storage;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 import net.scratch221171.simpletoolbelt.STUtils;
 
 /**
- * Toolbeltの中身を管理するためのデータコンポーネント
+ * Toolbeltの中身を管理するためのレコード
  *
  * @param ring 1周につき1ring。将来的にList<Ring>に変更するかも
  */
@@ -19,6 +22,8 @@ public record ToolbeltContents(Ring ring) {
     public static final ToolbeltContents DEFAULT = new ToolbeltContents(Ring.DEFAULT);
 
     public static final Codec<ToolbeltContents> CODEC = Ring.CODEC.xmap(ToolbeltContents::new, ToolbeltContents::ring);
+    public static final StreamCodec<RegistryFriendlyByteBuf, ToolbeltContents> STREAM_CODEC =
+            ByteBufCodecs.fromCodecWithRegistries(ToolbeltContents.CODEC);
 
     public record Ring(StackGroup initial, StackGroup current) {
         public static final Ring DEFAULT = new Ring(StackGroup.EMPTY, StackGroup.EMPTY);
@@ -59,5 +64,16 @@ public record ToolbeltContents(Ring ring) {
 
             return true;
         }
+    }
+
+    public static boolean isEmpty(ToolbeltContents contents) {
+        StackGroup init = contents.ring().initial();
+        StackGroup cur = contents.ring().current();
+        for (int i = 0; i < RING_SIZE; i++) {
+            if (!init.getStack(i).isEmpty() || !cur.getStack(i).isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
 }

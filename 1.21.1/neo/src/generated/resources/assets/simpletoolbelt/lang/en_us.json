@@ -1,7 +1,12 @@
 {
+  "commands.simpletoolbelt.list.failed.notfound": "Belt not found",
+  "commands.simpletoolbelt.list.success.printall": "UUID stored in storage: %s",
+  "commands.simpletoolbelt.restore.success.restored": "Restored the belt with the following UUID: %s",
   "gui.simpletoolbelt.toolbelt.title": "Toolbelt",
   "gui.simpletoolbelt.wheel.title": "Wheel",
   "gui.simpletoolbelt.wheel.tooltip.stow": "Stow All",
   "item.simpletoolbelt.toolbelt": "Toolbelt",
+  "item.simpletoolbelt.toolbeltinitializingUUID": "Initializing...",
+  "item.simpletoolbelt.toolbeltshiftKey": "Hold [%s] for more",
   "modmenu.descriptionTranslation.simpletoolbelt": "Adds a simple tool belt."
 }

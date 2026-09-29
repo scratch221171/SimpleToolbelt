@@ -14,9 +14,9 @@ import net.scratch221171.simpletoolbelt.Const;
 import net.scratch221171.simpletoolbelt.STUtils;
 import net.scratch221171.simpletoolbelt.client.STClientEvents;
 import net.scratch221171.simpletoolbelt.client.STKeyMappings;
-import net.scratch221171.simpletoolbelt.common.component.ToolbeltContents;
-import net.scratch221171.simpletoolbelt.common.item.ToolbeltItem;
+import net.scratch221171.simpletoolbelt.client.network.ClientBeltCache;
 import net.scratch221171.simpletoolbelt.common.network.SelectBeltSlotPayload;
+import net.scratch221171.simpletoolbelt.common.storage.ToolbeltContents;
 import net.scratch221171.simpletoolbelt.config.ClientConfig;
 import org.joml.Matrix4f;
 import org.jspecify.annotations.NonNull;
@@ -26,7 +26,6 @@ public class ToolbeltWheelScreen extends Screen {
     private final float WHEEL_RADIUS, INNER_DEADZONE_RADIUS, OUTER_STOW_ZONE_RADIUS;
 
     private static final int ICON_SIZE = 16;
-
     private static final int HIGHLIGHT_COLOR = 0x50FFFFFF;
     private static final int SECTOR_SEGMENTS = 12;
     private static final int STOW_SEGMENTS = 48;
@@ -38,7 +37,7 @@ public class ToolbeltWheelScreen extends Screen {
     private HoverState hoverState = HoverState.noAction();
 
     public ToolbeltWheelScreen() {
-        super(Component.translatable(Const.LangKey.WHEEL_SCREEN_TITLE));
+        super(Component.translatable(Const.LangKey.Screen.WHEEL_SCREEN_TITLE));
         this.WHEEL_RADIUS = (float) ClientConfig.Screen.ToolbeltWheel.WHEEL_RADIUS.getAsDouble();
         this.INNER_DEADZONE_RADIUS = (float) ClientConfig.Screen.ToolbeltWheel.INNER_DEADZONE_RADIUS.getAsDouble();
         this.OUTER_STOW_ZONE_RADIUS = (float) ClientConfig.Screen.ToolbeltWheel.OUTER_STOW_ZONE_RADIUS.getAsDouble();
@@ -67,7 +66,7 @@ public class ToolbeltWheelScreen extends Screen {
             renderMenuBackground(guiGraphics);
         }
 
-        ToolbeltContents stored = ToolbeltItem.getContent(belt);
+        ToolbeltContents stored = ClientBeltCache.read(belt);
 
         int centerX = this.width / 2;
         int centerY = this.height / 2;
@@ -83,7 +82,8 @@ public class ToolbeltWheelScreen extends Screen {
         }
         if (stowHover) {
             hoverState = HoverState.stow();
-            guiGraphics.renderTooltip(font, Component.translatable(Const.LangKey.WHEEL_TOOLTIP_STOW), mouseX, mouseY);
+            guiGraphics.renderTooltip(
+                    font, Component.translatable(Const.LangKey.Screen.WHEEL_TOOLTIP_STOW), mouseX, mouseY);
         } else if (distance < INNER_DEADZONE_RADIUS) {
             hoverState = HoverState.noAction();
         } else {
@@ -98,20 +98,20 @@ public class ToolbeltWheelScreen extends Screen {
             int x = centerX + (int) (WHEEL_RADIUS * Math.sin(angleRad)) - ICON_SIZE / 2;
             int y = centerY - (int) (WHEEL_RADIUS * Math.cos(angleRad)) - ICON_SIZE / 2;
             boolean isSelected = hoverState.action() == HoverState.HoverAction.SELECT && i == hoverState.index();
-            ItemStack initialStack = stored.ring().initial().getStack(i);
-            ItemStack currentStack = stored.ring().current().getStack(i);
+            ItemStack init = stored.ring().initial().getStack(i);
+            ItemStack cur = stored.ring().current().getStack(i);
 
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
-            if (currentStack.isEmpty()) {
-                if (initialStack.isEmpty()) {
+            if (cur.isEmpty()) {
+                if (init.isEmpty()) {
                     guiGraphics.blit(
                             EMPTY_SPRITE, x - (10 - ICON_SIZE) / 2, y - (10 - ICON_SIZE) / 2, 0, 0, 10, 10, 10, 10);
                 } else {
                     guiGraphics.blit(
                             FRAME_SPRITE, x - (22 - ICON_SIZE) / 2, y - (22 - ICON_SIZE) / 2, 0, 0, 22, 22, 22, 22);
                     guiGraphics.fill(x, y, x + ICON_SIZE, y + ICON_SIZE, 0x80202020);
-                    guiGraphics.renderItem(initialStack, x, y);
+                    guiGraphics.renderItem(init, x, y);
                     guiGraphics.pose().pushPose();
                     guiGraphics.pose().translate(0.0F, 0.0F, 200.0F);
                     guiGraphics.drawString(font, "0", x + 17 - font.width("0"), y + 9, 16777215, true);
@@ -132,10 +132,10 @@ public class ToolbeltWheelScreen extends Screen {
                             24,
                             24);
                 }
-                guiGraphics.renderItem(currentStack, x, y);
-                guiGraphics.renderItemDecorations(this.font, currentStack, x, y);
+                guiGraphics.renderItem(cur, x, y);
+                guiGraphics.renderItemDecorations(this.font, cur, x, y);
                 if (isSelected) {
-                    guiGraphics.renderTooltip(this.font, currentStack, mouseX, mouseY);
+                    guiGraphics.renderTooltip(this.font, cur, mouseX, mouseY);
                 }
             }
             RenderSystem.disableBlend();

@@ -16,10 +16,17 @@ public class STEnglishLangProvider extends STLangProvider {
 
         // アイテム
         addItem(STItems.TOOLBELT, "Toolbelt");
+        add(Const.LangKey.Item.INITIALIZING_UUID, "Initializing...");
+        add(Const.LangKey.Item.SHIFT_FOR_MORE_INFO, "Hold [%s] for more");
 
         // メニュー
-        add(Const.LangKey.TOOLBELT_SCREEN_TITLE, "Toolbelt");
-        add(Const.LangKey.WHEEL_SCREEN_TITLE, "Wheel");
-        add(Const.LangKey.WHEEL_TOOLTIP_STOW, "Stow All");
+        add(Const.LangKey.Screen.TOOLBELT_SCREEN_TITLE, "Toolbelt");
+        add(Const.LangKey.Screen.WHEEL_SCREEN_TITLE, "Wheel");
+        add(Const.LangKey.Screen.WHEEL_TOOLTIP_STOW, "Stow All");
+
+        // コマンド
+        add(Const.LangKey.Commands.NOT_FOUND, "Belt not found");
+        add(Const.LangKey.Commands.PRINT_ALL, "UUID stored in storage: %s");
+        add(Const.LangKey.Commands.RESTORED, "Restored the belt with the following UUID: %s");
     }
 }

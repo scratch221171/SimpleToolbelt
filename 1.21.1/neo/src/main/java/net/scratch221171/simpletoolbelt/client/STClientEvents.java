@@ -10,17 +10,17 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RenderTooltipEvent;
 import net.scratch221171.simpletoolbelt.Const;
 import net.scratch221171.simpletoolbelt.client.gui.ToolbeltWheelScreen;
+import net.scratch221171.simpletoolbelt.client.network.ClientBeltCache;
 import net.scratch221171.simpletoolbelt.client.tooltip.ToolbeltTooltip;
-import net.scratch221171.simpletoolbelt.common.item.ToolbeltItem;
 import net.scratch221171.simpletoolbelt.common.registry.STItems;
+import net.scratch221171.simpletoolbelt.common.storage.ToolbeltContents;
 import org.lwjgl.glfw.GLFW;
 
-// bus = GAME (the default/"FORGE" bus) because InputEvent fires on the main NeoForge event bus,
-// not the mod event bus. Only STKeyMappings/STPayloads use the mod bus (registration events).
 @EventBusSubscriber(modid = Const.MOD_ID, value = Dist.CLIENT)
 public class STClientEvents {
 
@@ -58,10 +58,14 @@ public class STClientEvents {
     @SubscribeEvent
     public static void onGatherTooltip(RenderTooltipEvent.GatherComponents event) {
         ItemStack stack = event.getItemStack();
-        if (!stack.is(STItems.TOOLBELT.get()) || !Screen.hasShiftDown()) {
-            return;
-        }
+        ToolbeltContents contents = ClientBeltCache.read(stack);
+        if (!stack.is(STItems.TOOLBELT.get()) || ToolbeltContents.isEmpty(contents) || !Screen.hasShiftDown()) return;
         List<Either<FormattedText, TooltipComponent>> elements = event.getTooltipElements();
-        elements.add(Math.min(1, elements.size()), Either.right(new ToolbeltTooltip(ToolbeltItem.getContent(stack))));
+        elements.add(Math.min(1, elements.size()), Either.right(new ToolbeltTooltip(ClientBeltCache.read(stack))));
+    }
+
+    @SubscribeEvent
+    public static void clearCache(ClientPlayerNetworkEvent.LoggingOut event) {
+        ClientBeltCache.clear();
     }
 }

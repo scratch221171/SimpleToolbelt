@@ -4,20 +4,16 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
 import net.scratch221171.simpletoolbelt.Const;
+import net.scratch221171.simpletoolbelt.STUtils;
 import org.jspecify.annotations.NonNull;
 
-/**
- * Sent client -> server when the player releases R over a wheel slot (slot = flat index) or
- * over the "stow" zone near the screen edge (slot = StoredItem.NO_ACTIVE_SLOT).
- */
+// C2S
 public record SelectBeltSlotPayload(int slot) implements CustomPacketPayload {
 
     public static final int STOW_INDEX = -1;
 
-    public static final Type<SelectBeltSlotPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(Const.MOD_ID, "select_toolbelt_slot"));
+    public static final Type<SelectBeltSlotPayload> TYPE = new Type<>(STUtils.id(Const.ID.Payload.SELECT_BELT_SLOT));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, SelectBeltSlotPayload> STREAM_CODEC =
             StreamCodec.composite(ByteBufCodecs.VAR_INT, SelectBeltSlotPayload::slot, SelectBeltSlotPayload::new);

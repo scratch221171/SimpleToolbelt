@@ -3,14 +3,18 @@ package net.scratch221171.simpletoolbelt.client.tooltip;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.scratch221171.simpletoolbelt.common.component.ToolbeltContents;
+import net.scratch221171.simpletoolbelt.common.storage.ToolbeltContents;
 import org.jspecify.annotations.NonNull;
 
 public class ClientToolbeltTooltip implements ClientTooltipComponent {
+
     private static final int COLUMNS = 8;
     private static final int SLOT_SIZE = 18;
     private static final int ROWS = ToolbeltContents.RING_SIZE / COLUMNS;
+
+    private static final ResourceLocation SLOT_SPRITE = ResourceLocation.withDefaultNamespace("container/slot");
 
     private final ToolbeltContents contents;
 
@@ -33,16 +37,14 @@ public class ClientToolbeltTooltip implements ClientTooltipComponent {
         for (int i = 0; i < ToolbeltContents.RING_SIZE; i++) {
             int sx = x + (i % COLUMNS) * SLOT_SIZE;
             int sy = y + (i / COLUMNS) * SLOT_SIZE;
-            guiGraphics.fill(sx, sy, sx + SLOT_SIZE - 1, sy + SLOT_SIZE - 1, 0x80000000);
-
-            ItemStack current = contents.ring().current().getStack(i);
-            ItemStack initial = contents.ring().initial().getStack(i);
-
-            if (!current.isEmpty()) {
-                guiGraphics.renderItem(current, sx + 1, sy + 1);
-                guiGraphics.renderItemDecorations(font, current, sx + 1, sy + 1);
-            } else if (!initial.isEmpty()) {
-                guiGraphics.renderItem(initial, sx + 1, sy + 1);
+            guiGraphics.blitSprite(SLOT_SPRITE, sx, sy, 0, 18, 18);
+            ItemStack init = contents.ring().initial().getStack(i);
+            ItemStack cur = contents.ring().current().getStack(i);
+            if (!cur.isEmpty()) {
+                guiGraphics.renderItem(cur, sx + 1, sy + 1);
+                guiGraphics.renderItemDecorations(font, cur, sx + 1, sy + 1);
+            } else if (!init.isEmpty()) {
+                guiGraphics.renderItem(init, sx + 1, sy + 1);
                 guiGraphics.fill(sx + 1, sy + 1, sx + 17, sy + 17, 0x80202020);
                 guiGraphics.pose().pushPose();
                 guiGraphics.pose().translate(0.0F, 0.0F, 200.0F);

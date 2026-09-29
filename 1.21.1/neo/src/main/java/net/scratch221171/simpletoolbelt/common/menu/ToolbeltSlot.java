@@ -1,6 +1,6 @@
 package net.scratch221171.simpletoolbelt.common.menu;
 
-import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 import net.minecraft.world.Container;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -9,14 +9,11 @@ import net.scratch221171.simpletoolbelt.common.registry.STItems;
 import org.jspecify.annotations.NonNull;
 
 public class ToolbeltSlot extends Slot {
-    private final ItemStack initial;
-    private final BooleanSupplier quickMoveContext;
+    private final Supplier<ItemStack> initial;
 
-    public ToolbeltSlot(
-            Container container, int index, int x, int y, ItemStack initial, BooleanSupplier quickMoveContext) {
+    public ToolbeltSlot(Container container, int index, int x, int y, Supplier<ItemStack> initial) {
         super(container, index, x, y);
         this.initial = initial;
-        this.quickMoveContext = quickMoveContext;
     }
 
     @Override
@@ -24,9 +21,8 @@ public class ToolbeltSlot extends Slot {
         if (!super.mayPlace(stack) || stack.is(STItems.TOOLBELT.get())) {
             return false;
         }
-        // quickMoveでは、前にアイテムが入っていた場所はスキップさせる
-        if (quickMoveContext.getAsBoolean() && initial != ItemStack.EMPTY) {
-            return STUtils.isSame(stack, initial);
+        if (initial.get() != ItemStack.EMPTY) {
+            return STUtils.isSame(stack, initial.get());
         }
         return true;
     }
