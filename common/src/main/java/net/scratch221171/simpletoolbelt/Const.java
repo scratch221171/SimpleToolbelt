@@ -44,6 +44,7 @@ public final class Const {
 
             public static final String INITIALIZING_UUID = define(PREFIX, ID.Item.TOOLBELT + "initializingUUID");
             public static final String SHIFT_FOR_MORE_INFO = define(PREFIX, ID.Item.TOOLBELT + "shiftKey");
+            public static final String HINT = define(PREFIX, ID.Item.TOOLBELT + "hint");
         }
 
         final class Screen {

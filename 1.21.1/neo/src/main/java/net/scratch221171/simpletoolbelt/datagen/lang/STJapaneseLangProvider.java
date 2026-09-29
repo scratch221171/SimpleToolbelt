@@ -18,6 +18,7 @@ public class STJapaneseLangProvider extends STLangProvider {
         addItem(STItems.TOOLBELT, "ツールベルト");
         add(Const.LangKey.Item.INITIALIZING_UUID, "初期化中...");
         add(Const.LangKey.Item.SHIFT_FOR_MORE_INFO, "[%s]を押してさらに表示");
+        add(Const.LangKey.Item.HINT, "手に持って使用するか、またはGUI内で右クリックしてメニューを開きます。");
 
         // メニュー
         add(Const.LangKey.Screen.TOOLBELT_SCREEN_TITLE, "ツールベルト");

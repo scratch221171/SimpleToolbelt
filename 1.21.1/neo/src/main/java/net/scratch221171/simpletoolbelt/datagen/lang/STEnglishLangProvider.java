@@ -18,6 +18,7 @@ public class STEnglishLangProvider extends STLangProvider {
         addItem(STItems.TOOLBELT, "Toolbelt");
         add(Const.LangKey.Item.INITIALIZING_UUID, "Initializing...");
         add(Const.LangKey.Item.SHIFT_FOR_MORE_INFO, "Hold [%s] for more");
+        add(Const.LangKey.Item.HINT, "Use while held, or right-click in a GUI to open the menu.");
 
         // メニュー
         add(Const.LangKey.Screen.TOOLBELT_SCREEN_TITLE, "Toolbelt");

@@ -92,6 +92,8 @@ public class ToolbeltItem extends Item {
                             Component.literal("Shift").withStyle(ChatFormatting.WHITE))
                     .withStyle(ChatFormatting.DARK_GRAY));
             tooltipComponents.add(
+                    Component.translatable(Const.LangKey.Item.HINT).withStyle(ChatFormatting.GRAY));
+            tooltipComponents.add(
                     Component.literal("UUID: " + stack.getOrDefault(STDataComponents.BELT_ID, "undefined"))
                             .withStyle(ChatFormatting.DARK_GRAY));
         } else {
