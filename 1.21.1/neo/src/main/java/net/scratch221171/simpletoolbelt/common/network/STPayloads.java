@@ -1,5 +1,6 @@
 package net.scratch221171.simpletoolbelt.common.network;
 
+import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerPlayer;
@@ -7,6 +8,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -19,6 +21,7 @@ import net.scratch221171.simpletoolbelt.common.menu.ToolbeltMenu;
 import net.scratch221171.simpletoolbelt.common.registry.STItems;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltContents;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltStorage;
+import net.scratch221171.simpletoolbelt.compat.curios.STCuriosHelper;
 
 @EventBusSubscriber(modid = Const.MOD_ID)
 public class STPayloads {
@@ -129,13 +132,19 @@ public class STPayloads {
     }
 
     private static ItemStack findToolbeltStack(ServerPlayer player) {
+        if (ModList.get().isLoaded("curios")) {
+            Optional<ItemStack> belt = STCuriosHelper.getBeltInCurios(player);
+            if (belt.isPresent()) {
+                return belt.get();
+            }
+        }
+
         for (ItemStack stack : player.getInventory().items) {
             if (stack.is(STItems.TOOLBELT.get())) {
                 return stack;
             }
         }
         return ItemStack.EMPTY;
-        // TODO: also scan Curios slots once that integration is added (see your roadmap step 7).
     }
 
     private static void requestBeltContent(RequestBeltContentsPayload payload, IPayloadContext context) {

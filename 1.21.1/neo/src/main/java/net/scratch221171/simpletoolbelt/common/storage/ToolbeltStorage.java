@@ -14,11 +14,13 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.scratch221171.simpletoolbelt.Const;
 import net.scratch221171.simpletoolbelt.common.network.SyncBeltContentsPayload;
 import net.scratch221171.simpletoolbelt.common.registry.STDataComponents;
 import net.scratch221171.simpletoolbelt.common.registry.STItems;
+import net.scratch221171.simpletoolbelt.compat.curios.STCuriosHelper;
 import org.jspecify.annotations.NonNull;
 
 public class ToolbeltStorage extends SavedData {
@@ -47,21 +49,16 @@ public class ToolbeltStorage extends SavedData {
     }
 
     public static void update(ServerPlayer player, UUID id, ToolbeltContents contents) {
-        Const.LOGGER.info(
-                "Sending belt sync: player={}, id={}, contents={}",
-                player.getGameProfile().getName(),
-                id,
-                contents);
         get(player.server).set(id, contents);
         PacketDistributor.sendToPlayer(player, new SyncBeltContentsPayload(id, contents));
     }
 
     /** 初回使用時にUUIDを初期化　ServerOnly */
     public static UUID ensureId(ItemStack stack) {
-        UUID id = stack.get(STDataComponents.BELT_ID.get());
+        UUID id = stack.get(STDataComponents.BELT_ID);
         if (id == null) {
             id = UUID.randomUUID();
-            stack.set(STDataComponents.BELT_ID.get(), id);
+            stack.set(STDataComponents.BELT_ID, id);
         }
         return id;
     }
@@ -71,10 +68,15 @@ public class ToolbeltStorage extends SavedData {
     }
 
     public static boolean playerHasBelt(Player player, UUID id) {
+        if (ModList.get().isLoaded("curios")) {
+            if (STCuriosHelper.hasBeltInCurios(player, id)) {
+                return true;
+            }
+        }
         Inventory inv = player.getInventory();
         for (int i = 0; i < inv.getContainerSize(); i++) {
             ItemStack s = inv.getItem(i);
-            if (s.is(STItems.TOOLBELT.get()) && id.equals(s.get(STDataComponents.BELT_ID.get()))) {
+            if (s.is(STItems.TOOLBELT) && id.equals(s.get(STDataComponents.BELT_ID))) {
                 return true;
             }
         }

@@ -8,7 +8,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
-import net.scratch221171.simpletoolbelt.Const;
 import net.scratch221171.simpletoolbelt.common.network.RequestBeltContentsPayload;
 import net.scratch221171.simpletoolbelt.common.network.SyncBeltContentsPayload;
 import net.scratch221171.simpletoolbelt.common.registry.STDataComponents;
@@ -23,13 +22,12 @@ public final class ClientBeltCache {
 
     public static void handleSync(SyncBeltContentsPayload payload, IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
-            Const.LOGGER.info("Received belt sync: id={}, contents={}", payload.id(), payload.contents());
             CACHE.put(payload.id(), payload.contents());
         });
     }
 
     public static ToolbeltContents read(ItemStack stack) {
-        UUID id = stack.get(STDataComponents.BELT_ID.get());
+        UUID id = stack.get(STDataComponents.BELT_ID);
         return id == null ? EMPTY : read(id);
     }
 

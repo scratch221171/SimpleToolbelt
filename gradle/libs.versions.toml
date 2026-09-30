@@ -30,3 +30,5 @@ jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
 configured = { module = "curse.maven:configured-457570" }
 forgeconfigscreens = { module = "maven.modrinth:forge-config-screens" }
 modmenu = { module = "maven.modrinth:modmenu" }
+
+curios-neoforge = { module = "top.theillusivec4.curios:curios-neoforge" }
