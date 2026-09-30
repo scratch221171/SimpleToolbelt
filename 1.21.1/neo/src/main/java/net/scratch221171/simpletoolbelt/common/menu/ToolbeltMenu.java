@@ -49,7 +49,6 @@ public class ToolbeltMenu extends AbstractContainerMenu {
             container.setItem(i, contents.ring().current().getStack(i).copy());
         }
         if (isServer) {
-            container.addListener(this::writeBack);
             container.addListener(c -> {
                 if (!suppressWriteBack) {
                     writeBack(c);
@@ -181,8 +180,6 @@ public class ToolbeltMenu extends AbstractContainerMenu {
         }
 
         ToolbeltContents updated = new ToolbeltContents(new ToolbeltContents.Ring(init, cur));
-        if (!stored.equals(updated)) {
-            ToolbeltStorage.update(serverPlayer, beltId, updated);
-        }
+        ToolbeltStorage.update(serverPlayer, beltId, updated);
     }
 }
