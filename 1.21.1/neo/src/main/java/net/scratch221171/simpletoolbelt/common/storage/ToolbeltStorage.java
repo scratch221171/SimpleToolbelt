@@ -17,19 +17,18 @@ import net.minecraft.world.level.saveddata.SavedData;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.scratch221171.simpletoolbelt.Const;
+import net.scratch221171.simpletoolbelt.common.item.ToolbeltItem;
 import net.scratch221171.simpletoolbelt.common.network.SyncBeltContentsPayload;
 import net.scratch221171.simpletoolbelt.common.registry.STDataComponents;
-import net.scratch221171.simpletoolbelt.common.registry.STItems;
 import net.scratch221171.simpletoolbelt.compat.curios.STCuriosHelper;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 public class ToolbeltStorage extends SavedData {
     private static final String TAG = "belts";
     private static final String NAME = Const.MOD_ID + "_" + TAG;
     private static final Codec<Map<UUID, ToolbeltContents>> BELTS_CODEC =
             Codec.unboundedMap(UUIDUtil.STRING_CODEC, ToolbeltContents.CODEC);
-
-    private static final ToolbeltContents EMPTY = ToolbeltContents.DEFAULT;
 
     private final Map<UUID, ToolbeltContents> belts = new HashMap<>();
 
@@ -39,8 +38,8 @@ public class ToolbeltStorage extends SavedData {
                 .computeIfAbsent(new SavedData.Factory<>(ToolbeltStorage::new, ToolbeltStorage::load, null), NAME);
     }
 
-    public ToolbeltContents get(UUID id) {
-        return belts.getOrDefault(id, EMPTY);
+    @Nullable public ToolbeltContents getOrNull(UUID id) {
+        return belts.get(id);
     }
 
     public void set(UUID id, ToolbeltContents contents) {
@@ -53,49 +52,58 @@ public class ToolbeltStorage extends SavedData {
         PacketDistributor.sendToPlayer(player, new SyncBeltContentsPayload(id, contents));
     }
 
+    public ToolbeltContents getOrInit(UUID id, int pages) {
+        ToolbeltContents cur = belts.get(id);
+        if (cur == null || cur.pagesSize() < pages) {
+            cur = (cur == null ? ToolbeltContents.EMPTY : cur).increasePageTo(pages);
+            set(id, cur);
+        }
+        return cur;
+    }
+
+    public ToolbeltContents resolve(UUID id, ItemStack stack) {
+        int capacity = stack.getItem() instanceof ToolbeltItem t ? t.getPageCount(stack) : 0;
+        return getOrInit(id, capacity);
+    }
+
     /** 初回使用時にUUIDを初期化　ServerOnly */
-    public static UUID ensureId(ItemStack stack) {
+    public UUID ensureId(ItemStack stack) {
         UUID id = stack.get(STDataComponents.BELT_ID);
         if (id == null) {
             id = UUID.randomUUID();
             stack.set(STDataComponents.BELT_ID, id);
         }
+        resolve(id, stack);
         return id;
     }
 
-    public void cleanUpData() {
-        belts.entrySet().removeIf(entry -> ToolbeltContents.isEmpty(entry.getValue()));
-    }
-
-    public static boolean playerHasBelt(Player player, UUID id) {
+    @Nullable public static ItemStack findBelt(Player player, UUID id) {
         if (ModList.get().isLoaded("curios")) {
-            if (STCuriosHelper.hasBeltInCurios(player, id)) {
-                return true;
+            Optional<ItemStack> optional = STCuriosHelper.getBeltInCurios(player, id);
+            if (optional.isPresent()) {
+                return optional.get();
             }
         }
         Inventory inv = player.getInventory();
         for (int i = 0; i < inv.getContainerSize(); i++) {
-            ItemStack s = inv.getItem(i);
-            if (s.is(STItems.TOOLBELT) && id.equals(s.get(STDataComponents.BELT_ID))) {
-                return true;
+            ItemStack stack = inv.getItem(i);
+            if (stack.getItem() instanceof ToolbeltItem && id.equals(stack.get(STDataComponents.BELT_ID))) {
+                return stack;
             }
         }
-        return false;
+        return null;
     }
 
     public Set<UUID> getIds() {
         return Collections.unmodifiableSet(belts.keySet());
     }
 
-    public boolean contains(UUID id) {
-        return belts.containsKey(id);
-    }
-
     @Override
     public @NonNull CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
         RegistryOps<Tag> ops = registries.createSerializationContext(NbtOps.INSTANCE);
-        cleanUpData();
-        tag.put(TAG, BELTS_CODEC.encodeStart(ops, belts).getOrThrow());
+        Map<UUID, ToolbeltContents> toSave = new HashMap<>(belts);
+        toSave.entrySet().removeIf(e -> ToolbeltContents.isEmpty(e.getValue()));
+        tag.put(TAG, BELTS_CODEC.encodeStart(ops, toSave).getOrThrow());
         return tag;
     }
 

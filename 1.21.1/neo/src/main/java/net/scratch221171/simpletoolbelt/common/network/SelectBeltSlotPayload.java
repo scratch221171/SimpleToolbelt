@@ -5,7 +5,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.scratch221171.simpletoolbelt.Const;
-import net.scratch221171.simpletoolbelt.STUtils;
+import net.scratch221171.simpletoolbelt.common.STUtils;
 import org.jspecify.annotations.NonNull;
 
 // C2S

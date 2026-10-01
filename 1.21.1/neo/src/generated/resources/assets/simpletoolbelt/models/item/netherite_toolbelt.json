@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "simpletoolbelt:item/netherite_toolbelt"
+  }
+}

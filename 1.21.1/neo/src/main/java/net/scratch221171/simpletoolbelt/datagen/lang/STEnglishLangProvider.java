@@ -16,14 +16,16 @@ public class STEnglishLangProvider extends STLangProvider {
 
         // アイテム
         addItem(STItems.TOOLBELT, "Toolbelt");
+        addItem(STItems.NETHERITE_TOOLBELT, "Netherite Toolbelt");
         add(Const.LangKey.Item.INITIALIZING_UUID, "Initializing...");
         add(Const.LangKey.Item.SHIFT_FOR_MORE_INFO, "Hold [%s] for more");
         add(Const.LangKey.Item.HINT, "Use while held, or right-click in a GUI to open the menu.");
 
-        // メニュー
+        // スクリーン
         add(Const.LangKey.Screen.TOOLBELT_SCREEN_TITLE, "Toolbelt");
         add(Const.LangKey.Screen.WHEEL_SCREEN_TITLE, "Wheel");
         add(Const.LangKey.Screen.WHEEL_TOOLTIP_STOW, "Stow All");
+        add(Const.LangKey.Screen.WHEEL_PAGE_INDEX, "Page %s / %s");
 
         // コマンド
         add(Const.LangKey.Commands.NOT_FOUND, "Belt not found");

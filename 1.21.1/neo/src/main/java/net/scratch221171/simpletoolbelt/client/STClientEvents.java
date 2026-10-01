@@ -6,7 +6,9 @@ import java.util.Optional;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
@@ -21,7 +23,7 @@ import net.scratch221171.simpletoolbelt.Const;
 import net.scratch221171.simpletoolbelt.client.gui.ToolbeltWheelScreen;
 import net.scratch221171.simpletoolbelt.client.network.ClientBeltCache;
 import net.scratch221171.simpletoolbelt.client.tooltip.ToolbeltTooltip;
-import net.scratch221171.simpletoolbelt.common.registry.STItems;
+import net.scratch221171.simpletoolbelt.common.item.ToolbeltItem;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltContents;
 import net.scratch221171.simpletoolbelt.compat.curios.STCuriosHelper;
 import org.lwjgl.glfw.GLFW;
@@ -58,7 +60,7 @@ public class STClientEvents {
             }
         }
         for (ItemStack stack : mc.player.getInventory().items) {
-            if (stack.is(STItems.TOOLBELT.get())) {
+            if (stack.getItem() instanceof ToolbeltItem) {
                 return stack;
             }
         }
@@ -72,10 +74,22 @@ public class STClientEvents {
             Slot slot = screen.getSlotUnderMouse();
             if (slot != null) stack = slot.getItem();
         }
-        ToolbeltContents contents = ClientBeltCache.read(stack);
-        if (!stack.is(STItems.TOOLBELT.get()) || ToolbeltContents.isEmpty(contents) || !Screen.hasShiftDown()) return;
-        List<Either<FormattedText, TooltipComponent>> elements = event.getTooltipElements();
-        elements.add(Math.min(1, elements.size()), Either.right(new ToolbeltTooltip(ClientBeltCache.read(stack))));
+        if (stack.getItem() instanceof ToolbeltItem) {
+            ClientBeltCache.read(stack).ifPresent(contents -> {
+                if (ToolbeltContents.isEmpty(contents) || !Screen.hasShiftDown()) return;
+                List<Either<FormattedText, TooltipComponent>> elements = event.getTooltipElements();
+                int index = -1;
+                for (int i = 0; i < elements.size(); i++) {
+                    if (elements.get(i).left().orElse(null) instanceof Component component
+                            && component.getContents() instanceof TranslatableContents translatable
+                            && translatable.getKey().equals("item.simpletoolbelt.toolbeltshiftKey")) {
+                        index = i;
+                        break;
+                    }
+                }
+                elements.add(index + 1, Either.right(new ToolbeltTooltip(contents)));
+            });
+        }
     }
 
     @SubscribeEvent

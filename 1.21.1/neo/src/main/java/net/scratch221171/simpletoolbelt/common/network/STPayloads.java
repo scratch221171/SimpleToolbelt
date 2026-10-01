@@ -15,13 +15,12 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.scratch221171.simpletoolbelt.Const;
-import net.scratch221171.simpletoolbelt.STUtils;
+import net.scratch221171.simpletoolbelt.common.STUtils;
 import net.scratch221171.simpletoolbelt.common.item.ToolbeltItem;
 import net.scratch221171.simpletoolbelt.common.menu.ToolbeltMenu;
-import net.scratch221171.simpletoolbelt.common.registry.STItems;
-import net.scratch221171.simpletoolbelt.common.storage.ToolbeltContents;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltStorage;
 import net.scratch221171.simpletoolbelt.compat.curios.STCuriosHelper;
+import org.jspecify.annotations.Nullable;
 
 @EventBusSubscriber(modid = Const.MOD_ID)
 public class STPayloads {
@@ -51,87 +50,81 @@ public class STPayloads {
 
     // ホイールでの操作を反映
     private static void applySelection(ServerPlayer player, int requestedSlot) {
-        ItemStack belt = findToolbeltStack(player);
-        if (belt.isEmpty()) {
-            return;
-        }
+        Optional.ofNullable(findToolbeltStack(player)).ifPresent(belt -> {
+            ToolbeltStorage storage = ToolbeltStorage.get(player.server);
+            UUID beltId = storage.ensureId(belt);
+            Optional.ofNullable(storage.getOrNull(beltId)).ifPresent(stored -> {
+                ItemStack mainHand = player.getMainHandItem();
 
-        ToolbeltStorage storage = ToolbeltStorage.get(player.server);
-        UUID beltId = ToolbeltStorage.ensureId(belt);
-        ToolbeltContents stored = storage.get(beltId);
-        ItemStack mainHand = player.getMainHandItem();
-        ToolbeltContents.StackGroup init = stored.ring().initial();
-        ToolbeltContents.StackGroup cur = stored.ring().current();
-
-        if (requestedSlot == SelectBeltSlotPayload.STOW_INDEX) {
-            for (int i = 0; i < init.stacks().size(); i++) {
-                if (!init.stacks().get(i).isEmpty() && cur.stacks().get(i).isEmpty()) {
-                    for (int j = 0; j < Inventory.INVENTORY_SIZE; j++) {
-                        if (STUtils.isSame(
-                                player.getInventory().getItem(j), init.stacks().get(i))) {
-                            cur = cur.withStack(i, player.getInventory().getItem(j));
-                            player.getInventory().setItem(j, ItemStack.EMPTY);
-                            break;
+                if (requestedSlot == SelectBeltSlotPayload.STOW_INDEX) {
+                    for (int i = 0; i < stored.totalSlots(); i++) {
+                        if (!stored.getInitialFlat(i).isEmpty()
+                                && stored.getCurrentFlat(i).isEmpty()) {
+                            for (int j = 0; j < Inventory.INVENTORY_SIZE; j++) {
+                                if (ItemStack.isSameItem(
+                                        stored.getInitialFlat(i),
+                                        player.getInventory().getItem(j))) {
+                                    stored = stored.withCurrentFlat(
+                                            i, player.getInventory().getItem(j));
+                                    player.getInventory().setItem(j, ItemStack.EMPTY);
+                                    break;
+                                }
+                            }
                         }
                     }
-                }
-            }
-        } else {
-            if (requestedSlot >= 0 && requestedSlot < cur.stacks().size()) {
-                // ベルト自身を手に持ったまま操作するのを防ぐ
-                if (mainHand == belt) {
-                    return;
-                }
-
-                // 選択したアイテムが空なら何もしない
-                if (cur.getStack(requestedSlot).isEmpty()) {
-                    return;
-                }
-
-                // mainhandが空でなければ一旦退避させる
-                boolean needsToPlaceBackInInventory = false;
-                if (!mainHand.isEmpty()) {
-                    int origin = -1;
-                    for (int i = 0; i < init.stacks().size(); i++) {
-                        if (STUtils.isSame(init.stacks().get(i), mainHand)
-                                && cur.stacks().get(i).isEmpty()) {
-                            origin = i;
-                            break;
+                } else {
+                    if (requestedSlot >= 0 && requestedSlot < stored.totalSlots()) {
+                        // 選択したアイテムが空なら何もしない
+                        if (stored.getCurrentFlat(requestedSlot).isEmpty()) {
+                            return;
                         }
-                    }
 
-                    if (origin >= 0) {
-                        // ベルトに収納できるスロットがある
-                        cur = cur.withStack(origin, mainHand.copy());
+                        // mainhandが空でなければ一旦退避させる
+                        boolean needsToPlaceBackInInventory = false;
+                        if (!mainHand.isEmpty()) {
+                            int origin = -1;
+                            for (int i = 0; i < stored.totalSlots(); i++) {
+                                if (STUtils.canStow(stored.getInitialFlat(i), mainHand)
+                                        && stored.getCurrentFlat(i).isEmpty()) {
+                                    origin = i;
+                                    break;
+                                }
+                            }
+
+                            if (origin >= 0) {
+                                // ベルトに収納できるスロットがある
+                                stored = stored.withCurrentFlat(origin, mainHand.copy());
+                            } else {
+                                needsToPlaceBackInInventory = true;
+                                // ベルトに収納できるスロットがない -> 通常のインベントリへ退避
+                                // メインハンドの消去がまだなので待機
+                            }
+                        }
+
+                        // mainhandが空で、あるスロットを選択 -> スロットから手に移動
+                        player.setItemInHand(InteractionHand.MAIN_HAND, stored.getCurrentFlat(requestedSlot));
+                        if (needsToPlaceBackInInventory) {
+                            if (player.isAlive() && !player.hasDisconnected()) {
+                                player.getInventory().placeItemBackInInventory(mainHand);
+                            } else {
+                                player.drop(mainHand, false);
+                            }
+                        }
+                        stored = stored.withCurrentFlat(requestedSlot, ItemStack.EMPTY);
+
                     } else {
-                        needsToPlaceBackInInventory = true;
-                        // ベルトに収納できるスロットがない -> 通常のインベントリへ退避
-                        // メインハンドの消去がまだなので待機
+                        // 無効なrequestedSlot
+                        return;
                     }
                 }
 
-                // mainhandが空で、あるスロットを選択 -> スロットから手に移動
-                player.setItemInHand(InteractionHand.MAIN_HAND, cur.stacks().get(requestedSlot));
-                if (needsToPlaceBackInInventory) {
-                    if (player.isAlive() && !player.hasDisconnected()) {
-                        player.getInventory().placeItemBackInInventory(mainHand);
-                    } else {
-                        player.drop(mainHand, false);
-                    }
-                }
-                cur = cur.withStack(requestedSlot, ItemStack.EMPTY);
-
-            } else {
-                // 無効なrequestedSlot
-                return;
-            }
-        }
-
-        ToolbeltStorage.update(player, beltId, new ToolbeltContents(new ToolbeltContents.Ring(init, cur)));
-        ToolbeltMenu.refreshIfOpen(player, beltId, storage.get(beltId));
+                ToolbeltStorage.update(player, beltId, stored);
+                ToolbeltMenu.refreshIfOpen(player, beltId, storage.getOrNull(beltId));
+            });
+        });
     }
 
-    private static ItemStack findToolbeltStack(ServerPlayer player) {
+    @Nullable private static ItemStack findToolbeltStack(ServerPlayer player) {
         if (ModList.get().isLoaded("curios")) {
             Optional<ItemStack> belt = STCuriosHelper.getBeltInCurios(player);
             if (belt.isPresent()) {
@@ -140,22 +133,23 @@ public class STPayloads {
         }
 
         for (ItemStack stack : player.getInventory().items) {
-            if (stack.is(STItems.TOOLBELT.get())) {
+            if (stack.getItem() instanceof ToolbeltItem) {
                 return stack;
             }
         }
-        return ItemStack.EMPTY;
+        return null;
     }
 
     private static void requestBeltContent(RequestBeltContentsPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
-            if (context.player() instanceof ServerPlayer serverPlayer
-                    && ToolbeltStorage.playerHasBelt(serverPlayer, payload.id())) {
-                PacketDistributor.sendToPlayer(
-                        serverPlayer,
-                        new SyncBeltContentsPayload(
-                                payload.id(),
-                                ToolbeltStorage.get(serverPlayer.server).get(payload.id())));
+            if (context.player() instanceof ServerPlayer serverPlayer) {
+                Optional.ofNullable(ToolbeltStorage.findBelt(serverPlayer, payload.id()))
+                        .ifPresent(stack -> PacketDistributor.sendToPlayer(
+                                serverPlayer,
+                                new SyncBeltContentsPayload(
+                                        payload.id(),
+                                        ToolbeltStorage.get(serverPlayer.server)
+                                                .resolve(payload.id(), stack))));
             }
         });
     }
@@ -163,16 +157,17 @@ public class STPayloads {
     private static void openBeltMenuInCreative(OpenBeltMenuInCreativePayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
             if (context.player() instanceof ServerPlayer serverPlayer) {
-                int slot = payload.slotIndex();
+                int slot = payload.slot();
                 Inventory inv = serverPlayer.getInventory();
                 if (slot < 0 || slot >= inv.getContainerSize()) {
                     return;
                 }
                 ItemStack beltStack = inv.getItem(slot);
-                if (beltStack.is(STItems.TOOLBELT.get())) {
-                    UUID id = ToolbeltStorage.ensureId(beltStack);
+                if (beltStack.getItem() instanceof ToolbeltItem) {
+                    UUID id = ToolbeltStorage.get(serverPlayer.server).ensureId(beltStack);
                     serverPlayer.server.tell(new TickTask(
-                            serverPlayer.server.getTickCount(), () -> ToolbeltItem.openMenu(serverPlayer, id)));
+                            serverPlayer.server.getTickCount(),
+                            () -> ToolbeltItem.openMenu(serverPlayer, id, beltStack)));
                 }
             }
         });

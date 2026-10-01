@@ -5,18 +5,16 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.scratch221171.simpletoolbelt.Const;
-import net.scratch221171.simpletoolbelt.STUtils;
+import net.scratch221171.simpletoolbelt.common.STUtils;
 import org.jspecify.annotations.NonNull;
 
-public record OpenBeltMenuInCreativePayload(int slotIndex) implements CustomPacketPayload {
+public record OpenBeltMenuInCreativePayload(int slot) implements CustomPacketPayload {
     public static final Type<OpenBeltMenuInCreativePayload> TYPE =
             new Type<>(STUtils.id(Const.ID.Payload.OPEN_BELT_MENU_IN_CREATIVE));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, OpenBeltMenuInCreativePayload> STREAM_CODEC =
             StreamCodec.composite(
-                    ByteBufCodecs.VAR_INT,
-                    OpenBeltMenuInCreativePayload::slotIndex,
-                    OpenBeltMenuInCreativePayload::new);
+                    ByteBufCodecs.VAR_INT, OpenBeltMenuInCreativePayload::slot, OpenBeltMenuInCreativePayload::new);
 
     @Override
     public @NonNull Type<? extends CustomPacketPayload> type() {

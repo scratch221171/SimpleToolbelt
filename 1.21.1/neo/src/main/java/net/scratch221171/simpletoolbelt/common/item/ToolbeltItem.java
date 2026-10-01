@@ -1,6 +1,7 @@
 package net.scratch221171.simpletoolbelt.common.item;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -22,8 +23,10 @@ import net.scratch221171.simpletoolbelt.Const;
 import net.scratch221171.simpletoolbelt.client.ClientBeltActions;
 import net.scratch221171.simpletoolbelt.common.menu.ToolbeltMenu;
 import net.scratch221171.simpletoolbelt.common.registry.STDataComponents;
+import net.scratch221171.simpletoolbelt.common.registry.STItems;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltContents;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltStorage;
+import net.scratch221171.simpletoolbelt.config.ServerConfig;
 import org.jspecify.annotations.NonNull;
 
 public class ToolbeltItem extends Item {
@@ -35,8 +38,10 @@ public class ToolbeltItem extends Item {
     @Override
     public void inventoryTick(
             @NonNull ItemStack stack, Level level, @NonNull Entity entity, int slotId, boolean isSelected) {
-        if (!level.isClientSide && entity instanceof ServerPlayer && !stack.has(STDataComponents.BELT_ID.get())) {
-            ToolbeltStorage.ensureId(stack);
+        if (!level.isClientSide
+                && entity instanceof ServerPlayer player
+                && !stack.has(STDataComponents.BELT_ID.get())) {
+            ToolbeltStorage.get(player.server).ensureId(stack);
         }
     }
 
@@ -45,7 +50,7 @@ public class ToolbeltItem extends Item {
             @NonNull Level level, Player player, @NonNull InteractionHand hand) {
         ItemStack beltStack = player.getItemInHand(hand);
         if (player instanceof ServerPlayer serverPlayer) {
-            openMenu(serverPlayer, ToolbeltStorage.ensureId(beltStack));
+            openMenu(serverPlayer, ToolbeltStorage.get(serverPlayer.server).ensureId(beltStack), beltStack);
         }
         return InteractionResultHolder.sidedSuccess(beltStack, level.isClientSide);
     }
@@ -59,25 +64,25 @@ public class ToolbeltItem extends Item {
             @NonNull Player player,
             @NonNull SlotAccess access) {
         if (action != ClickAction.SECONDARY || !other.isEmpty()) return false;
-        if (player instanceof ServerPlayer sp) {
-            UUID id = ToolbeltStorage.ensureId(beltStack);
-            sp.server.tell(new TickTask(sp.server.getTickCount(), () -> openMenu(sp, id)));
+        if (player instanceof ServerPlayer serverPlayer) {
+            UUID id = ToolbeltStorage.get(serverPlayer.server).ensureId(beltStack);
+            serverPlayer.server.tell(
+                    new TickTask(serverPlayer.server.getTickCount(), () -> openMenu(serverPlayer, id, beltStack)));
         } else if (player.level().isClientSide) {
             ClientBeltActions.requestOpenInCreative(slot);
         }
         return true;
     }
 
-    public static void openMenu(ServerPlayer player, UUID id) {
-        ToolbeltContents contents = ToolbeltStorage.get(player.server).get(id);
-        player.openMenu(
+    public static void openMenu(ServerPlayer player, UUID id, ItemStack stack) {
+        Optional.ofNullable(ToolbeltStorage.get(player.server).getOrNull(id)).ifPresent(contents -> player.openMenu(
                 new SimpleMenuProvider(
-                        (containerId, inv, p) -> ToolbeltMenu.forUUID(containerId, inv, id),
+                        (containerId, inv, p) -> ToolbeltMenu.forUUID(containerId, inv, id, stack),
                         Component.translatable(Const.LangKey.Screen.TOOLBELT_SCREEN_TITLE)),
                 buf -> {
                     buf.writeUUID(id);
                     ToolbeltContents.STREAM_CODEC.encode(buf, contents);
-                });
+                }));
     }
 
     @Override
@@ -102,5 +107,11 @@ public class ToolbeltItem extends Item {
                             Component.literal("Shift").withStyle(ChatFormatting.GRAY))
                     .withStyle(ChatFormatting.DARK_GRAY));
         }
+    }
+
+    public int getPageCount(ItemStack stack) {
+        if (stack.is(STItems.TOOLBELT)) return ServerConfig.Item.TOOLBELT_PAGES.getAsInt();
+        if (stack.is(STItems.NETHERITE_TOOLBELT)) return ServerConfig.Item.NETHERITE_PAGES.getAsInt();
+        return 0;
     }
 }

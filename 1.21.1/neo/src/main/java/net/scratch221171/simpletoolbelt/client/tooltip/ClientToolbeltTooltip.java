@@ -10,9 +10,10 @@ import org.jspecify.annotations.NonNull;
 
 public class ClientToolbeltTooltip implements ClientTooltipComponent {
 
-    private static final int COLUMNS = 8;
+    private static final int COLUMNS = ToolbeltContents.PAGE_SIZE;
     private static final int SLOT_SIZE = 18;
-    private static final int ROWS = ToolbeltContents.RING_SIZE / COLUMNS;
+    private final int rows;
+    private final int totalSlots;
 
     private static final ResourceLocation SLOT_SPRITE = ResourceLocation.withDefaultNamespace("container/slot");
 
@@ -20,11 +21,13 @@ public class ClientToolbeltTooltip implements ClientTooltipComponent {
 
     public ClientToolbeltTooltip(ToolbeltTooltip tooltip) {
         this.contents = tooltip.contents();
+        this.rows = contents.pagesSize();
+        this.totalSlots = contents.totalSlots();
     }
 
     @Override
     public int getHeight() {
-        return ROWS * SLOT_SIZE + 2;
+        return rows * SLOT_SIZE + 2;
     }
 
     @Override
@@ -34,12 +37,12 @@ public class ClientToolbeltTooltip implements ClientTooltipComponent {
 
     @Override
     public void renderImage(@NonNull Font font, int x, int y, @NonNull GuiGraphics guiGraphics) {
-        for (int i = 0; i < ToolbeltContents.RING_SIZE; i++) {
+        for (int i = 0; i < totalSlots; i++) {
             int sx = x + (i % COLUMNS) * SLOT_SIZE;
             int sy = y + (i / COLUMNS) * SLOT_SIZE;
             guiGraphics.blitSprite(SLOT_SPRITE, sx, sy, 0, 18, 18);
-            ItemStack init = contents.ring().initial().getStack(i);
-            ItemStack cur = contents.ring().current().getStack(i);
+            ItemStack init = contents.getInitialFlat(i);
+            ItemStack cur = contents.getCurrentFlat(i);
             if (!cur.isEmpty()) {
                 guiGraphics.renderItem(cur, sx + 1, sy + 1);
                 guiGraphics.renderItemDecorations(font, cur, sx + 1, sy + 1);

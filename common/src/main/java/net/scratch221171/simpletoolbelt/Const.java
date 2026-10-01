@@ -14,6 +14,7 @@ public final class Const {
         public static final class Item {
 
             public static final String TOOLBELT = "toolbelt";
+            public static final String NETHERITE_TOOLBELT = "netherite_toolbelt";
         }
 
         public static final class DataComponent {
@@ -53,6 +54,7 @@ public final class Const {
             public static final String TOOLBELT_SCREEN_TITLE = define(PREFIX, "toolbelt.title");
             public static final String WHEEL_SCREEN_TITLE = define(PREFIX, "wheel.title");
             public static final String WHEEL_TOOLTIP_STOW = define(PREFIX, "wheel.tooltip.stow");
+            public static final String WHEEL_PAGE_INDEX = define(PREFIX, "wheel.pageIndex");
         }
 
         final class Commands {

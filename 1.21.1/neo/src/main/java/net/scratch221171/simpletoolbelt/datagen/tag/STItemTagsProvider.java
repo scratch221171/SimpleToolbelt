@@ -5,10 +5,9 @@ import java.util.concurrent.CompletableFuture;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.ItemTagsProvider;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.scratch221171.simpletoolbelt.Const;
+import net.scratch221171.simpletoolbelt.common.STTags;
 import net.scratch221171.simpletoolbelt.common.registry.STItems;
 import org.jspecify.annotations.NonNull;
 
@@ -27,7 +26,7 @@ public class STItemTagsProvider extends ItemTagsProvider {
 
     @Override
     protected void addTags(HolderLookup.@NonNull Provider provider) {
-        tag(TagKey.create(this.registryKey, ResourceLocation.fromNamespaceAndPath("curios", "belt")))
-                .add(STItems.TOOLBELT.get());
+        tag(STTags.Items.TOOLBELT).add(STItems.TOOLBELT.get()).add(STItems.NETHERITE_TOOLBELT.get());
+        tag(STTags.Items.CURIOS_BELT).addTag(STTags.Items.TOOLBELT);
     }
 }

@@ -13,14 +13,16 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.scratch221171.simpletoolbelt.Const;
-import net.scratch221171.simpletoolbelt.STUtils;
 import net.scratch221171.simpletoolbelt.client.network.ClientBeltCache;
+import net.scratch221171.simpletoolbelt.common.STUtils;
 import net.scratch221171.simpletoolbelt.common.menu.ToolbeltMenu;
 import net.scratch221171.simpletoolbelt.common.network.SelectBeltSlotPayload;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltContents;
 import org.jspecify.annotations.NonNull;
 
 public class ToolbeltScreen extends AbstractContainerScreen<ToolbeltMenu> {
+
+    private static final int BASE_HEIGHT = 133;
 
     private static final ResourceLocation TEXTURE = STUtils.id("textures/gui/toolbelt/toolbelt.png");
     private static final ResourceLocation BUTTON = STUtils.id("textures/gui/toolbelt/button/button.png");
@@ -31,53 +33,62 @@ public class ToolbeltScreen extends AbstractContainerScreen<ToolbeltMenu> {
     private static final ResourceLocation STOW = STUtils.id("textures/gui/toolbelt/button/stow.png");
 
     public ToolbeltScreen(ToolbeltMenu menu, Inventory playerInventory, Component title) {
-        super(menu, playerInventory, Component.translatable(Const.LangKey.Screen.TOOLBELT_SCREEN_TITLE));
-        this.imageWidth = 176;
-        this.imageHeight = 133;
-        this.inventoryLabelY = this.imageHeight - 94;
+        super(menu, playerInventory, title);
+        imageWidth = 176;
+        imageHeight = BASE_HEIGHT + (menu.getPages() - 1) * 18;
+        inventoryLabelY = imageHeight - 94;
     }
 
     @Override
     protected void init() {
         super.init();
-        int x = (this.width - this.imageWidth) / 2 + (8 + ToolbeltMenu.BELT_SLOTS * 18);
-        int y = (this.height - this.imageHeight) / 2 + (20);
+        // ToolbeltMenuのToolbeltSlotとの辻褄あわせ
+        int x = leftPos + (8 + ToolbeltContents.PAGE_SIZE * 18);
+        int y = topPos + (20);
         addBeltButton(
                 new BeltStowButton(x, y, 16, 16, Component.translatable(Const.LangKey.Screen.WHEEL_TOOLTIP_STOW)));
     }
 
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY) {
-        int x = (this.width - this.imageWidth) / 2;
-        int y = (this.height - this.imageHeight) / 2;
-        guiGraphics.blit(TEXTURE, x, y, 0, 0, this.imageWidth, this.imageHeight);
-
-        ToolbeltContents original = ClientBeltCache.read(this.menu.getBeltId());
-        for (int i = 0; i < ToolbeltMenu.BELT_SLOTS; i++) {
-            ItemStack init = original.ring().initial().getStack(i);
-            ItemStack cur = original.ring().current().getStack(i);
-            Slot slot = this.menu.getSlot(i);
-            if (cur.isEmpty() && !init.isEmpty()) {
-                int itemX = x + slot.x;
-                int itemY = y + slot.y;
-                guiGraphics.fill(itemX, itemY, itemX + 16, itemY + 16, 0x80202020);
-                guiGraphics.renderItem(init, itemX, itemY);
-                guiGraphics.pose().pushPose();
-                guiGraphics.pose().translate(0.0F, 0.0F, 200.0F);
-                guiGraphics.drawString(font, "0", itemX + 17 - font.width("0"), itemY + 9, 16777215, true);
-                guiGraphics.pose().popPose();
-            }
+        int rows = menu.getPages();
+        int x = leftPos, y = topPos;
+        // 上部（ベルト1行目より上
+        guiGraphics.blit(TEXTURE, x, y, 0, 0, imageWidth, 19);
+        // ベルトのスロット行をページ数分だけ繰り返す
+        for (int r = 0; r < rows; r++) {
+            guiGraphics.blit(TEXTURE, x, y + 19 + r * 18, 0, 19, imageWidth, 18);
         }
+        // 下部（インベントリ側
+        guiGraphics.blit(TEXTURE, x, y + 19 + rows * 18, 0, 37, imageWidth, BASE_HEIGHT - 37);
+
+        ClientBeltCache.read(menu.getBeltId()).ifPresent(cached -> {
+            for (int i = 0; i < menu.getTotalSlots(); i++) {
+                ItemStack init = cached.getInitialFlat(i);
+                ItemStack cur = cached.getCurrentFlat(i);
+                Slot slot = menu.getSlot(i);
+                if (cur.isEmpty() && !init.isEmpty()) {
+                    int itemX = leftPos + slot.x;
+                    int itemY = topPos + slot.y;
+                    guiGraphics.fill(itemX, itemY, itemX + 16, itemY + 16, 0x80202020);
+                    guiGraphics.renderItem(init, itemX, itemY);
+                    guiGraphics.pose().pushPose();
+                    guiGraphics.pose().translate(0.0F, 0.0F, 200.0F);
+                    guiGraphics.drawString(font, "0", itemX + 17 - font.width("0"), itemY + 9, 16777215, true);
+                    guiGraphics.pose().popPose();
+                }
+            }
+        });
     }
 
     @Override
     public void render(@NonNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.render(guiGraphics, mouseX, mouseY, partialTick);
-        this.renderTooltip(guiGraphics, mouseX, mouseY);
+        renderTooltip(guiGraphics, mouseX, mouseY);
     }
 
     private <T extends AbstractWidget & BeltButton> void addBeltButton(T beltButton) {
-        this.addRenderableWidget(beltButton);
+        addRenderableWidget(beltButton);
     }
 
     interface BeltButton {}
@@ -87,40 +98,39 @@ public class ToolbeltScreen extends AbstractContainerScreen<ToolbeltMenu> {
 
         public BeltStowButton(int x, int y, int width, int height, Component message) {
             super(x, y, width, height, message);
-            this.setTooltip(Tooltip.create(message));
+            setTooltip(Tooltip.create(message));
         }
 
         @Override
         public void onPress() {
             ClientBeltCache.clear();
             PacketDistributor.sendToServer(new SelectBeltSlotPayload(SelectBeltSlotPayload.STOW_INDEX));
-            this.isPressed = true;
+            isPressed = true;
         }
 
         @Override
         public void onRelease(double mouseX, double mouseY) {
-            this.isPressed = false;
+            isPressed = false;
         }
 
         @Override
         protected void updateWidgetNarration(@NonNull NarrationElementOutput narrationElementOutput) {
-            this.defaultButtonNarrationText(narrationElementOutput);
+            defaultButtonNarrationText(narrationElementOutput);
         }
 
         @Override
         public void renderWidget(@NonNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
             ResourceLocation resourcelocation;
-            if (this.isPressed) {
+            if (isPressed) {
                 resourcelocation = BUTTON_SELECTED;
-            } else if (this.isHovered()) {
+            } else if (isHovered()) {
                 resourcelocation = BUTTON_HIGHLIGHTED;
             } else {
                 resourcelocation = BUTTON;
             }
 
-            guiGraphics.blit(
-                    resourcelocation, this.getX(), this.getY(), 0, 0, this.width, this.height, this.width, this.height);
-            guiGraphics.blit(STOW, this.getX() + 2, this.getY() + 2, 0, 0, 12, 12, 12, 12);
+            guiGraphics.blit(resourcelocation, getX(), getY(), 0, 0, width, height, width, height);
+            guiGraphics.blit(STOW, getX() + 2, getY() + 2, 0, 0, 12, 12, 12, 12);
         }
     }
 }

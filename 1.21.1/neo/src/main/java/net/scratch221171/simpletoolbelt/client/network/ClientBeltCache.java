@@ -2,6 +2,7 @@ package net.scratch221171.simpletoolbelt.client.network;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.ItemStack;
@@ -15,7 +16,6 @@ import net.scratch221171.simpletoolbelt.common.storage.ToolbeltContents;
 
 // client/ClientBeltCache.java
 public final class ClientBeltCache {
-    private static final ToolbeltContents EMPTY = ToolbeltContents.DEFAULT;
     private static final Map<UUID, ToolbeltContents> CACHE = new HashMap<>();
     private static final Map<UUID, Long> LAST_REQUEST = new HashMap<>();
     private static final int REQUEST_INTERVAL_TICKS = 40;
@@ -26,13 +26,12 @@ public final class ClientBeltCache {
         });
     }
 
-    public static ToolbeltContents read(ItemStack stack) {
-        UUID id = stack.get(STDataComponents.BELT_ID);
-        return id == null ? EMPTY : read(id);
+    public static Optional<ToolbeltContents> read(ItemStack stack) {
+        return Optional.ofNullable(stack.get(STDataComponents.BELT_ID)).flatMap(ClientBeltCache::read);
     }
 
     /** client用キャッシュ */
-    public static ToolbeltContents read(UUID id) {
+    public static Optional<ToolbeltContents> read(UUID id) {
         Level level = Minecraft.getInstance().level;
         if (level != null) {
             long now = level.getGameTime();
@@ -42,7 +41,7 @@ public final class ClientBeltCache {
                 PacketDistributor.sendToServer(new RequestBeltContentsPayload(id));
             }
         }
-        return CACHE.getOrDefault(id, EMPTY);
+        return Optional.ofNullable(CACHE.get(id));
     }
 
     public static void clear() {

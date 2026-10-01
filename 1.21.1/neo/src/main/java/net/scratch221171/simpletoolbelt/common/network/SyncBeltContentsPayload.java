@@ -6,7 +6,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.scratch221171.simpletoolbelt.Const;
-import net.scratch221171.simpletoolbelt.STUtils;
+import net.scratch221171.simpletoolbelt.common.STUtils;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltContents;
 import org.jspecify.annotations.NonNull;
 

@@ -11,10 +11,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.scratch221171.simpletoolbelt.Const;
-import net.scratch221171.simpletoolbelt.STUtils;
 import net.scratch221171.simpletoolbelt.client.STClientEvents;
 import net.scratch221171.simpletoolbelt.client.STKeyMappings;
 import net.scratch221171.simpletoolbelt.client.network.ClientBeltCache;
+import net.scratch221171.simpletoolbelt.common.STUtils;
 import net.scratch221171.simpletoolbelt.common.network.SelectBeltSlotPayload;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltContents;
 import net.scratch221171.simpletoolbelt.config.ClientConfig;
@@ -35,6 +35,7 @@ public class ToolbeltWheelScreen extends Screen {
     private static final ResourceLocation EMPTY_SPRITE = STUtils.id("textures/hud/wheel_empty.png");
 
     private HoverState hoverState = HoverState.noAction();
+    private int pageIndex = 0;
 
     public ToolbeltWheelScreen() {
         super(Component.translatable(Const.LangKey.Screen.WHEEL_SCREEN_TITLE));
@@ -66,8 +67,6 @@ public class ToolbeltWheelScreen extends Screen {
             renderMenuBackground(guiGraphics);
         }
 
-        ToolbeltContents stored = ClientBeltCache.read(belt);
-
         int centerX = this.width / 2;
         int centerY = this.height / 2;
 
@@ -90,63 +89,69 @@ public class ToolbeltWheelScreen extends Screen {
             double angleDeg = Math.toDegrees(Math.atan2(dx, -dy));
             if (angleDeg < 0) angleDeg += 360;
             hoverState =
-                    HoverState.select(Math.floorMod(Math.round((float) angleDeg / 45f), ToolbeltContents.RING_SIZE));
+                    HoverState.select(Math.floorMod(Math.round((float) angleDeg / 45f), ToolbeltContents.PAGE_SIZE));
         }
 
-        for (int i = 0; i < ToolbeltContents.RING_SIZE; i++) {
-            double angleRad = Math.toRadians(i * 45.0);
-            int x = centerX + (int) (WHEEL_RADIUS * Math.sin(angleRad)) - ICON_SIZE / 2;
-            int y = centerY - (int) (WHEEL_RADIUS * Math.cos(angleRad)) - ICON_SIZE / 2;
-            boolean isSelected = hoverState.action() == HoverState.HoverAction.SELECT && i == hoverState.index();
-            ItemStack init = stored.ring().initial().getStack(i);
-            ItemStack cur = stored.ring().current().getStack(i);
+        ClientBeltCache.read(belt).ifPresent(cached -> {
+            Component text =
+                    Component.translatable(Const.LangKey.Screen.WHEEL_PAGE_INDEX, pageIndex + 1, cached.pagesSize());
+            guiGraphics.drawString(font, text, centerX - font.width(text) / 2, centerY - font.lineHeight / 2, 16777215);
+            for (int i = 0; i < ToolbeltContents.PAGE_SIZE; i++) {
+                double angleRad = Math.toRadians(i * 45.0);
+                int x = centerX + (int) (WHEEL_RADIUS * Math.sin(angleRad)) - ICON_SIZE / 2;
+                int y = centerY - (int) (WHEEL_RADIUS * Math.cos(angleRad)) - ICON_SIZE / 2;
+                boolean isSelected = hoverState.action() == HoverState.HoverAction.SELECT && i == hoverState.index();
+                ItemStack init = cached.getPage(pageIndex).initial().getStack(i);
+                ItemStack cur = cached.getPage(pageIndex).current().getStack(i);
 
-            RenderSystem.enableBlend();
-            RenderSystem.defaultBlendFunc();
-            if (cur.isEmpty()) {
-                if (init.isEmpty()) {
-                    guiGraphics.blit(
-                            EMPTY_SPRITE, x - (10 - ICON_SIZE) / 2, y - (10 - ICON_SIZE) / 2, 0, 0, 10, 10, 10, 10);
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
+                if (cur.isEmpty()) {
+                    if (init.isEmpty()) {
+                        guiGraphics.blit(
+                                EMPTY_SPRITE, x - (10 - ICON_SIZE) / 2, y - (10 - ICON_SIZE) / 2, 0, 0, 10, 10, 10, 10);
+                    } else {
+                        guiGraphics.blit(
+                                FRAME_SPRITE, x - (22 - ICON_SIZE) / 2, y - (22 - ICON_SIZE) / 2, 0, 0, 22, 22, 22, 22);
+                        guiGraphics.fill(x, y, x + ICON_SIZE, y + ICON_SIZE, 0x80202020);
+                        guiGraphics.renderItem(init, x, y);
+                        guiGraphics.pose().pushPose();
+                        guiGraphics.pose().translate(0.0F, 0.0F, 200.0F);
+                        guiGraphics.drawString(font, "0", x + 17 - font.width("0"), y + 9, 16777215, true);
+                        guiGraphics.pose().popPose();
+                    }
                 } else {
                     guiGraphics.blit(
                             FRAME_SPRITE, x - (22 - ICON_SIZE) / 2, y - (22 - ICON_SIZE) / 2, 0, 0, 22, 22, 22, 22);
-                    guiGraphics.fill(x, y, x + ICON_SIZE, y + ICON_SIZE, 0x80202020);
-                    guiGraphics.renderItem(init, x, y);
-                    guiGraphics.pose().pushPose();
-                    guiGraphics.pose().translate(0.0F, 0.0F, 200.0F);
-                    guiGraphics.drawString(font, "0", x + 17 - font.width("0"), y + 9, 16777215, true);
-                    guiGraphics.pose().popPose();
+                    if (isSelected) {
+                        guiGraphics.blit(
+                                SELECTED_FRAME_SPRITE,
+                                x - (24 - ICON_SIZE) / 2,
+                                y - (24 - ICON_SIZE) / 2,
+                                0,
+                                0,
+                                24,
+                                24,
+                                24,
+                                24);
+                    }
+                    guiGraphics.renderItem(cur, x, y);
+                    guiGraphics.renderItemDecorations(this.font, cur, x, y);
+                    if (isSelected) {
+                        guiGraphics.renderTooltip(this.font, cur, mouseX, mouseY);
+                    }
                 }
-            } else {
-                guiGraphics.blit(
-                        FRAME_SPRITE, x - (22 - ICON_SIZE) / 2, y - (22 - ICON_SIZE) / 2, 0, 0, 22, 22, 22, 22);
-                if (isSelected) {
-                    guiGraphics.blit(
-                            SELECTED_FRAME_SPRITE,
-                            x - (24 - ICON_SIZE) / 2,
-                            y - (24 - ICON_SIZE) / 2,
-                            0,
-                            0,
-                            24,
-                            24,
-                            24,
-                            24);
-                }
-                guiGraphics.renderItem(cur, x, y);
-                guiGraphics.renderItemDecorations(this.font, cur, x, y);
-                if (isSelected) {
-                    guiGraphics.renderTooltip(this.font, cur, mouseX, mouseY);
-                }
+                RenderSystem.disableBlend();
             }
-            RenderSystem.disableBlend();
-        }
+        });
     }
 
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
         if (STKeyMappings.OPEN_WHEEL.matches(keyCode, scanCode)) {
             if (hoverState.action() == HoverState.HoverAction.SELECT) {
-                PacketDistributor.sendToServer(new SelectBeltSlotPayload(hoverState.index()));
+                PacketDistributor.sendToServer(
+                        new SelectBeltSlotPayload(pageIndex * ToolbeltContents.PAGE_SIZE + hoverState.index()));
             } else if (hoverState.action() == HoverState.HoverAction.STOW) {
                 PacketDistributor.sendToServer(new SelectBeltSlotPayload(SelectBeltSlotPayload.STOW_INDEX));
             }
@@ -156,45 +161,23 @@ public class ToolbeltWheelScreen extends Screen {
         return super.keyReleased(keyCode, scanCode, modifiers);
     }
 
-    public static final class HoverState {
-
-        private final HoverAction action;
-        private final int index;
-
-        private HoverState(HoverAction action, int index) {
-            this.action = action;
-            this.index = index;
-        }
-
-        public static HoverState noAction() {
-            return new HoverState(HoverAction.NO_ACTION, -1);
-        }
-
-        public static HoverState select(int index) {
-            return new HoverState(HoverAction.SELECT, index);
-        }
-
-        public static HoverState stow() {
-            return new HoverState(HoverAction.STOW, -1);
-        }
-
-        public HoverAction action() {
-            return action;
-        }
-
-        public int index() {
-            if (action != HoverAction.SELECT) {
-                throw new IllegalStateException("Index is only available for SELECT!");
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        Minecraft mc = this.minecraft;
+        if (mc != null && scrollY != 0) {
+            ItemStack belt = STClientEvents.findToolbeltInInventory(mc);
+            if (!belt.isEmpty()) {
+                int pages = ClientBeltCache.read(belt)
+                        .map(ToolbeltContents::pagesSize)
+                        .orElse(0);
+                if (pages > 1) {
+                    // 上スクロール(scrollY > 0)で減、下スクロールで増。端は循環
+                    pageIndex = Math.clamp(pageIndex + (scrollY > 0 ? -1 : 1), 0, pages - 1);
+                }
             }
-
-            return index;
+            return true;
         }
-
-        public enum HoverAction {
-            NO_ACTION,
-            SELECT,
-            STOW
-        }
+        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
     private void renderHoverHighlight(
@@ -248,5 +231,46 @@ public class ToolbeltWheelScreen extends Screen {
 
         RenderSystem.enableCull();
         RenderSystem.disableBlend();
+    }
+
+    public static final class HoverState {
+
+        private final HoverAction action;
+        private final int index;
+
+        private HoverState(HoverAction action, int index) {
+            this.action = action;
+            this.index = index;
+        }
+
+        public static HoverState noAction() {
+            return new HoverState(HoverAction.NO_ACTION, -1);
+        }
+
+        public static HoverState select(int index) {
+            return new HoverState(HoverAction.SELECT, index);
+        }
+
+        public static HoverState stow() {
+            return new HoverState(HoverAction.STOW, -1);
+        }
+
+        public HoverAction action() {
+            return action;
+        }
+
+        public int index() {
+            if (action != HoverAction.SELECT) {
+                throw new IllegalStateException("Index is only available for SELECT!");
+            }
+
+            return index;
+        }
+
+        public enum HoverAction {
+            NO_ACTION,
+            SELECT,
+            STOW
+        }
     }
 }

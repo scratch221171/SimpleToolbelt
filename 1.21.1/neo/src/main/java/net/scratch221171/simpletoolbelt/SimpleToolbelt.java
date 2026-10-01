@@ -7,6 +7,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.scratch221171.simpletoolbelt.common.STUtils;
 import net.scratch221171.simpletoolbelt.common.registry.STDataComponents;
 import net.scratch221171.simpletoolbelt.common.registry.STItems;
 import net.scratch221171.simpletoolbelt.common.registry.STMenus;
@@ -35,6 +36,10 @@ public class SimpleToolbelt {
         event.insertAfter(
                 Items.LEAD.getDefaultInstance(),
                 STItems.TOOLBELT.toStack(),
+                CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+        event.insertAfter(
+                STItems.TOOLBELT.toStack(),
+                STItems.NETHERITE_TOOLBELT.toStack(),
                 CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
     }
 }
