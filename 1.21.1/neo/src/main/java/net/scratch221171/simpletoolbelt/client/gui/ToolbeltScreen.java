@@ -63,6 +63,7 @@ public class ToolbeltScreen extends AbstractContainerScreen<ToolbeltMenu> {
         guiGraphics.blit(TEXTURE, x, y + 19 + rows * 18, 0, 37, imageWidth, BASE_HEIGHT - 37);
 
         ClientBeltCache.read(menu.getBeltId()).ifPresent(cached -> {
+            Const.LOGGER.info("menuSlots={}, cacheSlots={}", menu.getTotalSlots(), cached.totalSlots());
             for (int i = 0; i < menu.getTotalSlots(); i++) {
                 ItemStack init = cached.getInitialFlat(i);
                 ItemStack cur = cached.getCurrentFlat(i);

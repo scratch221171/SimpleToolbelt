@@ -11,5 +11,7 @@
   "item.simpletoolbelt.toolbelthint": "手に持って使用するか、GUI内で右クリックしてメニューを開きます。",
   "item.simpletoolbelt.toolbeltinitializingUUID": "初期化中...",
   "item.simpletoolbelt.toolbeltshiftKey": "[%s]を押してさらに表示",
+  "key.simpletoolbelt.category": "Simple Toolbelt",
+  "key.simpletoolbelt.wheel": "ホイールメニューを開く",
   "modmenu.descriptionTranslation.simpletoolbelt": "シンプルなツールベルトを追加します。"
 }

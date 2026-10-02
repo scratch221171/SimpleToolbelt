@@ -33,8 +33,8 @@ public class ToolbeltMenu extends AbstractContainerMenu {
 
     /** Server-side constructor */
     public static ToolbeltMenu forUUID(int containerId, Inventory inv, UUID beltId, ItemStack stack) {
-        ToolbeltContents contents =
-                ToolbeltStorage.get(((ServerPlayer) inv.player).server).resolve(beltId, stack);
+        ServerPlayer player = (ServerPlayer) inv.player;
+        ToolbeltContents contents = ToolbeltStorage.get(player.server).resolve(player, beltId, stack);
         return new ToolbeltMenu(containerId, inv, beltId, contents, true);
     }
 

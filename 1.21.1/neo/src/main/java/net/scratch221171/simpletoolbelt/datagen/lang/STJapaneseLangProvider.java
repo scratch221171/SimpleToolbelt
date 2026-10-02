@@ -28,8 +28,12 @@ public class STJapaneseLangProvider extends STLangProvider {
         add(Const.LangKey.Screen.WHEEL_PAGE_INDEX, "ページ %s / %s");
 
         // コマンド
-        add(Const.LangKey.Commands.NOT_FOUND, "ベルトが見つかりません");
-        add(Const.LangKey.Commands.PRINT_ALL, "以下のUUIDが保存されています: %s");
-        add(Const.LangKey.Commands.RESTORED, "以下のUUIDのベルトを復元しました: %s");
+        add(Const.LangKey.Command.NOT_FOUND, "ベルトが見つかりません");
+        add(Const.LangKey.Command.PRINT_ALL, "以下のUUIDが保存されています: %s");
+        add(Const.LangKey.Command.RESTORED, "以下のUUIDのベルトを復元しました: %s");
+
+        // キー
+        add(Const.LangKey.Key.CATEGORY, "Simple Toolbelt");
+        add(Const.LangKey.Key.WHEEL, "ホイールメニューを開く");
     }
 }

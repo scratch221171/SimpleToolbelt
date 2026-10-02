@@ -41,7 +41,7 @@ public class ToolbeltItem extends Item {
         if (!level.isClientSide
                 && entity instanceof ServerPlayer player
                 && !stack.has(STDataComponents.BELT_ID.get())) {
-            ToolbeltStorage.get(player.server).ensureId(stack);
+            ToolbeltStorage.get(player.server).ensureId(player, stack);
         }
     }
 
@@ -50,7 +50,10 @@ public class ToolbeltItem extends Item {
             @NonNull Level level, Player player, @NonNull InteractionHand hand) {
         ItemStack beltStack = player.getItemInHand(hand);
         if (player instanceof ServerPlayer serverPlayer) {
-            openMenu(serverPlayer, ToolbeltStorage.get(serverPlayer.server).ensureId(beltStack), beltStack);
+            openMenu(
+                    serverPlayer,
+                    ToolbeltStorage.get(serverPlayer.server).ensureId(serverPlayer, beltStack),
+                    beltStack);
         }
         return InteractionResultHolder.sidedSuccess(beltStack, level.isClientSide);
     }
@@ -65,7 +68,7 @@ public class ToolbeltItem extends Item {
             @NonNull SlotAccess access) {
         if (action != ClickAction.SECONDARY || !other.isEmpty()) return false;
         if (player instanceof ServerPlayer serverPlayer) {
-            UUID id = ToolbeltStorage.get(serverPlayer.server).ensureId(beltStack);
+            UUID id = ToolbeltStorage.get(serverPlayer.server).ensureId(serverPlayer, beltStack);
             serverPlayer.server.tell(
                     new TickTask(serverPlayer.server.getTickCount(), () -> openMenu(serverPlayer, id, beltStack)));
         } else if (player.level().isClientSide) {
@@ -75,14 +78,15 @@ public class ToolbeltItem extends Item {
     }
 
     public static void openMenu(ServerPlayer player, UUID id, ItemStack stack) {
-        Optional.ofNullable(ToolbeltStorage.get(player.server).getOrNull(id)).ifPresent(contents -> player.openMenu(
-                new SimpleMenuProvider(
-                        (containerId, inv, p) -> ToolbeltMenu.forUUID(containerId, inv, id, stack),
-                        Component.translatable(Const.LangKey.Screen.TOOLBELT_SCREEN_TITLE)),
-                buf -> {
-                    buf.writeUUID(id);
-                    ToolbeltContents.STREAM_CODEC.encode(buf, contents);
-                }));
+        Optional.ofNullable(ToolbeltStorage.get(player.server).getOrNull(id))
+                .ifPresent(contents -> player.openMenu(
+                        new SimpleMenuProvider(
+                                (containerId, inv, p) -> ToolbeltMenu.forUUID(containerId, inv, id, stack),
+                                Component.translatable(Const.LangKey.Screen.TOOLBELT_SCREEN_TITLE)),
+                        buf -> {
+                            buf.writeUUID(id);
+                            ToolbeltContents.STREAM_CODEC.encode(buf, contents);
+                        }));
     }
 
     @Override

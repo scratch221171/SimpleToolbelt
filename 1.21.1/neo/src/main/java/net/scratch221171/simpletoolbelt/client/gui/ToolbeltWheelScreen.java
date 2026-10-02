@@ -93,9 +93,12 @@ public class ToolbeltWheelScreen extends Screen {
         }
 
         ClientBeltCache.read(belt).ifPresent(cached -> {
-            Component text =
-                    Component.translatable(Const.LangKey.Screen.WHEEL_PAGE_INDEX, pageIndex + 1, cached.pagesSize());
-            guiGraphics.drawString(font, text, centerX - font.width(text) / 2, centerY - font.lineHeight / 2, 16777215);
+            if (cached.pagesSize() > 1) {
+                Component text = Component.translatable(
+                        Const.LangKey.Screen.WHEEL_PAGE_INDEX, pageIndex + 1, cached.pagesSize());
+                guiGraphics.drawString(
+                        font, text, centerX - font.width(text) / 2, centerY - font.lineHeight / 2, 16777215);
+            }
             for (int i = 0; i < ToolbeltContents.PAGE_SIZE; i++) {
                 double angleRad = Math.toRadians(i * 45.0);
                 int x = centerX + (int) (WHEEL_RADIUS * Math.sin(angleRad)) - ICON_SIZE / 2;

@@ -13,14 +13,12 @@ import org.lwjgl.glfw.GLFW;
 @EventBusSubscriber(modid = Const.MOD_ID, value = Dist.CLIENT)
 public class STKeyMappings {
 
-    public static final String CATEGORY = "key.categories." + Const.MOD_ID;
-
     public static final KeyMapping OPEN_WHEEL = new KeyMapping(
-            "key." + Const.MOD_ID + ".wheel",
+            Const.LangKey.Key.WHEEL,
             KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_R,
-            CATEGORY);
+            Const.LangKey.Key.CATEGORY);
 
     @SubscribeEvent
     public static void register(RegisterKeyMappingsEvent event) {

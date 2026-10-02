@@ -52,7 +52,7 @@ public class STPayloads {
     private static void applySelection(ServerPlayer player, int requestedSlot) {
         Optional.ofNullable(findToolbeltStack(player)).ifPresent(belt -> {
             ToolbeltStorage storage = ToolbeltStorage.get(player.server);
-            UUID beltId = storage.ensureId(belt);
+            UUID beltId = storage.ensureId(player, belt);
             Optional.ofNullable(storage.getOrNull(beltId)).ifPresent(stored -> {
                 ItemStack mainHand = player.getMainHandItem();
 
@@ -149,7 +149,7 @@ public class STPayloads {
                                 new SyncBeltContentsPayload(
                                         payload.id(),
                                         ToolbeltStorage.get(serverPlayer.server)
-                                                .resolve(payload.id(), stack))));
+                                                .resolve(serverPlayer, payload.id(), stack))));
             }
         });
     }
@@ -164,7 +164,7 @@ public class STPayloads {
                 }
                 ItemStack beltStack = inv.getItem(slot);
                 if (beltStack.getItem() instanceof ToolbeltItem) {
-                    UUID id = ToolbeltStorage.get(serverPlayer.server).ensureId(beltStack);
+                    UUID id = ToolbeltStorage.get(serverPlayer.server).ensureId(serverPlayer, beltStack);
                     serverPlayer.server.tell(new TickTask(
                             serverPlayer.server.getTickCount(),
                             () -> ToolbeltItem.openMenu(serverPlayer, id, beltStack)));

@@ -61,19 +61,24 @@ public class ToolbeltStorage extends SavedData {
         return cur;
     }
 
-    public ToolbeltContents resolve(UUID id, ItemStack stack) {
+    public ToolbeltContents resolve(ServerPlayer player, UUID id, ItemStack stack) {
         int capacity = stack.getItem() instanceof ToolbeltItem t ? t.getPageCount(stack) : 0;
-        return getOrInit(id, capacity);
+        ToolbeltContents cur = belts.get(id);
+        if (cur == null || cur.pagesSize() < capacity) {
+            cur = (cur == null ? ToolbeltContents.EMPTY : cur).increasePageTo(capacity);
+            update(player, id, cur);
+        }
+        return cur;
     }
 
     /** 初回使用時にUUIDを初期化　ServerOnly */
-    public UUID ensureId(ItemStack stack) {
+    public UUID ensureId(ServerPlayer player, ItemStack stack) {
         UUID id = stack.get(STDataComponents.BELT_ID);
         if (id == null) {
             id = UUID.randomUUID();
             stack.set(STDataComponents.BELT_ID, id);
         }
-        resolve(id, stack);
+        resolve(player, id, stack);
         return id;
     }
 

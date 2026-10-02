@@ -43,11 +43,11 @@ public class STCommands {
         Set<UUID> ids = storage.getIds();
 
         if (ids.isEmpty()) {
-            ctx.getSource().sendFailure(Component.translatable(Const.LangKey.Commands.NOT_FOUND));
+            ctx.getSource().sendFailure(Component.translatable(Const.LangKey.Command.NOT_FOUND));
             return 0;
         }
         ctx.getSource()
-                .sendSuccess(() -> Component.translatable(Const.LangKey.Commands.PRINT_ALL, ids.toString()), false);
+                .sendSuccess(() -> Component.translatable(Const.LangKey.Command.PRINT_ALL, ids.toString()), false);
         return ids.size();
     }
 
@@ -62,7 +62,7 @@ public class STCommands {
         ToolbeltContents contents =
                 ToolbeltStorage.get(ctx.getSource().getServer()).getOrNull(id);
         if (contents == null) {
-            ctx.getSource().sendFailure(Component.translatable(Const.LangKey.Commands.NOT_FOUND));
+            ctx.getSource().sendFailure(Component.translatable(Const.LangKey.Command.NOT_FOUND));
             return 0;
         } else {
             ItemStack stack =
@@ -74,7 +74,7 @@ public class STCommands {
             }
 
             ctx.getSource()
-                    .sendSuccess(() -> Component.translatable(Const.LangKey.Commands.RESTORED, id.toString()), true);
+                    .sendSuccess(() -> Component.translatable(Const.LangKey.Command.RESTORED, id.toString()), true);
             return 1;
         }
     }

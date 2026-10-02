@@ -28,8 +28,12 @@ public class STEnglishLangProvider extends STLangProvider {
         add(Const.LangKey.Screen.WHEEL_PAGE_INDEX, "Page %s / %s");
 
         // コマンド
-        add(Const.LangKey.Commands.NOT_FOUND, "Belt not found");
-        add(Const.LangKey.Commands.PRINT_ALL, "UUID stored in storage: %s");
-        add(Const.LangKey.Commands.RESTORED, "Restored the belt with the following UUID: %s");
+        add(Const.LangKey.Command.NOT_FOUND, "Belt not found");
+        add(Const.LangKey.Command.PRINT_ALL, "UUID stored in storage: %s");
+        add(Const.LangKey.Command.RESTORED, "Restored the belt with the following UUID: %s");
+
+        // キー
+        add(Const.LangKey.Key.CATEGORY, "Simple Toolbelt");
+        add(Const.LangKey.Key.WHEEL, "Open Wheel Menu");
     }
 }

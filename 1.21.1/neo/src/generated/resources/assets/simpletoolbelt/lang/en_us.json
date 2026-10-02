@@ -11,5 +11,7 @@
   "item.simpletoolbelt.toolbelthint": "Use while held, or right-click in a GUI to open the menu.",
   "item.simpletoolbelt.toolbeltinitializingUUID": "Initializing...",
   "item.simpletoolbelt.toolbeltshiftKey": "Hold [%s] for more",
+  "key.simpletoolbelt.category": "Simple Toolbelt",
+  "key.simpletoolbelt.wheel": "Open Wheel Menu",
   "modmenu.descriptionTranslation.simpletoolbelt": "Adds a simple tool belt."
 }

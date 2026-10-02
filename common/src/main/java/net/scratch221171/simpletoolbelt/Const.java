@@ -57,12 +57,19 @@ public final class Const {
             public static final String WHEEL_PAGE_INDEX = define(PREFIX, "wheel.pageIndex");
         }
 
-        final class Commands {
+        final class Command {
             public static final String PREFIX = "commands";
 
             public static final String NOT_FOUND = define(PREFIX, "list.failed.notfound");
             public static final String PRINT_ALL = define(PREFIX, "list.success.printall");
             public static final String RESTORED = define(PREFIX, "restore.success.restored");
+        }
+
+        final class Key {
+            public static final String PREFIX = "key";
+
+            public static final String CATEGORY = define(PREFIX, "category");
+            public static final String WHEEL = define(PREFIX, "wheel");
         }
 
         static String define(String prefix, String key) {
