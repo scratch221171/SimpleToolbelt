@@ -1,3 +1,4 @@
+import net.scratch221171.mdk.build.platformArtifacts
 import net.scratch221171.mdk.build.req
 
 plugins {
@@ -15,4 +16,10 @@ dependencies {
     }
     implementation(libs.curios.neoforge, req(curiosVersion))
     ciRuntimeMods(libs.curios.neoforge, req(curiosVersion))
+}
+
+platformArtifacts {
+    publishingDependencies {
+        optional("curios")
+    }
 }
