@@ -20,12 +20,12 @@ repositories {
 
 modPublishing {
     curseForge {
-        // projectId.set("123456")
+        projectId.set("1723791")
         client.set(true)
         server.set(true)
     }
     modrinth {
-        // projectId.set("xxxxxxxx")
+        projectId.set("fpWgSx7m")
         environment.set(CLIENT_AND_SERVER)
     }
 }
