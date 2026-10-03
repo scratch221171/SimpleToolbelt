@@ -1,7 +1,6 @@
 package net.scratch221171.simpletoolbelt.common.item;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -37,10 +36,8 @@ public class ToolbeltItem extends Item {
 
     @Override
     public void inventoryTick(
-            @NonNull ItemStack stack, Level level, @NonNull Entity entity, int slotId, boolean isSelected) {
-        if (!level.isClientSide
-                && entity instanceof ServerPlayer player
-                && !stack.has(STDataComponents.BELT_ID.get())) {
+            @NonNull ItemStack stack, @NonNull Level level, @NonNull Entity entity, int slotId, boolean isSelected) {
+        if (entity instanceof ServerPlayer player && !stack.has(STDataComponents.BELT_ID.get())) {
             ToolbeltStorage.get(player.server).ensureId(player, stack);
         }
     }
@@ -68,25 +65,11 @@ public class ToolbeltItem extends Item {
             @NonNull SlotAccess access) {
         if (action != ClickAction.SECONDARY || !other.isEmpty()) return false;
         if (player instanceof ServerPlayer serverPlayer) {
-            UUID id = ToolbeltStorage.get(serverPlayer.server).ensureId(serverPlayer, beltStack);
-            serverPlayer.server.tell(
-                    new TickTask(serverPlayer.server.getTickCount(), () -> openMenu(serverPlayer, id, beltStack)));
-        } else if (player.level().isClientSide) {
+            openMenuNextTick(serverPlayer, beltStack);
+        } else {
             ClientBeltActions.requestOpenInCreative(slot);
         }
         return true;
-    }
-
-    public static void openMenu(ServerPlayer player, UUID id, ItemStack stack) {
-        Optional.ofNullable(ToolbeltStorage.get(player.server).getOrNull(id))
-                .ifPresent(contents -> player.openMenu(
-                        new SimpleMenuProvider(
-                                (containerId, inv, p) -> ToolbeltMenu.forUUID(containerId, inv, id, stack),
-                                Component.translatable(Const.LangKey.Screen.TOOLBELT_SCREEN_TITLE)),
-                        buf -> {
-                            buf.writeUUID(id);
-                            ToolbeltContents.STREAM_CODEC.encode(buf, contents);
-                        }));
     }
 
     @Override
@@ -111,6 +94,23 @@ public class ToolbeltItem extends Item {
                             Component.literal("Shift").withStyle(ChatFormatting.GRAY))
                     .withStyle(ChatFormatting.DARK_GRAY));
         }
+    }
+
+    public static void openMenuNextTick(ServerPlayer player, ItemStack beltStack) {
+        UUID id = ToolbeltStorage.get(player.server).ensureId(player, beltStack);
+        player.server.tell(new TickTask(player.server.getTickCount(), () -> openMenu(player, id, beltStack)));
+    }
+
+    private static void openMenu(ServerPlayer player, UUID id, ItemStack stack) {
+        ToolbeltContents contents = ToolbeltStorage.get(player.server).resolve(player, id, stack);
+        player.openMenu(
+                new SimpleMenuProvider(
+                        (containerId, inv, p) -> ToolbeltMenu.forUUID(containerId, inv, id, stack),
+                        Component.translatable(Const.LangKey.Screen.TOOLBELT_SCREEN_TITLE)),
+                buf -> {
+                    buf.writeUUID(id);
+                    ToolbeltContents.STREAM_CODEC.encode(buf, contents);
+                });
     }
 
     public int getPageCount(ItemStack stack) {

@@ -12,6 +12,8 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.scratch221171.simpletoolbelt.common.item.ToolbeltItem;
+import net.scratch221171.simpletoolbelt.common.registry.STDataComponents;
 import net.scratch221171.simpletoolbelt.common.registry.STMenus;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltContents;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltStorage;
@@ -20,10 +22,11 @@ import org.jspecify.annotations.NonNull;
 public class ToolbeltMenu extends AbstractContainerMenu {
 
     private final Container beltContainer;
-    private final int pages;
-    private final int beltTotalSlots;
     private final UUID beltId;
     private final Player player;
+    private ToolbeltContents clientContents;
+    private final int pages;
+    private final int beltTotalSlots;
     private boolean suppressWriteBack = false;
 
     /** Client-side constructor */
@@ -44,6 +47,7 @@ public class ToolbeltMenu extends AbstractContainerMenu {
         this.player = inv.player;
         this.pages = contents.pagesSize();
         this.beltTotalSlots = contents.totalSlots();
+        this.clientContents = contents;
 
         SimpleContainer container = new SimpleContainer(beltTotalSlots);
         for (int i = 0; i < beltTotalSlots; i++) {
@@ -57,16 +61,14 @@ public class ToolbeltMenu extends AbstractContainerMenu {
             });
         }
 
-        checkContainerSize(container, beltTotalSlots);
         this.beltContainer = container;
-        beltContainer.startOpen(inv.player);
         for (int i = 0; i < beltTotalSlots; i++) {
             final int idx = i;
             Supplier<ItemStack> initial = isServer
                     ? () -> ToolbeltStorage.get(((ServerPlayer) player).server)
                             .getOrInit(beltId, pages)
                             .getInitialFlat(idx)
-                    : () -> contents.getInitialFlat(idx);
+                    : () -> clientContents.getInitialFlat(idx);
             this.addSlot(new ToolbeltSlot(
                     container,
                     i,
@@ -133,13 +135,12 @@ public class ToolbeltMenu extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(@NonNull Player player) {
-        return true;
-    }
-
-    @Override
-    public void removed(@NonNull Player player) {
-        super.removed(player);
-        beltContainer.stopOpen(player);
+        if (player.level().isClientSide) return true;
+        ItemStack carried = getCarried();
+        if (carried.getItem() instanceof ToolbeltItem && beltId.equals(carried.get(STDataComponents.BELT_ID))) {
+            return true; // カーソルに持ち上げ中
+        }
+        return ToolbeltStorage.findBelt(player, beltId).isPresent();
     }
 
     public UUID getBeltId() {
@@ -150,8 +151,14 @@ public class ToolbeltMenu extends AbstractContainerMenu {
         return pages;
     }
 
-    public int getTotalSlots() {
-        return beltTotalSlots;
+    public ToolbeltContents getClientContents() {
+        return clientContents;
+    }
+
+    public void applyClientSync(ToolbeltContents contents) {
+        if (contents.pagesSize() >= pages) {
+            this.clientContents = contents;
+        }
     }
 
     public static void refreshIfOpen(ServerPlayer player, UUID beltId, ToolbeltContents contents) {

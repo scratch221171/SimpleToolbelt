@@ -17,7 +17,7 @@ public class ToolbeltSlot extends Slot {
 
     @Override
     public boolean mayPlace(@NonNull ItemStack stack) {
-        if (!super.mayPlace(stack) || stack.getItem() instanceof ToolbeltItem) {
+        if (stack.getItem() instanceof ToolbeltItem) {
             return false;
         }
         ItemStack init = initial.get();

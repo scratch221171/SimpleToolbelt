@@ -22,7 +22,6 @@ import net.scratch221171.simpletoolbelt.common.registry.STItems;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltContents;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltStorage;
 
-// common/STCommands.java
 @EventBusSubscriber(modid = Const.MOD_ID)
 public class STCommands {
 

@@ -68,7 +68,6 @@ public record ToolbeltContents(List<Page> pages) {
     }
 
     public ToolbeltContents withPage(int index, Page page) {
-        if (index >= pages.size()) return this;
         List<Page> copy = new ArrayList<>(pages);
         copy.set(index, page);
         return new ToolbeltContents(copy);
@@ -104,10 +103,9 @@ public record ToolbeltContents(List<Page> pages) {
         return new ToolbeltContents(copy);
     }
 
-    public static boolean isEmpty(ToolbeltContents contents) {
-        for (int i = 0; i < contents.totalSlots(); i++) {
-            if (!contents.getInitialFlat(i).isEmpty()
-                    || !contents.getCurrentFlat(i).isEmpty()) {
+    public boolean isEmpty() {
+        for (int i = 0; i < totalSlots(); i++) {
+            if (!getInitialFlat(i).isEmpty() || !getCurrentFlat(i).isEmpty()) {
                 return false;
             }
         }

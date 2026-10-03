@@ -2,6 +2,8 @@ package net.scratch221171.simpletoolbelt.common.storage;
 
 import com.mojang.serialization.Codec;
 import java.util.*;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
@@ -63,10 +65,10 @@ public class ToolbeltStorage extends SavedData {
 
     public ToolbeltContents resolve(ServerPlayer player, UUID id, ItemStack stack) {
         int capacity = stack.getItem() instanceof ToolbeltItem t ? t.getPageCount(stack) : 0;
-        ToolbeltContents cur = belts.get(id);
-        if (cur == null || cur.pagesSize() < capacity) {
-            cur = (cur == null ? ToolbeltContents.EMPTY : cur).increasePageTo(capacity);
-            update(player, id, cur);
+        ToolbeltContents before = belts.get(id);
+        ToolbeltContents cur = getOrInit(id, capacity);
+        if (cur != before) {
+            PacketDistributor.sendToPlayer(player, new SyncBeltContentsPayload(id, cur));
         }
         return cur;
     }
@@ -82,21 +84,30 @@ public class ToolbeltStorage extends SavedData {
         return id;
     }
 
-    @Nullable public static ItemStack findBelt(Player player, UUID id) {
-        if (ModList.get().isLoaded("curios")) {
-            Optional<ItemStack> optional = STCuriosHelper.getBeltInCurios(player, id);
-            if (optional.isPresent()) {
-                return optional.get();
+    public static Optional<ItemStack> findAnyBelt(Player player) {
+        return find(player, () -> STCuriosHelper.getBeltInCurios(player), stack -> true);
+    }
+
+    public static Optional<ItemStack> findBelt(Player player, UUID id) {
+        return find(
+                player,
+                () -> STCuriosHelper.getBeltInCurios(player, id),
+                stack -> id.equals(stack.get(STDataComponents.BELT_ID)));
+    }
+
+    private static Optional<ItemStack> find(
+            Player player, Supplier<Optional<ItemStack>> inCurios, Predicate<ItemStack> filter) {
+        Optional<ItemStack> curios = ModList.get().isLoaded("curios") ? inCurios.get() : Optional.empty();
+        return curios.or(() -> {
+            Inventory inv = player.getInventory();
+            for (int i = 0; i < inv.getContainerSize(); i++) {
+                ItemStack stack = inv.getItem(i);
+                if (stack.getItem() instanceof ToolbeltItem && filter.test(stack)) {
+                    return Optional.of(stack);
+                }
             }
-        }
-        Inventory inv = player.getInventory();
-        for (int i = 0; i < inv.getContainerSize(); i++) {
-            ItemStack stack = inv.getItem(i);
-            if (stack.getItem() instanceof ToolbeltItem && id.equals(stack.get(STDataComponents.BELT_ID))) {
-                return stack;
-            }
-        }
-        return null;
+            return Optional.empty();
+        });
     }
 
     public Set<UUID> getIds() {
@@ -107,7 +118,7 @@ public class ToolbeltStorage extends SavedData {
     public @NonNull CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
         RegistryOps<Tag> ops = registries.createSerializationContext(NbtOps.INSTANCE);
         Map<UUID, ToolbeltContents> toSave = new HashMap<>(belts);
-        toSave.entrySet().removeIf(e -> ToolbeltContents.isEmpty(e.getValue()));
+        toSave.entrySet().removeIf(e -> e.getValue().isEmpty());
         tag.put(TAG, BELTS_CODEC.encodeStart(ops, toSave).getOrThrow());
         return tag;
     }

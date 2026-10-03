@@ -2,6 +2,7 @@ package net.scratch221171.simpletoolbelt.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import java.util.UUID;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -11,19 +12,17 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.scratch221171.simpletoolbelt.Const;
-import net.scratch221171.simpletoolbelt.client.STClientEvents;
 import net.scratch221171.simpletoolbelt.client.STKeyMappings;
 import net.scratch221171.simpletoolbelt.client.network.ClientBeltCache;
 import net.scratch221171.simpletoolbelt.common.STUtils;
 import net.scratch221171.simpletoolbelt.common.network.SelectBeltSlotPayload;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltContents;
+import net.scratch221171.simpletoolbelt.common.storage.ToolbeltStorage;
 import net.scratch221171.simpletoolbelt.config.ClientConfig;
 import org.joml.Matrix4f;
 import org.jspecify.annotations.NonNull;
 
 public class ToolbeltWheelScreen extends Screen {
-
-    private final float WHEEL_RADIUS, INNER_DEADZONE_RADIUS, OUTER_STOW_ZONE_RADIUS;
 
     private static final int ICON_SIZE = 16;
     private static final int HIGHLIGHT_COLOR = 0x50FFFFFF;
@@ -34,14 +33,19 @@ public class ToolbeltWheelScreen extends Screen {
     private static final ResourceLocation FRAME_SPRITE = STUtils.id("textures/hud/wheel_frame.png");
     private static final ResourceLocation EMPTY_SPRITE = STUtils.id("textures/hud/wheel_empty.png");
 
+    private final UUID beltId;
+    private final float wheelRadius, innerDeadzoneRadius, outerStowZoneRadius;
+    private double scrollAccumulator = 0;
+
     private HoverState hoverState = HoverState.noAction();
     private int pageIndex = 0;
 
-    public ToolbeltWheelScreen() {
+    public ToolbeltWheelScreen(UUID uuid) {
         super(Component.translatable(Const.LangKey.Screen.WHEEL_SCREEN_TITLE));
-        this.WHEEL_RADIUS = (float) ClientConfig.Screen.ToolbeltWheel.WHEEL_RADIUS.getAsDouble();
-        this.INNER_DEADZONE_RADIUS = (float) ClientConfig.Screen.ToolbeltWheel.INNER_DEADZONE_RADIUS.getAsDouble();
-        this.OUTER_STOW_ZONE_RADIUS = (float) ClientConfig.Screen.ToolbeltWheel.OUTER_STOW_ZONE_RADIUS.getAsDouble();
+        this.beltId = uuid;
+        this.wheelRadius = (float) ClientConfig.Screen.ToolbeltWheel.WHEEL_RADIUS.getAsDouble();
+        this.innerDeadzoneRadius = (float) ClientConfig.Screen.ToolbeltWheel.INNER_DEADZONE_RADIUS.getAsDouble();
+        this.outerStowZoneRadius = (float) ClientConfig.Screen.ToolbeltWheel.OUTER_STOW_ZONE_RADIUS.getAsDouble();
     }
 
     @Override
@@ -52,11 +56,8 @@ public class ToolbeltWheelScreen extends Screen {
     @Override
     public void render(@NonNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         Minecraft mc = this.minecraft;
-        if (mc == null) {
-            return;
-        }
-        ItemStack belt = STClientEvents.findToolbeltInInventory(mc);
-        if (belt.isEmpty()) {
+        if (mc == null || mc.player == null) return;
+        if (ToolbeltStorage.findBelt(mc.player, this.beltId).isEmpty()) {
             this.onClose();
             return;
         }
@@ -73,7 +74,7 @@ public class ToolbeltWheelScreen extends Screen {
         float dx = mouseX - centerX;
         float dy = mouseY - centerY;
         float distance = (float) Math.sqrt(dx * dx + dy * dy);
-        float stowThreshold = Math.min(OUTER_STOW_ZONE_RADIUS, Math.min(this.width, this.height) * 0.45f);
+        float stowThreshold = Math.min(outerStowZoneRadius, Math.min(this.width, this.height) * 0.45f);
 
         boolean stowHover = distance > stowThreshold;
         if (ClientConfig.Screen.ToolbeltWheel.ENABLE_HIGHLIGHT.getAsBoolean()) {
@@ -83,7 +84,7 @@ public class ToolbeltWheelScreen extends Screen {
             hoverState = HoverState.stow();
             guiGraphics.renderTooltip(
                     font, Component.translatable(Const.LangKey.Screen.WHEEL_TOOLTIP_STOW), mouseX, mouseY);
-        } else if (distance < INNER_DEADZONE_RADIUS) {
+        } else if (distance < innerDeadzoneRadius) {
             hoverState = HoverState.noAction();
         } else {
             double angleDeg = Math.toDegrees(Math.atan2(dx, -dy));
@@ -92,59 +93,73 @@ public class ToolbeltWheelScreen extends Screen {
                     HoverState.select(Math.floorMod(Math.round((float) angleDeg / 45f), ToolbeltContents.PAGE_SIZE));
         }
 
-        ClientBeltCache.read(belt).ifPresent(cached -> {
-            if (cached.pagesSize() > 1) {
-                Component text = Component.translatable(
-                        Const.LangKey.Screen.WHEEL_PAGE_INDEX, pageIndex + 1, cached.pagesSize());
-                guiGraphics.drawString(
-                        font, text, centerX - font.width(text) / 2, centerY - font.lineHeight / 2, 16777215);
-            }
-            for (int i = 0; i < ToolbeltContents.PAGE_SIZE; i++) {
-                double angleRad = Math.toRadians(i * 45.0);
-                int x = centerX + (int) (WHEEL_RADIUS * Math.sin(angleRad)) - ICON_SIZE / 2;
-                int y = centerY - (int) (WHEEL_RADIUS * Math.cos(angleRad)) - ICON_SIZE / 2;
-                boolean isSelected = hoverState.action() == HoverState.HoverAction.SELECT && i == hoverState.index();
-                ItemStack init = cached.getPage(pageIndex).initial().getStack(i);
-                ItemStack cur = cached.getPage(pageIndex).current().getStack(i);
+        ClientBeltCache.read(beltId).ifPresent(cached -> {
+            if (cached.pagesSize() > 0) {
+                if (cached.pagesSize() > 1) {
+                    Component text = Component.translatable(
+                            Const.LangKey.Screen.WHEEL_PAGE_INDEX, pageIndex + 1, cached.pagesSize());
+                    guiGraphics.drawString(
+                            font, text, centerX - font.width(text) / 2, centerY - font.lineHeight / 2, 16777215);
+                }
+                for (int i = 0; i < ToolbeltContents.PAGE_SIZE; i++) {
+                    double angleRad = Math.toRadians(i * 45.0);
+                    int x = centerX + (int) (wheelRadius * Math.sin(angleRad)) - ICON_SIZE / 2;
+                    int y = centerY - (int) (wheelRadius * Math.cos(angleRad)) - ICON_SIZE / 2;
+                    boolean isSelected =
+                            hoverState.action() == HoverState.HoverAction.SELECT && i == hoverState.index();
+                    ItemStack init = cached.getPage(pageIndex).initial().getStack(i);
+                    ItemStack cur = cached.getPage(pageIndex).current().getStack(i);
 
-                RenderSystem.enableBlend();
-                RenderSystem.defaultBlendFunc();
-                if (cur.isEmpty()) {
-                    if (init.isEmpty()) {
-                        guiGraphics.blit(
-                                EMPTY_SPRITE, x - (10 - ICON_SIZE) / 2, y - (10 - ICON_SIZE) / 2, 0, 0, 10, 10, 10, 10);
+                    RenderSystem.enableBlend();
+                    RenderSystem.defaultBlendFunc();
+                    if (cur.isEmpty()) {
+                        if (init.isEmpty()) {
+                            guiGraphics.blit(
+                                    EMPTY_SPRITE,
+                                    x - (10 - ICON_SIZE) / 2,
+                                    y - (10 - ICON_SIZE) / 2,
+                                    0,
+                                    0,
+                                    10,
+                                    10,
+                                    10,
+                                    10);
+                        } else {
+                            guiGraphics.blit(
+                                    FRAME_SPRITE,
+                                    x - (22 - ICON_SIZE) / 2,
+                                    y - (22 - ICON_SIZE) / 2,
+                                    0,
+                                    0,
+                                    22,
+                                    22,
+                                    22,
+                                    22);
+                            GhostItemRenderer.render(guiGraphics, font, init, x, y);
+                        }
                     } else {
                         guiGraphics.blit(
                                 FRAME_SPRITE, x - (22 - ICON_SIZE) / 2, y - (22 - ICON_SIZE) / 2, 0, 0, 22, 22, 22, 22);
-                        guiGraphics.fill(x, y, x + ICON_SIZE, y + ICON_SIZE, 0x80202020);
-                        guiGraphics.renderItem(init, x, y);
-                        guiGraphics.pose().pushPose();
-                        guiGraphics.pose().translate(0.0F, 0.0F, 200.0F);
-                        guiGraphics.drawString(font, "0", x + 17 - font.width("0"), y + 9, 16777215, true);
-                        guiGraphics.pose().popPose();
+                        if (isSelected) {
+                            guiGraphics.blit(
+                                    SELECTED_FRAME_SPRITE,
+                                    x - (24 - ICON_SIZE) / 2,
+                                    y - (24 - ICON_SIZE) / 2,
+                                    0,
+                                    0,
+                                    24,
+                                    24,
+                                    24,
+                                    24);
+                        }
+                        guiGraphics.renderItem(cur, x, y);
+                        guiGraphics.renderItemDecorations(this.font, cur, x, y);
+                        if (isSelected) {
+                            guiGraphics.renderTooltip(this.font, cur, mouseX, mouseY);
+                        }
                     }
-                } else {
-                    guiGraphics.blit(
-                            FRAME_SPRITE, x - (22 - ICON_SIZE) / 2, y - (22 - ICON_SIZE) / 2, 0, 0, 22, 22, 22, 22);
-                    if (isSelected) {
-                        guiGraphics.blit(
-                                SELECTED_FRAME_SPRITE,
-                                x - (24 - ICON_SIZE) / 2,
-                                y - (24 - ICON_SIZE) / 2,
-                                0,
-                                0,
-                                24,
-                                24,
-                                24,
-                                24);
-                    }
-                    guiGraphics.renderItem(cur, x, y);
-                    guiGraphics.renderItemDecorations(this.font, cur, x, y);
-                    if (isSelected) {
-                        guiGraphics.renderTooltip(this.font, cur, mouseX, mouseY);
-                    }
+                    RenderSystem.disableBlend();
                 }
-                RenderSystem.disableBlend();
             }
         });
     }
@@ -154,9 +169,9 @@ public class ToolbeltWheelScreen extends Screen {
         if (STKeyMappings.OPEN_WHEEL.matches(keyCode, scanCode)) {
             if (hoverState.action() == HoverState.HoverAction.SELECT) {
                 PacketDistributor.sendToServer(
-                        new SelectBeltSlotPayload(pageIndex * ToolbeltContents.PAGE_SIZE + hoverState.index()));
+                        new SelectBeltSlotPayload(beltId, pageIndex * ToolbeltContents.PAGE_SIZE + hoverState.index()));
             } else if (hoverState.action() == HoverState.HoverAction.STOW) {
-                PacketDistributor.sendToServer(new SelectBeltSlotPayload(SelectBeltSlotPayload.STOW_INDEX));
+                PacketDistributor.sendToServer(new SelectBeltSlotPayload(beltId, SelectBeltSlotPayload.STOW_INDEX));
             }
             this.onClose();
             return true;
@@ -166,21 +181,26 @@ public class ToolbeltWheelScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        Minecraft mc = this.minecraft;
-        if (mc != null && scrollY != 0) {
-            ItemStack belt = STClientEvents.findToolbeltInInventory(mc);
-            if (!belt.isEmpty()) {
-                int pages = ClientBeltCache.read(belt)
-                        .map(ToolbeltContents::pagesSize)
-                        .orElse(0);
-                if (pages > 1) {
-                    // 上スクロール(scrollY > 0)で減、下スクロールで増。端は循環
-                    pageIndex = Math.clamp(pageIndex + (scrollY > 0 ? -1 : 1), 0, pages - 1);
-                }
-            }
+        if (scrollY == 0) {
+            return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+        }
+        // 向きが変わったら溜めた分を捨てる
+        if (scrollAccumulator != 0 && Math.signum(scrollY) != Math.signum(scrollAccumulator)) {
+            scrollAccumulator = 0;
+        }
+        scrollAccumulator += scrollY;
+        int steps = (int) scrollAccumulator; // 0方向へ切り捨て
+        if (steps == 0) {
             return true;
         }
-        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+        scrollAccumulator -= steps;
+
+        int pages =
+                ClientBeltCache.read(beltId).map(ToolbeltContents::pagesSize).orElse(0);
+        if (pages > 1) {
+            pageIndex = Math.floorMod(pageIndex + (steps > 0 ? -1 : 1), pages);
+        }
+        return true;
     }
 
     private void renderHoverHighlight(
@@ -195,7 +215,7 @@ public class ToolbeltWheelScreen extends Screen {
                     guiGraphics,
                     centerX,
                     centerY,
-                    INNER_DEADZONE_RADIUS,
+                    innerDeadzoneRadius,
                     stowThreshold,
                     center - 22.5f,
                     center + 22.5f,

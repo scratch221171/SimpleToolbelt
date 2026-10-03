@@ -9,12 +9,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.scratch221171.simpletoolbelt.common.menu.ToolbeltMenu;
 import net.scratch221171.simpletoolbelt.common.network.RequestBeltContentsPayload;
 import net.scratch221171.simpletoolbelt.common.network.SyncBeltContentsPayload;
 import net.scratch221171.simpletoolbelt.common.registry.STDataComponents;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltContents;
 
-// client/ClientBeltCache.java
 public final class ClientBeltCache {
     private static final Map<UUID, ToolbeltContents> CACHE = new HashMap<>();
     private static final Map<UUID, Long> LAST_REQUEST = new HashMap<>();
@@ -23,6 +23,10 @@ public final class ClientBeltCache {
     public static void handleSync(SyncBeltContentsPayload payload, IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
             CACHE.put(payload.id(), payload.contents());
+            if (ctx.player().containerMenu instanceof ToolbeltMenu menu
+                    && menu.getBeltId().equals(payload.id())) {
+                menu.applyClientSync(payload.contents());
+            }
         });
     }
 

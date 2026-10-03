@@ -2,7 +2,6 @@ package net.scratch221171.simpletoolbelt.client.gui;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
-import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -13,7 +12,6 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.scratch221171.simpletoolbelt.Const;
-import net.scratch221171.simpletoolbelt.client.network.ClientBeltCache;
 import net.scratch221171.simpletoolbelt.common.STUtils;
 import net.scratch221171.simpletoolbelt.common.menu.ToolbeltMenu;
 import net.scratch221171.simpletoolbelt.common.network.SelectBeltSlotPayload;
@@ -45,7 +43,7 @@ public class ToolbeltScreen extends AbstractContainerScreen<ToolbeltMenu> {
         // ToolbeltMenuのToolbeltSlotとの辻褄あわせ
         int x = leftPos + (8 + ToolbeltContents.PAGE_SIZE * 18);
         int y = topPos + (20);
-        addBeltButton(
+        addRenderableWidget(
                 new BeltStowButton(x, y, 16, 16, Component.translatable(Const.LangKey.Screen.WHEEL_TOOLTIP_STOW)));
     }
 
@@ -62,24 +60,14 @@ public class ToolbeltScreen extends AbstractContainerScreen<ToolbeltMenu> {
         // 下部（インベントリ側
         guiGraphics.blit(TEXTURE, x, y + 19 + rows * 18, 0, 37, imageWidth, BASE_HEIGHT - 37);
 
-        ClientBeltCache.read(menu.getBeltId()).ifPresent(cached -> {
-            Const.LOGGER.info("menuSlots={}, cacheSlots={}", menu.getTotalSlots(), cached.totalSlots());
-            for (int i = 0; i < menu.getTotalSlots(); i++) {
-                ItemStack init = cached.getInitialFlat(i);
-                ItemStack cur = cached.getCurrentFlat(i);
-                Slot slot = menu.getSlot(i);
-                if (cur.isEmpty() && !init.isEmpty()) {
-                    int itemX = leftPos + slot.x;
-                    int itemY = topPos + slot.y;
-                    guiGraphics.fill(itemX, itemY, itemX + 16, itemY + 16, 0x80202020);
-                    guiGraphics.renderItem(init, itemX, itemY);
-                    guiGraphics.pose().pushPose();
-                    guiGraphics.pose().translate(0.0F, 0.0F, 200.0F);
-                    guiGraphics.drawString(font, "0", itemX + 17 - font.width("0"), itemY + 9, 16777215, true);
-                    guiGraphics.pose().popPose();
-                }
+        ToolbeltContents synced = menu.getClientContents();
+        for (int i = 0; i < menu.getPages() * ToolbeltContents.PAGE_SIZE; i++) {
+            Slot slot = menu.getSlot(i);
+            ItemStack init = synced.getInitialFlat(i);
+            if (!slot.hasItem() && !init.isEmpty()) {
+                GhostItemRenderer.render(guiGraphics, font, init, leftPos + slot.x, topPos + slot.y);
             }
-        });
+        }
     }
 
     @Override
@@ -88,13 +76,7 @@ public class ToolbeltScreen extends AbstractContainerScreen<ToolbeltMenu> {
         renderTooltip(guiGraphics, mouseX, mouseY);
     }
 
-    private <T extends AbstractWidget & BeltButton> void addBeltButton(T beltButton) {
-        addRenderableWidget(beltButton);
-    }
-
-    interface BeltButton {}
-
-    static class BeltStowButton extends AbstractButton implements BeltButton {
+    class BeltStowButton extends AbstractButton {
         private boolean isPressed = false;
 
         public BeltStowButton(int x, int y, int width, int height, Component message) {
@@ -104,8 +86,8 @@ public class ToolbeltScreen extends AbstractContainerScreen<ToolbeltMenu> {
 
         @Override
         public void onPress() {
-            ClientBeltCache.clear();
-            PacketDistributor.sendToServer(new SelectBeltSlotPayload(SelectBeltSlotPayload.STOW_INDEX));
+            PacketDistributor.sendToServer(
+                    new SelectBeltSlotPayload(menu.getBeltId(), SelectBeltSlotPayload.STOW_INDEX));
             isPressed = true;
         }
 
