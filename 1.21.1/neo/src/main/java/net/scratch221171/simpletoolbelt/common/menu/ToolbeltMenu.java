@@ -12,8 +12,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.scratch221171.simpletoolbelt.common.item.ToolbeltItem;
-import net.scratch221171.simpletoolbelt.common.registry.STDataComponents;
 import net.scratch221171.simpletoolbelt.common.registry.STMenus;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltContents;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltStorage;
@@ -118,16 +116,20 @@ public class ToolbeltMenu extends AbstractContainerMenu {
 
     @Override
     public void clicked(int slotId, int button, @NonNull ClickType clickType, @NonNull Player player) {
-        if (player instanceof ServerPlayer serverPlayer
-                && (clickType == ClickType.PICKUP || clickType == ClickType.QUICK_MOVE)
-                && slotId >= 0
-                && slotId < beltTotalSlots
-                && getCarried().isEmpty()) {
-            ToolbeltContents stored = ToolbeltStorage.get(serverPlayer.server).getOrInit(beltId, pages);
-            if (!stored.getInitialFlat(slotId).isEmpty()
-                    && stored.getCurrentFlat(slotId).isEmpty()) {
-                ToolbeltStorage.update(serverPlayer, beltId, stored.withInitialFlat(slotId, ItemStack.EMPTY));
-                return;
+
+        if (player instanceof ServerPlayer serverPlayer) {
+            applyExternalUpdate(ToolbeltStorage.get(serverPlayer.server).getOrInit(beltId, pages));
+            if ((clickType == ClickType.PICKUP || clickType == ClickType.QUICK_MOVE)
+                    && slotId >= 0
+                    && slotId < beltTotalSlots
+                    && getCarried().isEmpty()) {
+                ToolbeltContents stored =
+                        ToolbeltStorage.get(serverPlayer.server).getOrInit(beltId, pages);
+                if (!stored.getInitialFlat(slotId).isEmpty()
+                        && stored.getCurrentFlat(slotId).isEmpty()) {
+                    ToolbeltStorage.update(serverPlayer, beltId, stored.withInitialFlat(slotId, ItemStack.EMPTY));
+                    return;
+                }
             }
         }
         super.clicked(slotId, button, clickType, player);
@@ -135,12 +137,15 @@ public class ToolbeltMenu extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(@NonNull Player player) {
-        if (player.level().isClientSide) return true;
-        ItemStack carried = getCarried();
-        if (carried.getItem() instanceof ToolbeltItem && beltId.equals(carried.get(STDataComponents.BELT_ID))) {
-            return true; // カーソルに持ち上げ中
+        return true;
+    }
+
+    @Override
+    public void broadcastChanges() {
+        if (player instanceof ServerPlayer serverPlayer) {
+            applyExternalUpdate(ToolbeltStorage.get(serverPlayer.server).getOrInit(beltId, pages));
         }
-        return ToolbeltStorage.findBelt(player, beltId).isPresent();
+        super.broadcastChanges();
     }
 
     public UUID getBeltId() {
@@ -171,7 +176,10 @@ public class ToolbeltMenu extends AbstractContainerMenu {
         suppressWriteBack = true;
         try {
             for (int i = 0; i < beltTotalSlots; i++) {
-                beltContainer.setItem(i, contents.getCurrentFlat(i).copy());
+                ItemStack fresh = contents.getCurrentFlat(i);
+                if (!ItemStack.isSameItemSameComponents(beltContainer.getItem(i), fresh)) {
+                    beltContainer.setItem(i, fresh.copy());
+                }
             }
         } finally {
             suppressWriteBack = false;

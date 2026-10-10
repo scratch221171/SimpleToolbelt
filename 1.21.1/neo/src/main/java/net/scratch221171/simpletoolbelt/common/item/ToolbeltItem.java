@@ -85,6 +85,13 @@ public class ToolbeltItem extends Item {
                     .withStyle(ChatFormatting.DARK_GRAY));
             tooltipComponents.add(
                     Component.translatable(Const.LangKey.Item.HINT).withStyle(ChatFormatting.GRAY));
+            int extra = stack.getOrDefault(STDataComponents.EXTRA_PAGES, 0);
+            if (extra > 0) {
+                tooltipComponents.add(Component.translatable(
+                                Const.LangKey.Item.EXTRA_PAGE,
+                                Component.literal(String.valueOf(extra)).withStyle(ChatFormatting.GOLD))
+                        .withStyle(ChatFormatting.GRAY));
+            }
             tooltipComponents.add(
                     Component.literal("UUID: " + stack.getOrDefault(STDataComponents.BELT_ID, "undefined"))
                             .withStyle(ChatFormatting.DARK_GRAY));
@@ -113,9 +120,10 @@ public class ToolbeltItem extends Item {
                 });
     }
 
-    public int getPageCount(ItemStack stack) {
-        if (stack.is(STItems.TOOLBELT)) return ServerConfig.Item.TOOLBELT_PAGES.getAsInt();
-        if (stack.is(STItems.NETHERITE_TOOLBELT)) return ServerConfig.Item.NETHERITE_PAGES.getAsInt();
-        return 0;
+    public static int getPageCount(ItemStack stack) {
+        int base = 0;
+        if (stack.is(STItems.TOOLBELT)) base = ServerConfig.Item.TOOLBELT_BASE_PAGES.getAsInt();
+        if (stack.is(STItems.NETHERITE_TOOLBELT)) base = ServerConfig.Item.NETHERITE_BASE_PAGES.getAsInt();
+        return base + stack.getOrDefault(STDataComponents.EXTRA_PAGES, 0);
     }
 }

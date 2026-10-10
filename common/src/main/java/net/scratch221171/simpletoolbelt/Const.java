@@ -20,6 +20,7 @@ public final class Const {
         public static final class DataComponent {
 
             public static final String BELT_ID = "belt_id";
+            public static final String EXTRA_PAGES = "extra_pages";
         }
 
         public static final class Menu {
@@ -34,6 +35,10 @@ public final class Const {
             public static final String OPEN_BELT_MENU_IN_CREATIVE = "open_belt_menu_in_creative";
             public static final String SYNC_BELT_CONTENTS = "sync_belt_contents";
         }
+
+        public static final class Recipe {
+            public static final String TOOLBELT_PAGE_UPGRADE = "toolbelt_page_upgrade";
+        }
     }
 
     public interface LangKey {
@@ -46,6 +51,7 @@ public final class Const {
             public static final String INITIALIZING_UUID = define(PREFIX, ID.Item.TOOLBELT + "initializingUUID");
             public static final String SHIFT_FOR_MORE_INFO = define(PREFIX, ID.Item.TOOLBELT + "shiftKey");
             public static final String HINT = define(PREFIX, ID.Item.TOOLBELT + "hint");
+            public static final String EXTRA_PAGE = define(PREFIX, ID.Item.TOOLBELT + "extraPage");
         }
 
         final class Screen {

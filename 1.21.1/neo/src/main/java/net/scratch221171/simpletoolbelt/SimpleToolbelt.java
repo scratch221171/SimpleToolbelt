@@ -11,6 +11,7 @@ import net.scratch221171.simpletoolbelt.common.STUtils;
 import net.scratch221171.simpletoolbelt.common.registry.STDataComponents;
 import net.scratch221171.simpletoolbelt.common.registry.STItems;
 import net.scratch221171.simpletoolbelt.common.registry.STMenus;
+import net.scratch221171.simpletoolbelt.common.registry.STRecipeSerializers;
 import net.scratch221171.simpletoolbelt.config.ModConfigs;
 import net.scratch221171.simpletoolbelt.mdk.config.PlatformConfigRegistrar;
 import net.scratch221171.simpletoolbelt.mdk.config.VersionedConfigSpec;
@@ -24,6 +25,7 @@ public class SimpleToolbelt {
         STDataComponents.register(modEventBus);
         STItems.register(modEventBus);
         STMenus.register(modEventBus);
+        STRecipeSerializers.register(modEventBus);
 
         modEventBus.addListener(SimpleToolbelt::buildCreativeTabContents);
     }

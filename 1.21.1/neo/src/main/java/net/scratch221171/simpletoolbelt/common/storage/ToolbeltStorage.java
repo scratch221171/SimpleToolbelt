@@ -20,6 +20,7 @@ import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.scratch221171.simpletoolbelt.Const;
 import net.scratch221171.simpletoolbelt.common.item.ToolbeltItem;
+import net.scratch221171.simpletoolbelt.common.menu.ToolbeltMenu;
 import net.scratch221171.simpletoolbelt.common.network.SyncBeltContentsPayload;
 import net.scratch221171.simpletoolbelt.common.registry.STDataComponents;
 import net.scratch221171.simpletoolbelt.compat.curios.STCuriosHelper;
@@ -51,7 +52,15 @@ public class ToolbeltStorage extends SavedData {
 
     public static void update(ServerPlayer player, UUID id, ToolbeltContents contents) {
         get(player.server).set(id, contents);
-        PacketDistributor.sendToPlayer(player, new SyncBeltContentsPayload(id, contents));
+        SyncBeltContentsPayload payload = new SyncBeltContentsPayload(id, contents);
+        PacketDistributor.sendToPlayer(player, payload);
+        for (ServerPlayer other : player.server.getPlayerList().getPlayers()) {
+            if (other != player
+                    && other.containerMenu instanceof ToolbeltMenu menu
+                    && menu.getBeltId().equals(id)) {
+                PacketDistributor.sendToPlayer(other, payload);
+            }
+        }
     }
 
     public ToolbeltContents getOrInit(UUID id, int pages) {
@@ -64,7 +73,7 @@ public class ToolbeltStorage extends SavedData {
     }
 
     public ToolbeltContents resolve(ServerPlayer player, UUID id, ItemStack stack) {
-        int capacity = stack.getItem() instanceof ToolbeltItem t ? t.getPageCount(stack) : 0;
+        int capacity = stack.getItem() instanceof ToolbeltItem ? ToolbeltItem.getPageCount(stack) : 0;
         ToolbeltContents before = belts.get(id);
         ToolbeltContents cur = getOrInit(id, capacity);
         if (cur != before) {

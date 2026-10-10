@@ -2,6 +2,8 @@ package net.scratch221171.simpletoolbelt.common.network;
 
 import java.util.UUID;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
@@ -65,6 +67,7 @@ public class STPayloads {
                                 stored = stored.withCurrentFlat(
                                         i, player.getInventory().getItem(j));
                                 player.getInventory().setItem(j, ItemStack.EMPTY);
+                                player.playNotifySound(SoundEvents.BUNDLE_INSERT, SoundSource.MASTER, 0.1F, 1);
                                 break;
                             }
                         }
@@ -93,6 +96,7 @@ public class STPayloads {
                 player.setItemInHand(
                         InteractionHand.MAIN_HAND,
                         stored.getCurrentFlat(requestedSlot).copy());
+                player.playNotifySound(SoundEvents.ARMOR_EQUIP_GENERIC.value(), SoundSource.MASTER, 0.1F, 1);
                 if (needsToPlaceBackInInventory) {
                     player.getInventory().placeItemBackInInventory(mainHand);
                 }

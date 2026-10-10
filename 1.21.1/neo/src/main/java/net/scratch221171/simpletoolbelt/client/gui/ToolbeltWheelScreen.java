@@ -2,13 +2,17 @@ package net.scratch221171.simpletoolbelt.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import java.util.Optional;
 import java.util.UUID;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.scratch221171.simpletoolbelt.Const;
@@ -62,7 +66,7 @@ public class ToolbeltWheelScreen extends Screen {
             return;
         }
 
-        if (ClientConfig.Screen.ToolbeltWheel.ENABLE_HIGHLIGHT.getAsBoolean()) {
+        if (ClientConfig.Screen.ToolbeltWheel.ENABLE_BLUR.getAsBoolean()) {
             renderBackground(guiGraphics, mouseX, mouseY, partialTick);
         } else {
             renderMenuBackground(guiGraphics);
@@ -80,6 +84,8 @@ public class ToolbeltWheelScreen extends Screen {
         if (ClientConfig.Screen.ToolbeltWheel.ENABLE_HIGHLIGHT.getAsBoolean()) {
             renderHoverHighlight(guiGraphics, centerX, centerY, stowThreshold, stowHover);
         }
+
+        final HoverState prevHoverState = hoverState;
         if (stowHover) {
             hoverState = HoverState.stow();
             guiGraphics.renderTooltip(
@@ -91,6 +97,9 @@ public class ToolbeltWheelScreen extends Screen {
             if (angleDeg < 0) angleDeg += 360;
             hoverState =
                     HoverState.select(Math.floorMod(Math.round((float) angleDeg / 45f), ToolbeltContents.PAGE_SIZE));
+        }
+        if (!hoverState.equals(prevHoverState)) {
+            mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_HAT.value(), 2.0F, 0.1F));
         }
 
         ClientBeltCache.read(beltId).ifPresent(cached -> {
@@ -138,6 +147,9 @@ public class ToolbeltWheelScreen extends Screen {
                             GhostItemRenderer.render(guiGraphics, font, init, x, y);
                         }
                     } else {
+                        if (ClientConfig.Screen.ToolbeltWheel.SHOW_KEY_BINDINGS.getAsBoolean()) {
+                            renderKeyLabel(guiGraphics, mc, i, centerX, centerY);
+                        }
                         guiGraphics.blit(
                                 FRAME_SPRITE, x - (22 - ICON_SIZE) / 2, y - (22 - ICON_SIZE) / 2, 0, 0, 22, 22, 22, 22);
                         if (isSelected) {
@@ -155,7 +167,10 @@ public class ToolbeltWheelScreen extends Screen {
                         guiGraphics.renderItem(cur, x, y);
                         guiGraphics.renderItemDecorations(this.font, cur, x, y);
                         if (isSelected) {
+                            guiGraphics.pose().pushPose();
+                            guiGraphics.pose().translate(0.0F, 0.0F, 100.0F);
                             guiGraphics.renderTooltip(this.font, cur, mouseX, mouseY);
+                            guiGraphics.pose().popPose();
                         }
                     }
                     RenderSystem.disableBlend();
@@ -180,16 +195,42 @@ public class ToolbeltWheelScreen extends Screen {
     }
 
     @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        Minecraft mc = this.minecraft;
+        if (mc != null) {
+            KeyMapping[] hotbar = mc.options.keyHotbarSlots;
+            int count = Math.min(ToolbeltContents.PAGE_SIZE, hotbar.length);
+            for (int i = 0; i < count; i++) {
+                if (hotbar[i].matches(keyCode, scanCode)) {
+                    final int index = i;
+                    if (ClientBeltCache.read(beltId)
+                            .filter(c -> pageIndex < c.pagesSize())
+                            .map(c -> !c.getPage(pageIndex)
+                                    .current()
+                                    .getStack(index)
+                                    .isEmpty())
+                            .orElse(false)) {
+                        PacketDistributor.sendToServer(
+                                new SelectBeltSlotPayload(beltId, pageIndex * ToolbeltContents.PAGE_SIZE + i));
+                        this.onClose();
+                    }
+                    return true;
+                }
+            }
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         if (scrollY == 0) {
             return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
         }
-        // 向きが変わったら溜めた分を捨てる
         if (scrollAccumulator != 0 && Math.signum(scrollY) != Math.signum(scrollAccumulator)) {
             scrollAccumulator = 0;
         }
         scrollAccumulator += scrollY;
-        int steps = (int) scrollAccumulator; // 0方向へ切り捨て
+        int steps = (int) scrollAccumulator;
         if (steps == 0) {
             return true;
         }
@@ -199,14 +240,25 @@ public class ToolbeltWheelScreen extends Screen {
                 ClientBeltCache.read(beltId).map(ToolbeltContents::pagesSize).orElse(0);
         if (pages > 1) {
             pageIndex = Math.floorMod(pageIndex + (steps > 0 ? -1 : 1), pages);
+            Optional.ofNullable(this.minecraft).ifPresent(minecraft -> minecraft
+                    .getSoundManager()
+                    .play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_HAT.value(), 1.5F, 0.1F)));
         }
         return true;
+    }
+
+    private void renderKeyLabel(GuiGraphics g, Minecraft mc, int index, int centerX, int centerY) {
+        Component label = mc.options.keyHotbarSlots[index].getTranslatedKeyMessage();
+        double rad = Math.toRadians(index * 45 - 16 * 70F / wheelRadius);
+        int cx = (int) (centerX + ((wheelRadius - 5) * Math.sin(rad)) - 15);
+        int cy = (int) (centerY - ((wheelRadius - 5) * Math.cos(rad)) + 14);
+
+        g.renderTooltip(font, label, cx, cy);
     }
 
     private void renderHoverHighlight(
             GuiGraphics guiGraphics, int centerX, int centerY, float stowThreshold, boolean stowHover) {
         if (stowHover) {
-            // 画面の対角長を外半径にすれば、円の外側は画面全体をカバーできる
             float far = (float) Math.hypot(this.width, this.height);
             drawAnnularSector(guiGraphics, centerX, centerY, stowThreshold, far, 0f, 360f, STOW_SEGMENTS);
         } else if (hoverState.action() == HoverState.HoverAction.SELECT) {
@@ -223,7 +275,6 @@ public class ToolbeltWheelScreen extends Screen {
         }
     }
 
-    /** 角度は12時方向を0°として時計回り。rIn〜rOut の環状扇形を1回の描画で塗る */
     private static void drawAnnularSector(
             GuiGraphics guiGraphics,
             float cx,
@@ -233,7 +284,7 @@ public class ToolbeltWheelScreen extends Screen {
             float startDeg,
             float endDeg,
             int segments) {
-        guiGraphics.flush(); // guiGraphics 側に溜まっている描画を先に確定させ、重ね順を保つ
+        guiGraphics.flush();
         Matrix4f matrix = guiGraphics.pose().last().pose();
 
         RenderSystem.enableBlend();
@@ -256,15 +307,7 @@ public class ToolbeltWheelScreen extends Screen {
         RenderSystem.disableBlend();
     }
 
-    public static final class HoverState {
-
-        private final HoverAction action;
-        private final int index;
-
-        private HoverState(HoverAction action, int index) {
-            this.action = action;
-            this.index = index;
-        }
+    public record HoverState(HoverAction action, int index) {
 
         public static HoverState noAction() {
             return new HoverState(HoverAction.NO_ACTION, -1);

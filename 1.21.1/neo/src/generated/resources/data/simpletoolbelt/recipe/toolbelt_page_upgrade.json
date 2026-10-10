@@ -1,0 +1,12 @@
+{
+  "type": "simpletoolbelt:toolbelt_page_upgrade",
+  "addition": {
+    "item": "minecraft:iron_nugget"
+  },
+  "base": {
+    "tag": "simpletoolbelt:toolbelt"
+  },
+  "template": {
+    "item": "minecraft:leather"
+  }
+}

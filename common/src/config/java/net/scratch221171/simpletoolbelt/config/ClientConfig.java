@@ -39,6 +39,8 @@ public class ClientConfig {
                     .comment("Enable the blur effect on the background.")
                     .define(ConfigID.Client.ENABLE_BLUR, true);
 
+            public static final ConfigEntry.BooleanEntry SHOW_KEY_BINDINGS = BUILDER.comment("The i-th key on the hotbar corresponds to the i-th key on the wheel.").define(ConfigID.Client.SHOW_KEY_BINDINGS, true);
+
             public static final ConfigEntries ENTRIES = BUILDER.build();
         }
 

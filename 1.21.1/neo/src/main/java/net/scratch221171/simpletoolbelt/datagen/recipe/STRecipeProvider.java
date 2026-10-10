@@ -8,6 +8,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.neoforged.neoforge.common.Tags;
 import net.scratch221171.simpletoolbelt.Const;
+import net.scratch221171.simpletoolbelt.common.STTags;
+import net.scratch221171.simpletoolbelt.common.STUtils;
 import net.scratch221171.simpletoolbelt.common.registry.STItems;
 import org.jspecify.annotations.NonNull;
 
@@ -33,5 +35,12 @@ public class STRecipeProvider extends RecipeProvider {
                         STItems.NETHERITE_TOOLBELT.get())
                 .unlocks("has_template", has(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE))
                 .save(output, Const.ID.Item.NETHERITE_TOOLBELT);
+
+        ToolbeltPageUpgradeRecipeBuilder.upgrade(
+                        Ingredient.of(Items.LEATHER),
+                        Ingredient.of(STTags.Items.TOOLBELT),
+                        Ingredient.of(Items.IRON_NUGGET))
+                .unlockedBy("has_toolbelt", has(STTags.Items.TOOLBELT))
+                .save(output, STUtils.id("toolbelt_page_upgrade"));
     }
 }
