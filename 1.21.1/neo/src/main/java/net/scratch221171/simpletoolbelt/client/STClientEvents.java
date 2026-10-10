@@ -15,7 +15,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
-import net.neoforged.neoforge.client.event.InputEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderTooltipEvent;
 import net.scratch221171.simpletoolbelt.Const;
 import net.scratch221171.simpletoolbelt.client.gui.ToolbeltWheelScreen;
@@ -24,24 +24,18 @@ import net.scratch221171.simpletoolbelt.client.tooltip.ToolbeltTooltip;
 import net.scratch221171.simpletoolbelt.common.item.ToolbeltItem;
 import net.scratch221171.simpletoolbelt.common.registry.STDataComponents;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltStorage;
-import org.lwjgl.glfw.GLFW;
 
 @EventBusSubscriber(modid = Const.MOD_ID, value = Dist.CLIENT)
 public class STClientEvents {
 
     @SubscribeEvent
-    public static void onKeyPressed(InputEvent.Key event) {
-        if (event.getAction() != GLFW.GLFW_PRESS
-                || !STKeyMappings.OPEN_WHEEL.matches(event.getKey(), event.getScanCode())) {
-            return;
-        }
+    public static void onClientTick(ClientTickEvent.Post evt) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.screen != null || mc.player == null) {
-            return;
+        if (STKeyMappings.OPEN_WHEEL.consumeClick() && mc.screen == null && mc.player != null) {
+            ToolbeltStorage.findAnyBelt(mc.player)
+                    .map(belt -> belt.get(STDataComponents.BELT_ID))
+                    .ifPresent(id -> mc.setScreen(new ToolbeltWheelScreen(id)));
         }
-        ToolbeltStorage.findAnyBelt(mc.player)
-                .map(belt -> belt.get(STDataComponents.BELT_ID))
-                .ifPresent(id -> mc.setScreen(new ToolbeltWheelScreen(id)));
     }
 
     @SubscribeEvent

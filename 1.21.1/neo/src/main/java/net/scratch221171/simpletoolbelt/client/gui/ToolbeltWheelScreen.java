@@ -8,6 +8,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.tooltip.TooltipRenderUtil;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
@@ -148,7 +149,7 @@ public class ToolbeltWheelScreen extends Screen {
                         }
                     } else {
                         if (ClientConfig.Screen.ToolbeltWheel.SHOW_KEY_BINDINGS.getAsBoolean()) {
-                            renderKeyLabel(guiGraphics, mc, i, centerX, centerY);
+                            renderKeyLabel(guiGraphics, mc, i, x, y);
                         }
                         guiGraphics.blit(
                                 FRAME_SPRITE, x - (22 - ICON_SIZE) / 2, y - (22 - ICON_SIZE) / 2, 0, 0, 22, 22, 22, 22);
@@ -182,16 +183,29 @@ public class ToolbeltWheelScreen extends Screen {
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
         if (STKeyMappings.OPEN_WHEEL.matches(keyCode, scanCode)) {
-            if (hoverState.action() == HoverState.HoverAction.SELECT) {
-                PacketDistributor.sendToServer(
-                        new SelectBeltSlotPayload(beltId, pageIndex * ToolbeltContents.PAGE_SIZE + hoverState.index()));
-            } else if (hoverState.action() == HoverState.HoverAction.STOW) {
-                PacketDistributor.sendToServer(new SelectBeltSlotPayload(beltId, SelectBeltSlotPayload.STOW_INDEX));
-            }
-            this.onClose();
+            confirmSelection();
             return true;
         }
         return super.keyReleased(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (STKeyMappings.OPEN_WHEEL.matchesMouse(button)) {
+            confirmSelection();
+            return true;
+        }
+        return super.mouseReleased(mouseX, mouseY, button);
+    }
+
+    private void confirmSelection() {
+        if (hoverState.action() == HoverState.HoverAction.SELECT) {
+            PacketDistributor.sendToServer(
+                    new SelectBeltSlotPayload(beltId, pageIndex * ToolbeltContents.PAGE_SIZE + hoverState.index()));
+        } else if (hoverState.action() == HoverState.HoverAction.STOW) {
+            PacketDistributor.sendToServer(new SelectBeltSlotPayload(beltId, SelectBeltSlotPayload.STOW_INDEX));
+        }
+        this.onClose();
     }
 
     @Override
@@ -247,13 +261,20 @@ public class ToolbeltWheelScreen extends Screen {
         return true;
     }
 
-    private void renderKeyLabel(GuiGraphics g, Minecraft mc, int index, int centerX, int centerY) {
+    private void renderKeyLabel(GuiGraphics g, Minecraft mc, int index, int slotX, int slotY) {
         Component label = mc.options.keyHotbarSlots[index].getTranslatedKeyMessage();
-        double rad = Math.toRadians(index * 45 - 16 * 70F / wheelRadius);
-        int cx = (int) (centerX + ((wheelRadius - 5) * Math.sin(rad)) - 15);
-        int cy = (int) (centerY - ((wheelRadius - 5) * Math.cos(rad)) + 14);
 
-        g.renderTooltip(font, label, cx, cy);
+        int width = mc.font.width(label);
+        int height = mc.font.lineHeight;
+
+        g.pose().pushPose();
+        g.pose().translate(slotX - ICON_SIZE / 2F + 6, slotY - ICON_SIZE / 2F, 0.0F);
+        g.pose().scale(0.75F, 0.75F, 1.0F);
+        TooltipRenderUtil.renderTooltipBackground(
+                g, -width, 0, width, height, 400, 0xF0100010, 0xF0100010, 0x505000FF, 0x5028007F);
+        g.pose().translate(0.0F, 0.0F, 400.0F);
+        g.drawString(font, label, -width, 0, 0xFFFFFFFF);
+        g.pose().popPose();
     }
 
     private void renderHoverHighlight(
