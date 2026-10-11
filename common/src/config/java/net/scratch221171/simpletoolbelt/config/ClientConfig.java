@@ -19,6 +19,8 @@ public class ClientConfig {
         public static final class ToolbeltWheel {
             private static final ConfigEntryBuilder BUILDER = new ConfigEntryBuilder();
 
+            public static final ConfigEntry.BooleanEntry PAUSE_GAME = BUILDER.comment("Works only in single-player mode. May cause some lag!").define(ConfigID.Client.PAUSE_GAME, false);
+
             public static final ConfigEntry.DoubleEntry WHEEL_RADIUS = BUILDER.defineInRange(
                     ConfigID.Client.WHEEL_RADIUS, 70, 0, Double.MAX_VALUE
             );

@@ -55,7 +55,7 @@ public class ToolbeltWheelScreen extends Screen {
 
     @Override
     public boolean isPauseScreen() {
-        return false;
+        return ClientConfig.Screen.ToolbeltWheel.PAUSE_GAME.getAsBoolean();
     }
 
     @Override
