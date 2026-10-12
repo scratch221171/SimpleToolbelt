@@ -2,6 +2,8 @@ package net.scratch221171.simpletoolbelt.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.client.KeyMapping;
@@ -38,24 +40,39 @@ public class ToolbeltWheelScreen extends Screen {
     private static final ResourceLocation FRAME_SPRITE = STUtils.id("textures/hud/wheel_frame.png");
     private static final ResourceLocation EMPTY_SPRITE = STUtils.id("textures/hud/wheel_empty.png");
 
-    private final UUID beltId;
-    private final float wheelRadius, innerDeadzoneRadius, outerStowZoneRadius;
-    private double scrollAccumulator = 0;
+    private static final Map<UUID, Integer> LAST_PAGE = new HashMap<>();
 
+    private final float wheelRadius, innerDeadzoneRadius, outerStowZoneRadius;
     private HoverState hoverState = HoverState.noAction();
-    private int pageIndex = 0;
+    private int pageIndex;
+    private final UUID beltId;
+    private int tickCount = 0;
+    private double scrollAccumulator = 0;
 
     public ToolbeltWheelScreen(UUID uuid) {
         super(Component.translatable(Const.LangKey.Screen.WHEEL_SCREEN_TITLE));
         this.beltId = uuid;
+        this.pageIndex =
+                ClientConfig.Screen.ToolbeltWheel.REMEMBER_PAGE.getAsBoolean() ? LAST_PAGE.getOrDefault(uuid, 0) : 0;
         this.wheelRadius = (float) ClientConfig.Screen.ToolbeltWheel.WHEEL_RADIUS.getAsDouble();
         this.innerDeadzoneRadius = (float) ClientConfig.Screen.ToolbeltWheel.INNER_DEADZONE_RADIUS.getAsDouble();
         this.outerStowZoneRadius = (float) ClientConfig.Screen.ToolbeltWheel.OUTER_STOW_ZONE_RADIUS.getAsDouble();
     }
 
     @Override
+    public void tick() {
+        tickCount++;
+    }
+
+    @Override
     public boolean isPauseScreen() {
         return ClientConfig.Screen.ToolbeltWheel.PAUSE_GAME.getAsBoolean();
+    }
+
+    @Override
+    public void removed() {
+        LAST_PAGE.put(beltId, pageIndex);
+        super.removed();
     }
 
     @Override
@@ -105,59 +122,55 @@ public class ToolbeltWheelScreen extends Screen {
 
         ClientBeltCache.read(beltId).ifPresent(cached -> {
             if (cached.pagesSize() > 0) {
+                if (pageIndex >= cached.pagesSize()) {
+                    pageIndex = Math.max(0, cached.pagesSize() - 1);
+                }
                 if (cached.pagesSize() > 1) {
                     Component text = Component.translatable(
                             Const.LangKey.Screen.WHEEL_PAGE_INDEX, pageIndex + 1, cached.pagesSize());
                     guiGraphics.drawString(
                             font, text, centerX - font.width(text) / 2, centerY - font.lineHeight / 2, 16777215);
                 }
+
+                PoseStack pose = guiGraphics.pose();
+
+                double progress = Math.clamp((tickCount + partialTick) / 10, 0, 1);
+                double animatedRad = wheelRadius - 5 * (Math.pow(1 - progress, 8));
                 for (int i = 0; i < ToolbeltContents.PAGE_SIZE; i++) {
-                    double angleRad = Math.toRadians(i * 45.0);
-                    int x = centerX + (int) (wheelRadius * Math.sin(angleRad)) - ICON_SIZE / 2;
-                    int y = centerY - (int) (wheelRadius * Math.cos(angleRad)) - ICON_SIZE / 2;
+                    double angleRad = Math.toRadians(i * 45);
+                    double x = centerX + (animatedRad * Math.sin(angleRad)) - ICON_SIZE / 2.0;
+                    double y = centerY - (animatedRad * Math.cos(angleRad)) - ICON_SIZE / 2.0;
                     boolean isSelected =
                             hoverState.action() == HoverState.HoverAction.SELECT && i == hoverState.index();
                     ItemStack init = cached.getPage(pageIndex).initial().getStack(i);
                     ItemStack cur = cached.getPage(pageIndex).current().getStack(i);
 
+                    pose.pushPose();
+                    pose.translate(x, y, 0);
+
                     RenderSystem.enableBlend();
                     RenderSystem.defaultBlendFunc();
                     if (cur.isEmpty()) {
                         if (init.isEmpty()) {
+
                             guiGraphics.blit(
-                                    EMPTY_SPRITE,
-                                    x - (10 - ICON_SIZE) / 2,
-                                    y - (10 - ICON_SIZE) / 2,
-                                    0,
-                                    0,
-                                    10,
-                                    10,
-                                    10,
-                                    10);
+                                    EMPTY_SPRITE, -(10 - ICON_SIZE) / 2, -(10 - ICON_SIZE) / 2, 0, 0, 10, 10, 10, 10);
                         } else {
                             guiGraphics.blit(
-                                    FRAME_SPRITE,
-                                    x - (22 - ICON_SIZE) / 2,
-                                    y - (22 - ICON_SIZE) / 2,
-                                    0,
-                                    0,
-                                    22,
-                                    22,
-                                    22,
-                                    22);
-                            GhostItemRenderer.render(guiGraphics, font, init, x, y);
+                                    FRAME_SPRITE, -(22 - ICON_SIZE) / 2, -(22 - ICON_SIZE) / 2, 0, 0, 22, 22, 22, 22);
+                            GhostItemRenderer.render(guiGraphics, font, init, 0, 0);
                         }
                     } else {
                         if (ClientConfig.Screen.ToolbeltWheel.SHOW_KEY_BINDINGS.getAsBoolean()) {
-                            renderKeyLabel(guiGraphics, mc, i, x, y);
+                            renderKeyLabel(guiGraphics, mc, i, 0, 0);
                         }
                         guiGraphics.blit(
-                                FRAME_SPRITE, x - (22 - ICON_SIZE) / 2, y - (22 - ICON_SIZE) / 2, 0, 0, 22, 22, 22, 22);
+                                FRAME_SPRITE, -(22 - ICON_SIZE) / 2, -(22 - ICON_SIZE) / 2, 0, 0, 22, 22, 22, 22);
                         if (isSelected) {
                             guiGraphics.blit(
                                     SELECTED_FRAME_SPRITE,
-                                    x - (24 - ICON_SIZE) / 2,
-                                    y - (24 - ICON_SIZE) / 2,
+                                    -(24 - ICON_SIZE) / 2,
+                                    -(24 - ICON_SIZE) / 2,
                                     0,
                                     0,
                                     24,
@@ -165,47 +178,21 @@ public class ToolbeltWheelScreen extends Screen {
                                     24,
                                     24);
                         }
-                        guiGraphics.renderItem(cur, x, y);
-                        guiGraphics.renderItemDecorations(this.font, cur, x, y);
+                        guiGraphics.renderItem(cur, 0, 0);
+                        guiGraphics.renderItemDecorations(this.font, cur, 0, 0);
                         if (isSelected) {
                             guiGraphics.pose().pushPose();
-                            guiGraphics.pose().translate(0.0F, 0.0F, 100.0F);
+                            guiGraphics.pose().translate(-x, -y, 100);
                             guiGraphics.renderTooltip(this.font, cur, mouseX, mouseY);
                             guiGraphics.pose().popPose();
                         }
                     }
+
+                    pose.popPose();
                     RenderSystem.disableBlend();
                 }
             }
         });
-    }
-
-    @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        if (STKeyMappings.OPEN_WHEEL.matches(keyCode, scanCode)) {
-            confirmSelection();
-            return true;
-        }
-        return super.keyReleased(keyCode, scanCode, modifiers);
-    }
-
-    @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (STKeyMappings.OPEN_WHEEL.matchesMouse(button)) {
-            confirmSelection();
-            return true;
-        }
-        return super.mouseReleased(mouseX, mouseY, button);
-    }
-
-    private void confirmSelection() {
-        if (hoverState.action() == HoverState.HoverAction.SELECT) {
-            PacketDistributor.sendToServer(
-                    new SelectBeltSlotPayload(beltId, pageIndex * ToolbeltContents.PAGE_SIZE + hoverState.index()));
-        } else if (hoverState.action() == HoverState.HoverAction.STOW) {
-            PacketDistributor.sendToServer(new SelectBeltSlotPayload(beltId, SelectBeltSlotPayload.STOW_INDEX));
-        }
-        this.onClose();
     }
 
     @Override
@@ -236,6 +223,19 @@ public class ToolbeltWheelScreen extends Screen {
     }
 
     @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (button == 2 && pageIndex != 0) {
+            tickCount = 0;
+            pageIndex = 0;
+            Optional.ofNullable(this.minecraft).ifPresent(minecraft -> minecraft
+                    .getSoundManager()
+                    .play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_HAT.value(), 1.5F, 0.1F)));
+            return true;
+        }
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         if (scrollY == 0) {
             return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
@@ -253,12 +253,42 @@ public class ToolbeltWheelScreen extends Screen {
         int pages =
                 ClientBeltCache.read(beltId).map(ToolbeltContents::pagesSize).orElse(0);
         if (pages > 1) {
+            tickCount = 0;
             pageIndex = Math.floorMod(pageIndex + (steps > 0 ? -1 : 1), pages);
             Optional.ofNullable(this.minecraft).ifPresent(minecraft -> minecraft
                     .getSoundManager()
                     .play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_HAT.value(), 1.5F, 0.1F)));
         }
         return true;
+    }
+
+    @Override
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+        if (STKeyMappings.OPEN_WHEEL.matches(keyCode, scanCode)) {
+            confirmSelection();
+            return true;
+        }
+        return super.keyReleased(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        // サイドボタン対応
+        if (STKeyMappings.OPEN_WHEEL.matchesMouse(button)) {
+            confirmSelection();
+            return true;
+        }
+        return super.mouseReleased(mouseX, mouseY, button);
+    }
+
+    private void confirmSelection() {
+        if (hoverState.action() == HoverState.HoverAction.SELECT) {
+            PacketDistributor.sendToServer(
+                    new SelectBeltSlotPayload(beltId, pageIndex * ToolbeltContents.PAGE_SIZE + hoverState.index()));
+        } else if (hoverState.action() == HoverState.HoverAction.STOW) {
+            PacketDistributor.sendToServer(new SelectBeltSlotPayload(beltId, SelectBeltSlotPayload.STOW_INDEX));
+        }
+        this.onClose();
     }
 
     private void renderKeyLabel(GuiGraphics g, Minecraft mc, int index, int slotX, int slotY) {

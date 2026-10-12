@@ -1,28 +1,8 @@
 # Simple Toolbelt
 
+[![Modrinth Downloads](https://img.shields.io/modrinth/dt/fpWgSx7m?style=for-the-badge&logo=modrinth&label=Modrinth&color=00af5c)](https://modrinth.com/mod/simpletoolbelt)
+[![CurseForge Downloads](https://img.shields.io/curseforge/dt/1723791?style=for-the-badge&logo=curseforge&label=CurseForge&color=F56A00)](https://www.curseforge.com/minecraft/mc-mods/simpletoolbelt)
+[![GitHub Release Date](https://img.shields.io/github/release-date/scratch221171/SimpleToolbelt?display_date=published_at&style=for-the-badge&logo=github&label=Last%20Release&color=6690D0)](https://github.com/scratch221171/SimpleToolbelt/releases)
+[![GitHub License](https://img.shields.io/github/license/scratch221171/SimpleToolbelt?style=for-the-badge&logo=github)](https://github.com/scratch221171/SimpleToolbelt)
+
 A lightweight toolbelt for NeoForge 1.21.1. Switch tools from a radial wheel, and every tool returns to its place.
-
-## Features
-
-### Switch-type, not swap-type
-The belt remembers which slot each tool came from, and returns the previous tool there when you switch. Your belt stays organized.
-
-### Radial wheel
-Hold the `R` key to open the wheel, move the mouse to a tool, and release to select it. Move the cursor outside the wheel to stow the tool you are holding. Scroll to change pages.
-
-### Inventory GUI
-Right-click a belt to open its inventory. Hold down the `Shift` key and hover over a belt to preview its contents.
-
-### Netherite tier
-Immune to fire and lava. It has three pages, each holding up to eight items.
-
-### UUID-based data management
-Belt contents are stored by UUID, which prevents item loss and duplication by design. A lost belt can be restored via command.
-
-### Compatibility
-Optional Curios support.
-
-### Showcase
-[Youtube Link Here]
-
-*Heavily inspired by the Toolbox from the Create mod.*

@@ -21,12 +21,14 @@ public class ClientConfig {
 
             public static final ConfigEntry.BooleanEntry PAUSE_GAME = BUILDER.comment("Works only in single-player mode. May cause some lag!").define(ConfigID.Client.PAUSE_GAME, false);
 
+            public static final ConfigEntry.BooleanEntry REMEMBER_PAGE = BUILDER.comment("Remember the last page you opened.").define(ConfigID.Client.REMEMBER_PAGE, true);
+
             public static final ConfigEntry.DoubleEntry WHEEL_RADIUS = BUILDER.defineInRange(
                     ConfigID.Client.WHEEL_RADIUS, 70, 0, Double.MAX_VALUE
             );
 
             public static final ConfigEntry.DoubleEntry INNER_DEADZONE_RADIUS = BUILDER.defineInRange(
-                    ConfigID.Client.INNER_DEADZONE_RADIUS, 30, 0, Double.MAX_VALUE
+                    ConfigID.Client.INNER_DEADZONE_RADIUS, 20, 0, Double.MAX_VALUE
             );
 
             public static final ConfigEntry.DoubleEntry OUTER_STOW_ZONE_RADIUS = BUILDER.defineInRange(
