@@ -133,6 +133,7 @@ public class ToolbeltWheelScreen extends Screen {
                 }
 
                 PoseStack pose = guiGraphics.pose();
+                ItemStack selected = ItemStack.EMPTY;
 
                 double progress = Math.clamp((tickCount + partialTick) / 10, 0, 1);
                 double animatedRad = wheelRadius - 5 * (Math.pow(1 - progress, 8));
@@ -181,15 +182,19 @@ public class ToolbeltWheelScreen extends Screen {
                         guiGraphics.renderItem(cur, 0, 0);
                         guiGraphics.renderItemDecorations(this.font, cur, 0, 0);
                         if (isSelected) {
-                            guiGraphics.pose().pushPose();
-                            guiGraphics.pose().translate(-x, -y, 100);
-                            guiGraphics.renderTooltip(this.font, cur, mouseX, mouseY);
-                            guiGraphics.pose().popPose();
+                            selected = cur;
                         }
                     }
 
                     pose.popPose();
                     RenderSystem.disableBlend();
+                }
+
+                if (!selected.isEmpty()) {
+                    guiGraphics.pose().pushPose();
+                    guiGraphics.pose().translate(0, 0, 100);
+                    guiGraphics.renderTooltip(this.font, selected, mouseX, mouseY);
+                    guiGraphics.pose().popPose();
                 }
             }
         });

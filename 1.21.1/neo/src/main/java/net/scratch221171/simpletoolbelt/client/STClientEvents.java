@@ -26,6 +26,7 @@ import net.scratch221171.simpletoolbelt.common.item.ToolbeltItem;
 import net.scratch221171.simpletoolbelt.common.network.ToggleAutoSwitchPayload;
 import net.scratch221171.simpletoolbelt.common.registry.STDataComponents;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltStorage;
+import net.scratch221171.simpletoolbelt.config.ServerConfig;
 
 @EventBusSubscriber(modid = Const.MOD_ID, value = Dist.CLIENT)
 public class STClientEvents {
@@ -41,7 +42,9 @@ public class STClientEvents {
                         .ifPresent(id -> mc.setScreen(new ToolbeltWheelScreen(id)));
             }
             if (STKeyMappings.TOGGLE_AUTO_SWITCH.consumeClick()) {
-                PacketDistributor.sendToServer(new ToggleAutoSwitchPayload());
+                if (ServerConfig.Item.ALLOW_AUTO_SWITCH.getAsBoolean()) {
+                    PacketDistributor.sendToServer(new ToggleAutoSwitchPayload());
+                }
             }
         }
     }

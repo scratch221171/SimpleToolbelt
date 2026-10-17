@@ -39,5 +39,6 @@ public class STEnglishLangProvider extends STLangProvider {
         // キー
         add(Const.LangKey.Key.CATEGORY, "Simple Toolbelt");
         add(Const.LangKey.Key.WHEEL, "Open Wheel Menu");
+        add(Const.LangKey.Key.TOGGLE_AUTO_SWITCH, "Automatic Tool Switching");
     }
 }

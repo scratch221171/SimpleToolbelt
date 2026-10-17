@@ -16,6 +16,7 @@
   "item.simpletoolbelt.toolbeltshiftKey": "Hold [%s] for more",
   "item.simpletoolbelt.toolbelttoggleAutoSwitch": "Auto Switch: %s",
   "key.simpletoolbelt.category": "Simple Toolbelt",
+  "key.simpletoolbelt.toggle_auto_switch": "Automatic Tool Switching",
   "key.simpletoolbelt.wheel": "Open Wheel Menu",
   "modmenu.descriptionTranslation.simpletoolbelt": "Adds a simple tool belt."
 }

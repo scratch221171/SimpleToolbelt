@@ -1,5 +1,6 @@
 package net.scratch221171.simpletoolbelt.server.command;
 
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
@@ -17,6 +18,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.scratch221171.simpletoolbelt.Const;
+import net.scratch221171.simpletoolbelt.common.item.ToolbeltItem;
 import net.scratch221171.simpletoolbelt.common.registry.STDataComponents;
 import net.scratch221171.simpletoolbelt.common.registry.STItems;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltContents;
@@ -34,7 +36,8 @@ public class STCommands {
                         .then(Commands.literal("restore")
                                 .then(Commands.argument("uuid", UuidArgument.uuid())
                                         .suggests(STCommands::suggestBeltIds)
-                                        .executes(STCommands::restoreBelt))));
+                                        .then(Commands.argument("is_netherite", BoolArgumentType.bool())
+                                                .executes(STCommands::restoreBelt)))));
     }
 
     private static int listBelts(CommandContext<CommandSourceStack> ctx) {
@@ -64,9 +67,11 @@ public class STCommands {
             ctx.getSource().sendFailure(Component.translatable(Const.LangKey.Command.NOT_FOUND));
             return 0;
         } else {
-            ItemStack stack =
-                    new ItemStack((contents.pagesSize() > 1 ? STItems.NETHERITE_TOOLBELT : STItems.TOOLBELT).get());
+            ItemStack stack = new ItemStack(
+                    (BoolArgumentType.getBool(ctx, "is_netherite") ? STItems.NETHERITE_TOOLBELT : STItems.TOOLBELT)
+                            .get());
             stack.set(STDataComponents.BELT_ID.get(), id);
+            stack.set(STDataComponents.EXTRA_PAGES, contents.pagesSize() - ToolbeltItem.getPageCount(stack));
             boolean added = player.getInventory().add(stack);
             if (!added) {
                 player.drop(stack, false);

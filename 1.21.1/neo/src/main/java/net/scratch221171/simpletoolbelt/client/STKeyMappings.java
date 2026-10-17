@@ -30,5 +30,6 @@ public class STKeyMappings {
     @SubscribeEvent
     public static void register(RegisterKeyMappingsEvent event) {
         event.register(OPEN_WHEEL);
+        event.register(TOGGLE_AUTO_SWITCH);
     }
 }

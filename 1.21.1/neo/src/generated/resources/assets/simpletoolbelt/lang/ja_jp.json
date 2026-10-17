@@ -16,6 +16,7 @@
   "item.simpletoolbelt.toolbeltshiftKey": "[%s]を押してさらに表示",
   "item.simpletoolbelt.toolbelttoggleAutoSwitch": "自動切り替え: %s",
   "key.simpletoolbelt.category": "Simple Toolbelt",
+  "key.simpletoolbelt.toggle_auto_switch": "ツールの自動切り替え",
   "key.simpletoolbelt.wheel": "ホイールメニューを開く",
   "modmenu.descriptionTranslation.simpletoolbelt": "シンプルなツールベルトを追加します。"
 }

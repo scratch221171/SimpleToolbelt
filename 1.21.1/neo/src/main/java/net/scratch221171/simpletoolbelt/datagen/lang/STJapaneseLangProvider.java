@@ -39,5 +39,6 @@ public class STJapaneseLangProvider extends STLangProvider {
         // キー
         add(Const.LangKey.Key.CATEGORY, "Simple Toolbelt");
         add(Const.LangKey.Key.WHEEL, "ホイールメニューを開く");
+        add(Const.LangKey.Key.TOGGLE_AUTO_SWITCH, "ツールの自動切り替え");
     }
 }
