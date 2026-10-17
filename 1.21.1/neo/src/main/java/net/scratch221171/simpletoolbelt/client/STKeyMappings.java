@@ -20,6 +20,13 @@ public class STKeyMappings {
             GLFW.GLFW_KEY_R,
             Const.LangKey.Key.CATEGORY);
 
+    public static final KeyMapping TOGGLE_AUTO_SWITCH = new KeyMapping(
+            Const.LangKey.Key.TOGGLE_AUTO_SWITCH,
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_LEFT_ALT,
+            Const.LangKey.Key.CATEGORY);
+
     @SubscribeEvent
     public static void register(RegisterKeyMappingsEvent event) {
         event.register(OPEN_WHEEL);

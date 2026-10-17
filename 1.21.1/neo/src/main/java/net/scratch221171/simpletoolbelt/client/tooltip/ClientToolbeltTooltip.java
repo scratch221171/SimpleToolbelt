@@ -50,7 +50,7 @@ public class ClientToolbeltTooltip implements ClientTooltipComponent {
                 guiGraphics.renderItem(init, sx + 1, sy + 1);
                 guiGraphics.fill(sx + 1, sy + 1, sx + 17, sy + 17, 0x80202020);
                 guiGraphics.pose().pushPose();
-                guiGraphics.pose().translate(0.0F, 0.0F, 200.0F);
+                guiGraphics.pose().translate(0f, 0f, 200f);
                 guiGraphics.drawString(font, "0", sx + 18 - font.width("0"), sy + 10, 0xFFFFFF, true);
                 guiGraphics.pose().popPose();
             }

@@ -8,10 +8,13 @@
   "gui.simpletoolbelt.wheel.tooltip.stow": "Stow All",
   "item.simpletoolbelt.netherite_toolbelt": "Netherite Toolbelt",
   "item.simpletoolbelt.toolbelt": "Toolbelt",
+  "item.simpletoolbelt.toolbeltautoSwitchFailed": "Auto switch failed: %s",
   "item.simpletoolbelt.toolbeltextraPage": "Extra Pages: %s",
   "item.simpletoolbelt.toolbelthint": "Use while held, or right-click in a GUI to open the menu.",
   "item.simpletoolbelt.toolbeltinitializingUUID": "Initializing...",
+  "item.simpletoolbelt.toolbeltinventoryFull": "Inventory full!",
   "item.simpletoolbelt.toolbeltshiftKey": "Hold [%s] for more",
+  "item.simpletoolbelt.toolbelttoggleAutoSwitch": "Auto Switch: %s",
   "key.simpletoolbelt.category": "Simple Toolbelt",
   "key.simpletoolbelt.wheel": "Open Wheel Menu",
   "modmenu.descriptionTranslation.simpletoolbelt": "Adds a simple tool belt."

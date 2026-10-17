@@ -8,10 +8,7 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.scratch221171.simpletoolbelt.common.STUtils;
-import net.scratch221171.simpletoolbelt.common.registry.STDataComponents;
-import net.scratch221171.simpletoolbelt.common.registry.STItems;
-import net.scratch221171.simpletoolbelt.common.registry.STMenus;
-import net.scratch221171.simpletoolbelt.common.registry.STRecipeSerializers;
+import net.scratch221171.simpletoolbelt.common.registry.*;
 import net.scratch221171.simpletoolbelt.config.ModConfigs;
 import net.scratch221171.simpletoolbelt.mdk.config.PlatformConfigRegistrar;
 import net.scratch221171.simpletoolbelt.mdk.config.VersionedConfigSpec;
@@ -26,6 +23,7 @@ public class SimpleToolbelt {
         STItems.register(modEventBus);
         STMenus.register(modEventBus);
         STRecipeSerializers.register(modEventBus);
+        STAttachments.register(modEventBus);
 
         modEventBus.addListener(SimpleToolbelt::buildCreativeTabContents);
     }

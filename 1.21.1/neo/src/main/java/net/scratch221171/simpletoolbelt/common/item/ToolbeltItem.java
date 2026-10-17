@@ -6,11 +6,13 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
@@ -18,9 +20,13 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.items.wrapper.PlayerMainInvWrapper;
 import net.scratch221171.simpletoolbelt.Const;
 import net.scratch221171.simpletoolbelt.client.ClientBeltActions;
 import net.scratch221171.simpletoolbelt.common.menu.ToolbeltMenu;
+import net.scratch221171.simpletoolbelt.common.network.SelectBeltSlotPayload;
 import net.scratch221171.simpletoolbelt.common.registry.STDataComponents;
 import net.scratch221171.simpletoolbelt.common.registry.STItems;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltContents;
@@ -125,5 +131,66 @@ public class ToolbeltItem extends Item {
         if (stack.is(STItems.TOOLBELT)) base = ServerConfig.Item.TOOLBELT_BASE_PAGES.getAsInt();
         if (stack.is(STItems.NETHERITE_TOOLBELT)) base = ServerConfig.Item.NETHERITE_BASE_PAGES.getAsInt();
         return base + stack.getOrDefault(STDataComponents.EXTRA_PAGES, 0);
+    }
+
+    public static void applySelection(ServerPlayer player, UUID beltId, int requestedSlot, Component failed) {
+        ToolbeltStorage.findBelt(player, beltId).ifPresent(belt -> {
+            ToolbeltContents stored = ToolbeltStorage.get(player.server).resolve(player, beltId, belt);
+            ItemStack mainHand = player.getMainHandItem();
+
+            if (requestedSlot == SelectBeltSlotPayload.STOW_INDEX) {
+                for (int i = 0; i < stored.totalSlots(); i++) {
+                    if (!stored.getInitialFlat(i).isEmpty()
+                            && stored.getCurrentFlat(i).isEmpty()) {
+                        for (int j = 0; j < Inventory.INVENTORY_SIZE; j++) {
+                            if (ItemStack.isSameItem(
+                                    stored.getInitialFlat(i),
+                                    player.getInventory().getItem(j))) {
+                                stored = stored.withCurrentFlat(
+                                        i, player.getInventory().getItem(j));
+                                player.getInventory().setItem(j, ItemStack.EMPTY);
+                                player.playSound(SoundEvents.BUNDLE_INSERT, 0.1f, 1);
+                                break;
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (requestedSlot < 0 || requestedSlot >= stored.totalSlots()) return;
+                if (stored.getCurrentFlat(requestedSlot).isEmpty()) return;
+
+                if (!mainHand.isEmpty()) {
+                    int origin = -1;
+                    for (int i = 0; i < stored.totalSlots(); i++) {
+                        if (ItemStack.isSameItem(stored.getInitialFlat(i), mainHand)
+                                && stored.getCurrentFlat(i).isEmpty()) {
+                            origin = i;
+                            break;
+                        }
+                    }
+                    if (origin >= 0) {
+                        stored = stored.withCurrentFlat(origin, mainHand.copy());
+                    } else {
+                        Inventory inv = player.getInventory();
+                        IItemHandler target = new ExcludeSlotHandler(new PlayerMainInvWrapper(inv), inv.selected);
+                        ItemStack moving = mainHand.copy();
+                        if (!ItemHandlerHelper.insertItemStacked(target, moving, true)
+                                .isEmpty()) {
+                            player.displayClientMessage(failed, true);
+                            return;
+                        }
+                        ItemHandlerHelper.insertItemStacked(target, moving, false);
+                    }
+                }
+                player.setItemInHand(
+                        InteractionHand.MAIN_HAND,
+                        stored.getCurrentFlat(requestedSlot).copy());
+                player.playSound(SoundEvents.ARMOR_EQUIP_GENERIC.value(), 0.1f, 1);
+                stored = stored.withCurrentFlat(requestedSlot, ItemStack.EMPTY);
+            }
+
+            ToolbeltStorage.update(player, beltId, stored);
+            ToolbeltMenu.refreshIfOpen(player, beltId, stored);
+        });
     }
 }

@@ -11,7 +11,7 @@ public final class GhostItemRenderer {
         g.fill(x, y, x + 16, y + 16, 0x80202020);
         g.renderItem(stack, x, y);
         g.pose().pushPose();
-        g.pose().translate(0.0F, 0.0F, 200.0F);
+        g.pose().translate(0f, 0f, 200f);
         g.drawString(font, "0", x + 17 - font.width("0"), y + 9, 16777215, true);
         g.pose().popPose();
     }

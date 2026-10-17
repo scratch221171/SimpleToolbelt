@@ -21,6 +21,9 @@ public class STEnglishLangProvider extends STLangProvider {
         add(Const.LangKey.Item.SHIFT_FOR_MORE_INFO, "Hold [%s] for more");
         add(Const.LangKey.Item.HINT, "Use while held, or right-click in a GUI to open the menu.");
         add(Const.LangKey.Item.EXTRA_PAGE, "Extra Pages: %s");
+        add(Const.LangKey.Item.TOGGLE_AUTO_SWITCH, "Auto Switch: %s");
+        add(Const.LangKey.Item.INVENTORY_FULL, "Inventory full!");
+        add(Const.LangKey.Item.AUTO_SWITCH_FAILED, "Auto switch failed: %s");
 
         // スクリーン
         add(Const.LangKey.Screen.TOOLBELT_SCREEN_TITLE, "Toolbelt");

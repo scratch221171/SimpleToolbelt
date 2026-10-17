@@ -6,6 +6,7 @@ public class ConfigID {
         public static final String TOOLBELT_BASE_PAGES = "toolbelt_base_pages";
         public static final String NETHERITE_BASE_PAGES = "netherite_base_pages";
         public static final String MAX_EXTRA_PAGES = "max_extra_pages";
+        public static final String ALLOW_AUTO_SWITCH = "allow_auto_switch";
     }
 
     public static final class Client {

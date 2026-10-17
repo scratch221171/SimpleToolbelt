@@ -18,6 +18,8 @@ public class ServerConfig {
 
         public static final ConfigEntry.IntEntry MAX_EXTRA_PAGES = BUILDER.comment("Maximum number of pages you can add with item").defineInRange(ConfigID.Server.MAX_EXTRA_PAGES, 5, 0, 64);
 
+        public static final ConfigEntry.BooleanEntry ALLOW_AUTO_SWITCH = BUILDER.define(ConfigID.Server.ALLOW_AUTO_SWITCH, true);
+
         public static final ConfigEntries ENTRIES = BUILDER.build();
     }
 

@@ -23,6 +23,7 @@ import net.scratch221171.simpletoolbelt.common.item.ToolbeltItem;
 import net.scratch221171.simpletoolbelt.common.menu.ToolbeltMenu;
 import net.scratch221171.simpletoolbelt.common.network.SyncBeltContentsPayload;
 import net.scratch221171.simpletoolbelt.common.registry.STDataComponents;
+import net.scratch221171.simpletoolbelt.common.registry.STItems;
 import net.scratch221171.simpletoolbelt.compat.curios.STCuriosHelper;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -95,6 +96,11 @@ public class ToolbeltStorage extends SavedData {
 
     public static Optional<ItemStack> findAnyBelt(Player player) {
         return find(player, () -> STCuriosHelper.getBeltInCurios(player), stack -> true);
+    }
+
+    public static Optional<ItemStack> findAnyNetheriteBelt(Player player) {
+        return find(
+                player, () -> STCuriosHelper.getBeltInCurios(player), stack -> stack.is(STItems.NETHERITE_TOOLBELT));
     }
 
     public static Optional<ItemStack> findBelt(Player player, UUID id) {

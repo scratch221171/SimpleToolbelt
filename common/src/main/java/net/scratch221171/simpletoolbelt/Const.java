@@ -34,10 +34,15 @@ public final class Const {
             public static final String REQUEST_BELT_CONTENTS = "request_belt_contents";
             public static final String OPEN_BELT_MENU_IN_CREATIVE = "open_belt_menu_in_creative";
             public static final String SYNC_BELT_CONTENTS = "sync_belt_contents";
+            public static final String TOGGLE_AUTO_SWITCH = "toggle_auto_switch";
         }
 
         public static final class Recipe {
             public static final String TOOLBELT_PAGE_UPGRADE = "toolbelt_page_upgrade";
+        }
+
+        public static final class Attachment {
+            public static final String AUTO_TOOL_SWITCH = "auto_tool_switch";
         }
     }
 
@@ -52,6 +57,9 @@ public final class Const {
             public static final String SHIFT_FOR_MORE_INFO = define(PREFIX, ID.Item.TOOLBELT + "shiftKey");
             public static final String HINT = define(PREFIX, ID.Item.TOOLBELT + "hint");
             public static final String EXTRA_PAGE = define(PREFIX, ID.Item.TOOLBELT + "extraPage");
+            public static final String TOGGLE_AUTO_SWITCH = define(PREFIX, ID.Item.TOOLBELT + "toggleAutoSwitch");
+            public static final String INVENTORY_FULL = define(PREFIX, ID.Item.TOOLBELT + "inventoryFull");
+            public static final String AUTO_SWITCH_FAILED = define(PREFIX, ID.Item.TOOLBELT + "autoSwitchFailed");
         }
 
         final class Screen {
@@ -76,6 +84,7 @@ public final class Const {
 
             public static final String CATEGORY = define(PREFIX, "category");
             public static final String WHEEL = define(PREFIX, "wheel");
+            public static final String TOGGLE_AUTO_SWITCH = define(PREFIX, "toggle_auto_switch");
         }
 
         static String define(String prefix, String key) {

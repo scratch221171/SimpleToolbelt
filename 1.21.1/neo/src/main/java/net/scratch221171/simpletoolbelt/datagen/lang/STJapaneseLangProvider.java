@@ -21,6 +21,9 @@ public class STJapaneseLangProvider extends STLangProvider {
         add(Const.LangKey.Item.SHIFT_FOR_MORE_INFO, "[%s]を押してさらに表示");
         add(Const.LangKey.Item.HINT, "手に持って使用するか、GUI内で右クリックしてメニューを開きます。");
         add(Const.LangKey.Item.EXTRA_PAGE, "追加ページ: %s");
+        add(Const.LangKey.Item.TOGGLE_AUTO_SWITCH, "自動切り替え: %s");
+        add(Const.LangKey.Item.INVENTORY_FULL, "インベントリがいっぱいです！");
+        add(Const.LangKey.Item.AUTO_SWITCH_FAILED, "自動持ち替え失敗：%s");
 
         // スクリーン
         add(Const.LangKey.Screen.TOOLBELT_SCREEN_TITLE, "ツールベルト");

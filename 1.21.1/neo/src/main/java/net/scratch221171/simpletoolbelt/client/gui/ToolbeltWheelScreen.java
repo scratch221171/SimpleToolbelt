@@ -117,7 +117,7 @@ public class ToolbeltWheelScreen extends Screen {
                     HoverState.select(Math.floorMod(Math.round((float) angleDeg / 45f), ToolbeltContents.PAGE_SIZE));
         }
         if (!hoverState.equals(prevHoverState)) {
-            mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_HAT.value(), 2.0F, 0.1F));
+            mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_HAT.value(), 2f, 0.1f));
         }
 
         ClientBeltCache.read(beltId).ifPresent(cached -> {
@@ -229,7 +229,7 @@ public class ToolbeltWheelScreen extends Screen {
             pageIndex = 0;
             Optional.ofNullable(this.minecraft).ifPresent(minecraft -> minecraft
                     .getSoundManager()
-                    .play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_HAT.value(), 1.5F, 0.1F)));
+                    .play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_HAT.value(), 1.5f, 0.1f)));
             return true;
         }
         return super.mouseClicked(mouseX, mouseY, button);
@@ -257,7 +257,7 @@ public class ToolbeltWheelScreen extends Screen {
             pageIndex = Math.floorMod(pageIndex + (steps > 0 ? -1 : 1), pages);
             Optional.ofNullable(this.minecraft).ifPresent(minecraft -> minecraft
                     .getSoundManager()
-                    .play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_HAT.value(), 1.5F, 0.1F)));
+                    .play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_HAT.value(), 1.5f, 0.1f)));
         }
         return true;
     }
@@ -298,11 +298,11 @@ public class ToolbeltWheelScreen extends Screen {
         int height = mc.font.lineHeight;
 
         g.pose().pushPose();
-        g.pose().translate(slotX - ICON_SIZE / 2F + 6, slotY - ICON_SIZE / 2F, 0.0F);
-        g.pose().scale(0.75F, 0.75F, 1.0F);
+        g.pose().translate(slotX - ICON_SIZE / 2f + 6, slotY - ICON_SIZE / 2f, 0f);
+        g.pose().scale(0.75f, 0.75f, 1f);
         TooltipRenderUtil.renderTooltipBackground(
-                g, -width, 0, width, height, 400, 0xF0100010, 0xF0100010, 0x505000FF, 0x5028007F);
-        g.pose().translate(0.0F, 0.0F, 400.0F);
+                g, -width, 0, width, height, 400, 0xF0100010, 0xF0100010, 0x505000FF, 0x5028007f);
+        g.pose().translate(0f, 0f, 400f);
         g.drawString(font, label, -width, 0, 0xFFFFFFFF);
         g.pose().popPose();
     }
