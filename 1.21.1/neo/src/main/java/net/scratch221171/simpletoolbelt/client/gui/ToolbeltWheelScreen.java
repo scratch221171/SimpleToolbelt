@@ -1,5 +1,6 @@
 package net.scratch221171.simpletoolbelt.client.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import java.util.HashMap;
@@ -20,6 +21,7 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.scratch221171.simpletoolbelt.Const;
 import net.scratch221171.simpletoolbelt.client.STKeyMappings;
+import net.scratch221171.simpletoolbelt.client.keymap.ToolbeltKeyMap;
 import net.scratch221171.simpletoolbelt.client.network.ClientBeltCache;
 import net.scratch221171.simpletoolbelt.common.STUtils;
 import net.scratch221171.simpletoolbelt.common.network.SelectBeltSlotPayload;
@@ -36,9 +38,9 @@ public class ToolbeltWheelScreen extends Screen {
     private static final int SECTOR_SEGMENTS = 12;
     private static final int STOW_SEGMENTS = 48;
 
-    private static final ResourceLocation SELECTED_FRAME_SPRITE = STUtils.id("textures/hud/wheel_selected_frame.png");
-    private static final ResourceLocation FRAME_SPRITE = STUtils.id("textures/hud/wheel_frame.png");
-    private static final ResourceLocation EMPTY_SPRITE = STUtils.id("textures/hud/wheel_empty.png");
+    private static final ResourceLocation SELECTED_FRAME_SPRITE = STUtils.id("textures/hud/selected_frame.png");
+    private static final ResourceLocation FRAME_SPRITE = STUtils.id("textures/hud/frame.png");
+    private static final ResourceLocation EMPTY_SPRITE = STUtils.id("textures/hud/empty.png");
 
     private static final Map<UUID, Integer> LAST_PAGE = new HashMap<>();
 
@@ -135,7 +137,8 @@ public class ToolbeltWheelScreen extends Screen {
                 PoseStack pose = guiGraphics.pose();
                 ItemStack selected = ItemStack.EMPTY;
 
-                double progress = Math.clamp((tickCount + partialTick) / 10, 0, 1);
+                float smoothPartial = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
+                double progress = Math.clamp((tickCount + smoothPartial) / 10.0, 0.0, 1.0);
                 double animatedRad = wheelRadius - 5 * (Math.pow(1 - progress, 8));
                 for (int i = 0; i < ToolbeltContents.PAGE_SIZE; i++) {
                     double angleRad = Math.toRadians(i * 45);
@@ -159,11 +162,13 @@ public class ToolbeltWheelScreen extends Screen {
                         } else {
                             guiGraphics.blit(
                                     FRAME_SPRITE, -(22 - ICON_SIZE) / 2, -(22 - ICON_SIZE) / 2, 0, 0, 22, 22, 22, 22);
-                            GhostItemRenderer.render(guiGraphics, font, init, 0, 0);
+                            GhostItemRenderer.render(guiGraphics, init, 0, 0, false);
                         }
                     } else {
                         if (ClientConfig.Screen.ToolbeltWheel.SHOW_KEY_BINDINGS.getAsBoolean()) {
-                            renderKeyLabel(guiGraphics, mc, i, 0, 0);
+                            ToolbeltKeyMap.getKey(beltId, pageIndex * ToolbeltContents.PAGE_SIZE + i)
+                                    .map(InputConstants.Key::getDisplayName)
+                                    .ifPresent(label -> renderKeyLabel(guiGraphics, mc, label, 0, 0));
                         }
                         guiGraphics.blit(
                                 FRAME_SPRITE, -(22 - ICON_SIZE) / 2, -(22 - ICON_SIZE) / 2, 0, 0, 22, 22, 22, 22);
@@ -296,8 +301,7 @@ public class ToolbeltWheelScreen extends Screen {
         this.onClose();
     }
 
-    private void renderKeyLabel(GuiGraphics g, Minecraft mc, int index, int slotX, int slotY) {
-        Component label = mc.options.keyHotbarSlots[index].getTranslatedKeyMessage();
+    private void renderKeyLabel(GuiGraphics g, Minecraft mc, Component label, int slotX, int slotY) {
 
         int width = mc.font.width(label);
         int height = mc.font.lineHeight;

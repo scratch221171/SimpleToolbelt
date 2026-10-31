@@ -5,6 +5,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.scratch221171.simpletoolbelt.client.gui.GhostItemRenderer;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltContents;
 import org.jspecify.annotations.NonNull;
 
@@ -47,12 +48,7 @@ public class ClientToolbeltTooltip implements ClientTooltipComponent {
                 guiGraphics.renderItem(cur, sx + 1, sy + 1);
                 guiGraphics.renderItemDecorations(font, cur, sx + 1, sy + 1);
             } else if (!init.isEmpty()) {
-                guiGraphics.renderItem(init, sx + 1, sy + 1);
-                guiGraphics.fill(sx + 1, sy + 1, sx + 17, sy + 17, 0x80202020);
-                guiGraphics.pose().pushPose();
-                guiGraphics.pose().translate(0f, 0f, 200f);
-                guiGraphics.drawString(font, "0", sx + 18 - font.width("0"), sy + 10, 0xFFFFFF, true);
-                guiGraphics.pose().popPose();
+                GhostItemRenderer.render(guiGraphics, init, sx + 1, sy + 1, true);
             }
         }
     }

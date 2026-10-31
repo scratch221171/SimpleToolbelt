@@ -30,6 +30,11 @@ public class STEnglishLangProvider extends STLangProvider {
         add(Const.LangKey.Screen.WHEEL_SCREEN_TITLE, "Wheel");
         add(Const.LangKey.Screen.WHEEL_TOOLTIP_STOW, "Stow All");
         add(Const.LangKey.Screen.WHEEL_PAGE_INDEX, "Page %s / %s");
+        add(Const.LangKey.Screen.KEYMAP_OPEN, "Hotkeys");
+        add(Const.LangKey.Screen.KEYMAP_TITLE, "Hotkey Assignment");
+        add(
+                Const.LangKey.Screen.KEYMAP_HINT,
+                "Key settings are independent for each belt, but you cannot assign the same key to slots on multiple belts.");
 
         // コマンド
         add(Const.LangKey.Command.NOT_FOUND, "Belt not found");

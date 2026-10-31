@@ -28,7 +28,8 @@ public class ToolbeltScreen extends AbstractContainerScreen<ToolbeltMenu> {
             STUtils.id("textures/gui/toolbelt/button/button_highlighted.png");
     private static final ResourceLocation BUTTON_SELECTED =
             STUtils.id("textures/gui/toolbelt/button/button_selected.png");
-    private static final ResourceLocation STOW = STUtils.id("textures/gui/toolbelt/button/stow.png");
+    static final ResourceLocation STOW = STUtils.id("textures/gui/toolbelt/button/stow.png");
+    private final ResourceLocation KEY = STUtils.id("textures/gui/toolbelt/button/key.png");
 
     public ToolbeltScreen(ToolbeltMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
@@ -45,6 +46,8 @@ public class ToolbeltScreen extends AbstractContainerScreen<ToolbeltMenu> {
         int y = topPos + (20);
         addRenderableWidget(
                 new BeltStowButton(x, y, 16, 16, Component.translatable(Const.LangKey.Screen.WHEEL_TOOLTIP_STOW)));
+        addRenderableWidget(
+                new BeltKeyMapButton(x, topPos + 4, 16, 14, Component.translatable(Const.LangKey.Screen.KEYMAP_OPEN)));
     }
 
     @Override
@@ -65,7 +68,7 @@ public class ToolbeltScreen extends AbstractContainerScreen<ToolbeltMenu> {
             Slot slot = menu.getSlot(i);
             ItemStack init = synced.getInitialFlat(i);
             if (!slot.hasItem() && !init.isEmpty()) {
-                GhostItemRenderer.render(guiGraphics, font, init, leftPos + slot.x, topPos + slot.y);
+                GhostItemRenderer.render(guiGraphics, init, leftPos + slot.x, topPos + slot.y, true);
             }
         }
     }
@@ -114,6 +117,30 @@ public class ToolbeltScreen extends AbstractContainerScreen<ToolbeltMenu> {
 
             guiGraphics.blit(resourcelocation, getX(), getY(), 0, 0, width, height, width, height);
             guiGraphics.blit(STOW, getX() + 2, getY() + 2, 0, 0, 12, 12, 12, 12);
+        }
+    }
+
+    class BeltKeyMapButton extends AbstractButton {
+        public BeltKeyMapButton(int x, int y, int width, int height, Component message) {
+            super(x, y, width, height, message);
+            setTooltip(Tooltip.create(message));
+        }
+
+        @Override
+        public void onPress() {
+            ToolbeltScreen.this.minecraft.setScreen(new KeyMapScreen(ToolbeltScreen.this, menu));
+        }
+
+        @Override
+        protected void updateWidgetNarration(@NonNull NarrationElementOutput narrationElementOutput) {
+            defaultButtonNarrationText(narrationElementOutput);
+        }
+
+        @Override
+        public void renderWidget(@NonNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+            guiGraphics.blit(
+                    isHovered() ? BUTTON_HIGHLIGHTED : BUTTON, getX(), getY(), 0, 0, width, height, width, height);
+            guiGraphics.blit(KEY, getX() + 1, getY() + 2, 0, 0, 13, 10, 13, 10);
         }
     }
 }

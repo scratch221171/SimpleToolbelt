@@ -30,6 +30,9 @@ public class STJapaneseLangProvider extends STLangProvider {
         add(Const.LangKey.Screen.WHEEL_SCREEN_TITLE, "ホイール");
         add(Const.LangKey.Screen.WHEEL_TOOLTIP_STOW, "アイテムを片付ける");
         add(Const.LangKey.Screen.WHEEL_PAGE_INDEX, "ページ %s / %s");
+        add(Const.LangKey.Screen.KEYMAP_OPEN, "ホットキー");
+        add(Const.LangKey.Screen.KEYMAP_TITLE, "ホットキーの割り当て");
+        add(Const.LangKey.Screen.KEYMAP_HINT, "キー設定はベルトごとに独立していますが、同じキーを複数のベルトのスロットに割り当てることはできません。");
 
         // コマンド
         add(Const.LangKey.Command.NOT_FOUND, "ベルトが見つかりません");

@@ -69,6 +69,9 @@ public final class Const {
             public static final String WHEEL_SCREEN_TITLE = define(PREFIX, "wheel.title");
             public static final String WHEEL_TOOLTIP_STOW = define(PREFIX, "wheel.tooltip.stow");
             public static final String WHEEL_PAGE_INDEX = define(PREFIX, "wheel.pageIndex");
+            public static final String KEYMAP_OPEN = define(PREFIX, "keymap.open");
+            public static final String KEYMAP_TITLE = define(PREFIX, "keymap.title");
+            public static final String KEYMAP_HINT = define(PREFIX, "keymap.hint");
         }
 
         final class Command {

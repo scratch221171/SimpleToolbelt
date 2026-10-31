@@ -112,6 +112,8 @@ public class ToolbeltStorage extends SavedData {
 
     private static Optional<ItemStack> find(
             Player player, Supplier<Optional<ItemStack>> inCurios, Predicate<ItemStack> filter) {
+        ItemStack mainhand = player.getMainHandItem();
+        if (mainhand.getItem() instanceof ToolbeltItem && filter.test(mainhand)) return Optional.of(mainhand);
         Optional<ItemStack> curios = ModList.get().isLoaded("curios") ? inCurios.get() : Optional.empty();
         return curios.or(() -> {
             Inventory inv = player.getInventory();

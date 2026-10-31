@@ -7,6 +7,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.SimpleMenuProvider;
@@ -149,7 +150,7 @@ public class ToolbeltItem extends Item {
                                 stored = stored.withCurrentFlat(
                                         i, player.getInventory().getItem(j));
                                 player.getInventory().setItem(j, ItemStack.EMPTY);
-                                player.playSound(SoundEvents.BUNDLE_INSERT, 0.1f, 1);
+                                player.playNotifySound(SoundEvents.BUNDLE_INSERT, SoundSource.PLAYERS, 1, 1);
                                 break;
                             }
                         }
@@ -185,7 +186,7 @@ public class ToolbeltItem extends Item {
                 player.setItemInHand(
                         InteractionHand.MAIN_HAND,
                         stored.getCurrentFlat(requestedSlot).copy());
-                player.playSound(SoundEvents.ARMOR_EQUIP_GENERIC.value(), 0.1f, 1);
+                player.playNotifySound(SoundEvents.ARMOR_EQUIP_GENERIC.value(), SoundSource.PLAYERS, 1, 1);
                 stored = stored.withCurrentFlat(requestedSlot, ItemStack.EMPTY);
             }
 
