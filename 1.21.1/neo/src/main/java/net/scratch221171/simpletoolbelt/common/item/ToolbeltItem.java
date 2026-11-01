@@ -143,55 +143,63 @@ public class ToolbeltItem extends Item {
                 for (int i = 0; i < stored.totalSlots(); i++) {
                     if (!stored.getInitialFlat(i).isEmpty()
                             && stored.getCurrentFlat(i).isEmpty()) {
-                        for (int j = 0; j < Inventory.INVENTORY_SIZE; j++) {
-                            if (ItemStack.isSameItem(
-                                    stored.getInitialFlat(i),
-                                    player.getInventory().getItem(j))) {
-                                stored = stored.withCurrentFlat(
-                                        i, player.getInventory().getItem(j));
-                                player.getInventory().setItem(j, ItemStack.EMPTY);
-                                player.playNotifySound(SoundEvents.BUNDLE_INSERT, SoundSource.PLAYERS, 1, 1);
-                                break;
-                            }
-                        }
+                        stored = findAndStow(player, stored, i);
+                        player.playNotifySound(SoundEvents.BUNDLE_INSERT, SoundSource.PLAYERS, 1, 1);
                     }
                 }
             } else {
                 if (requestedSlot < 0 || requestedSlot >= stored.totalSlots()) return;
-                if (stored.getCurrentFlat(requestedSlot).isEmpty()) return;
+                if (stored.getCurrentFlat(requestedSlot).isEmpty()) {
+                    stored = findAndStow(player, stored, requestedSlot);
+                    player.playNotifySound(SoundEvents.BUNDLE_INSERT, SoundSource.PLAYERS, 1, 1);
+                } else {
 
-                if (!mainHand.isEmpty()) {
-                    int origin = -1;
-                    for (int i = 0; i < stored.totalSlots(); i++) {
-                        if (ItemStack.isSameItem(stored.getInitialFlat(i), mainHand)
-                                && stored.getCurrentFlat(i).isEmpty()) {
-                            origin = i;
-                            break;
+                    if (!mainHand.isEmpty()) {
+                        int origin = -1;
+                        for (int i = 0; i < stored.totalSlots(); i++) {
+                            if (ItemStack.isSameItem(stored.getInitialFlat(i), mainHand)
+                                    && stored.getCurrentFlat(i).isEmpty()) {
+                                origin = i;
+                                break;
+                            }
+                        }
+                        if (origin >= 0) {
+                            stored = stored.withCurrentFlat(origin, mainHand.copy());
+                        } else {
+                            Inventory inv = player.getInventory();
+                            IItemHandler target = new ExcludeSlotHandler(new PlayerMainInvWrapper(inv), inv.selected);
+                            ItemStack moving = mainHand.copy();
+                            if (!ItemHandlerHelper.insertItemStacked(target, moving, true)
+                                    .isEmpty()) {
+                                player.displayClientMessage(failed, true);
+                                return;
+                            }
+                            ItemHandlerHelper.insertItemStacked(target, moving, false);
                         }
                     }
-                    if (origin >= 0) {
-                        stored = stored.withCurrentFlat(origin, mainHand.copy());
-                    } else {
-                        Inventory inv = player.getInventory();
-                        IItemHandler target = new ExcludeSlotHandler(new PlayerMainInvWrapper(inv), inv.selected);
-                        ItemStack moving = mainHand.copy();
-                        if (!ItemHandlerHelper.insertItemStacked(target, moving, true)
-                                .isEmpty()) {
-                            player.displayClientMessage(failed, true);
-                            return;
-                        }
-                        ItemHandlerHelper.insertItemStacked(target, moving, false);
-                    }
+                    player.setItemInHand(
+                            InteractionHand.MAIN_HAND,
+                            stored.getCurrentFlat(requestedSlot).copy());
+                    player.playNotifySound(SoundEvents.ARMOR_EQUIP_GENERIC.value(), SoundSource.PLAYERS, 1, 1);
+                    stored = stored.withCurrentFlat(requestedSlot, ItemStack.EMPTY);
                 }
-                player.setItemInHand(
-                        InteractionHand.MAIN_HAND,
-                        stored.getCurrentFlat(requestedSlot).copy());
-                player.playNotifySound(SoundEvents.ARMOR_EQUIP_GENERIC.value(), SoundSource.PLAYERS, 1, 1);
-                stored = stored.withCurrentFlat(requestedSlot, ItemStack.EMPTY);
             }
 
             ToolbeltStorage.update(player, beltId, stored);
             ToolbeltMenu.refreshIfOpen(player, beltId, stored);
         });
+    }
+
+    private static ToolbeltContents findAndStow(Player player, ToolbeltContents stored, int requestedSlot) {
+        for (int i = 0; i < Inventory.INVENTORY_SIZE; i++) {
+            if (ItemStack.isSameItem(
+                    stored.getInitialFlat(requestedSlot), player.getInventory().getItem(i))) {
+                stored = stored.withCurrentFlat(
+                        requestedSlot, player.getInventory().getItem(i));
+                player.getInventory().setItem(i, ItemStack.EMPTY);
+                break;
+            }
+        }
+        return stored;
     }
 }

@@ -135,7 +135,7 @@ public class KeyMapScreen extends Screen {
                 g.renderTooltip(font, stack, mouseX, mouseY);
             }
         } else if (hovered == STOW_SLOT) {
-            g.renderTooltip(font, Component.translatable(Const.LangKey.Screen.WHEEL_TOOLTIP_STOW), mouseX, mouseY);
+            g.renderTooltip(font, Component.translatable(Const.LangKey.Screen.WHEEL_TOOLTIP_STOW_ALL), mouseX, mouseY);
         }
     }
 
