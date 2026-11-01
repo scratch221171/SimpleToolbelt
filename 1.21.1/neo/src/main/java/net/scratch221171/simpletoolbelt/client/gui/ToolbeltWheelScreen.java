@@ -109,7 +109,7 @@ public class ToolbeltWheelScreen extends Screen {
         if (stowHover) {
             hoverState = HoverState.stow();
             guiGraphics.renderTooltip(
-                    font, Component.translatable(Const.LangKey.Screen.WHEEL_TOOLTIP_STOW), mouseX, mouseY);
+                    font, Component.translatable(Const.LangKey.Screen.WHEEL_TOOLTIP_STOW_ALL), mouseX, mouseY);
         } else if (distance < innerDeadzoneRadius) {
             hoverState = HoverState.noAction();
         } else {
@@ -136,6 +136,8 @@ public class ToolbeltWheelScreen extends Screen {
 
                 PoseStack pose = guiGraphics.pose();
                 ItemStack selected = ItemStack.EMPTY;
+                ToolbeltContents.StackGroup init = cached.getPage(pageIndex).initial();
+                ToolbeltContents.StackGroup cur = cached.getPage(pageIndex).current();
 
                 float smoothPartial = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
                 double progress = Math.clamp((tickCount + smoothPartial) / 10.0, 0.0, 1.0);
@@ -146,30 +148,25 @@ public class ToolbeltWheelScreen extends Screen {
                     double y = centerY - (animatedRad * Math.cos(angleRad)) - ICON_SIZE / 2.0;
                     boolean isSelected =
                             hoverState.action() == HoverState.HoverAction.SELECT && i == hoverState.index();
-                    ItemStack init = cached.getPage(pageIndex).initial().getStack(i);
-                    ItemStack cur = cached.getPage(pageIndex).current().getStack(i);
+                    ItemStack initStack = init.getStack(i);
+                    ItemStack curStack = cur.getStack(i);
 
                     pose.pushPose();
                     pose.translate(x, y, 0);
 
                     RenderSystem.enableBlend();
                     RenderSystem.defaultBlendFunc();
-                    if (cur.isEmpty()) {
-                        if (init.isEmpty()) {
 
+                    if (curStack.isEmpty()) {
+                        if (initStack.isEmpty()) {
                             guiGraphics.blit(
                                     EMPTY_SPRITE, -(10 - ICON_SIZE) / 2, -(10 - ICON_SIZE) / 2, 0, 0, 10, 10, 10, 10);
                         } else {
                             guiGraphics.blit(
                                     FRAME_SPRITE, -(22 - ICON_SIZE) / 2, -(22 - ICON_SIZE) / 2, 0, 0, 22, 22, 22, 22);
-                            GhostItemRenderer.render(guiGraphics, init, 0, 0, false);
+                            GhostItemRenderer.render(guiGraphics, initStack, 0, 0, false);
                         }
                     } else {
-                        if (ClientConfig.Screen.ToolbeltWheel.SHOW_KEY_BINDINGS.getAsBoolean()) {
-                            ToolbeltKeyMap.getKey(beltId, pageIndex * ToolbeltContents.PAGE_SIZE + i)
-                                    .map(InputConstants.Key::getDisplayName)
-                                    .ifPresent(label -> renderKeyLabel(guiGraphics, mc, label, 0, 0));
-                        }
                         guiGraphics.blit(
                                 FRAME_SPRITE, -(22 - ICON_SIZE) / 2, -(22 - ICON_SIZE) / 2, 0, 0, 22, 22, 22, 22);
                         if (isSelected) {
@@ -184,11 +181,16 @@ public class ToolbeltWheelScreen extends Screen {
                                     24,
                                     24);
                         }
-                        guiGraphics.renderItem(cur, 0, 0);
-                        guiGraphics.renderItemDecorations(this.font, cur, 0, 0);
+                        guiGraphics.renderItem(curStack, 0, 0);
+                        guiGraphics.renderItemDecorations(this.font, curStack, 0, 0);
                         if (isSelected) {
-                            selected = cur;
+                            selected = curStack;
                         }
+                    }
+                    if (ClientConfig.Screen.ToolbeltWheel.SHOW_KEY_BINDINGS.getAsBoolean()) {
+                        ToolbeltKeyMap.getKey(beltId, pageIndex * ToolbeltContents.PAGE_SIZE + i)
+                                .map(InputConstants.Key::getDisplayName)
+                                .ifPresent(label -> renderKeyLabel(guiGraphics, mc, label, 0, 0));
                     }
 
                     pose.popPose();
@@ -200,6 +202,13 @@ public class ToolbeltWheelScreen extends Screen {
                     guiGraphics.pose().translate(0, 0, 100);
                     guiGraphics.renderTooltip(this.font, selected, mouseX, mouseY);
                     guiGraphics.pose().popPose();
+                } else {
+                    if (hoverState.action() == HoverState.HoverAction.SELECT
+                            && cur.getStack(hoverState.index()).isEmpty()
+                            && !init.getStack(hoverState.index()).isEmpty()) {
+                        guiGraphics.renderTooltip(
+                                font, Component.translatable(Const.LangKey.Screen.WHEEL_TOOLTIP_STOW), mouseX, mouseY);
+                    }
                 }
             }
         });

@@ -28,7 +28,8 @@ public class STJapaneseLangProvider extends STLangProvider {
         // スクリーン
         add(Const.LangKey.Screen.TOOLBELT_SCREEN_TITLE, "ツールベルト");
         add(Const.LangKey.Screen.WHEEL_SCREEN_TITLE, "ホイール");
-        add(Const.LangKey.Screen.WHEEL_TOOLTIP_STOW, "アイテムを片付ける");
+        add(Const.LangKey.Screen.WHEEL_TOOLTIP_STOW, "これをしまう");
+        add(Const.LangKey.Screen.WHEEL_TOOLTIP_STOW_ALL, "全てしまう");
         add(Const.LangKey.Screen.WHEEL_PAGE_INDEX, "ページ %s / %s");
         add(Const.LangKey.Screen.KEYMAP_OPEN, "ホットキー");
         add(Const.LangKey.Screen.KEYMAP_TITLE, "ホットキーの割り当て");

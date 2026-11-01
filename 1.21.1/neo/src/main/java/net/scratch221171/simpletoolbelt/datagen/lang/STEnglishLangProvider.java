@@ -28,7 +28,8 @@ public class STEnglishLangProvider extends STLangProvider {
         // スクリーン
         add(Const.LangKey.Screen.TOOLBELT_SCREEN_TITLE, "Toolbelt");
         add(Const.LangKey.Screen.WHEEL_SCREEN_TITLE, "Wheel");
-        add(Const.LangKey.Screen.WHEEL_TOOLTIP_STOW, "Stow All");
+        add(Const.LangKey.Screen.WHEEL_TOOLTIP_STOW, "Stow This");
+        add(Const.LangKey.Screen.WHEEL_TOOLTIP_STOW_ALL, "Stow All");
         add(Const.LangKey.Screen.WHEEL_PAGE_INDEX, "Page %s / %s");
         add(Const.LangKey.Screen.KEYMAP_OPEN, "Hotkeys");
         add(Const.LangKey.Screen.KEYMAP_TITLE, "Hotkey Assignment");
