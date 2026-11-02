@@ -16,7 +16,7 @@ public class VersionedClientConfig {
 
         public static final ConfigEntry.ListEntry<String> HELD_ITEM_WHITELIST = BUILDER.comment(
                         "Auto switch only when the held item matches. Item id or #tag. Empty = always")
-                .defineList(
+                .defineListAllowEmpty(
                         ConfigID.Client.HELD_ITEM_WHITELIST,
                         List.of("#c:tools"),
                         () -> "#c:tools",
