@@ -1,9 +1,8 @@
 package net.scratch221171.simpletoolbelt.config;
 
+import java.util.List;
 import net.scratch221171.simpletoolbelt.mdk.config.ConfigDeclaration;
 import net.scratch221171.simpletoolbelt.mdk.config.ConfigSide;
-
-import java.util.List;
 
 public final class ModConfigs {
     public static final ConfigDeclaration SERVER = ConfigDeclaration.of(ConfigSide.SERVER, ServerConfig.ENTRIES);

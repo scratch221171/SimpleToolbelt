@@ -1,5 +1,7 @@
 package net.scratch221171.simpletoolbelt.client;
 
+import static net.scratch221171.simpletoolbelt.client.SimpleToolbeltClient.sendAutoSwitchSettings;
+
 import com.mojang.datafixers.util.Either;
 import java.util.List;
 import net.minecraft.client.Minecraft;
@@ -78,5 +80,10 @@ public class STClientEvents {
     @SubscribeEvent
     public static void clearCache(ClientPlayerNetworkEvent.LoggingOut event) {
         ClientBeltCache.clear();
+    }
+
+    @SubscribeEvent
+    public static void onLogin(ClientPlayerNetworkEvent.LoggingIn e) {
+        sendAutoSwitchSettings();
     }
 }

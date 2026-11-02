@@ -1,8 +1,7 @@
 package net.scratch221171.simpletoolbelt.mdk.config;
 
 public final class ConfigReadableNames {
-    private ConfigReadableNames() {
-    }
+    private ConfigReadableNames() {}
 
     public static String fromKey(String key) {
         String[] words = key.split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])");

@@ -10,10 +10,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.scratch221171.simpletoolbelt.Const;
 import net.scratch221171.simpletoolbelt.common.item.ToolbeltItem;
 import net.scratch221171.simpletoolbelt.common.registry.STAttachments;
+import net.scratch221171.simpletoolbelt.common.storage.AutoSwitchSettings;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltContents;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltStorage;
 import net.scratch221171.simpletoolbelt.config.ServerConfig;
@@ -22,11 +24,17 @@ import net.scratch221171.simpletoolbelt.config.ServerConfig;
 public class STEvents {
 
     @SubscribeEvent
+    public static void onLogout(PlayerEvent.PlayerLoggedOutEvent e) {
+        if (e.getEntity() instanceof ServerPlayer sp) AutoSwitchSettings.remove(sp);
+    }
+
+    @SubscribeEvent
     public static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
         if (ServerConfig.Item.ALLOW_AUTO_SWITCH.getAsBoolean()
                 && event.getAction() == PlayerInteractEvent.LeftClickBlock.Action.START
                 && event.getEntity() instanceof ServerPlayer player
                 && player.getData(STAttachments.AUTO_TOOL_SWITCH)
+                && AutoSwitchSettings.get(player).allows(player.getMainHandItem())
                 && !player.getAbilities().instabuild) {
             ItemStack tool = event.getItemStack();
             BlockState state = event.getLevel().getBlockState(event.getPos());

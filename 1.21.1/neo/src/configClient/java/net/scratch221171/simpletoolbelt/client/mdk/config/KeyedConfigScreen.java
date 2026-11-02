@@ -2,9 +2,9 @@ package net.scratch221171.simpletoolbelt.client.mdk.config;
 
 import com.electronwill.nightconfig.core.UnmodifiableConfig;
 import com.electronwill.nightconfig.core.UnmodifiableConfig.Entry;
-import net.scratch221171.simpletoolbelt.mdk.config.ConfigReadableNames;
-import net.scratch221171.simpletoolbelt.mdk.config.ConfigScreenTranslations;
-import net.scratch221171.simpletoolbelt.mdk.config.ConfigTranslationKeys;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
@@ -16,11 +16,10 @@ import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen.ConfigurationSectionScreen;
 import net.neoforged.neoforge.common.ModConfigSpec.ConfigValue;
 import net.neoforged.neoforge.common.ModConfigSpec.ListValueSpec;
+import net.scratch221171.simpletoolbelt.mdk.config.ConfigReadableNames;
+import net.scratch221171.simpletoolbelt.mdk.config.ConfigScreenTranslations;
+import net.scratch221171.simpletoolbelt.mdk.config.ConfigTranslationKeys;
 import org.jspecify.annotations.NonNull;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public final class KeyedConfigScreen extends ConfigurationSectionScreen {
     public KeyedConfigScreen(Screen parent, ModConfig.Type type, ModConfig modConfig, Component title) {
@@ -32,12 +31,14 @@ public final class KeyedConfigScreen extends ConfigurationSectionScreen {
             Screen parent,
             Map<String, Object> valueSpecs,
             String key,
-            Set<? extends Entry> entrySet
-    ) {
+            Set<? extends Entry> entrySet) {
         super(
                 Context.section(parentContext, parent, entrySet, valueSpecs, key),
-                Component.translatable(ConfigTranslationKeys.BREADCRUMB_ORDER, parent.getTitle(), ConfigurationScreen.CRUMB_SEPARATOR, getTranslationComponent(parentContext, key))
-        );
+                Component.translatable(
+                        ConfigTranslationKeys.BREADCRUMB_ORDER,
+                        parent.getTitle(),
+                        ConfigurationScreen.CRUMB_SEPARATOR,
+                        getTranslationComponent(parentContext, key)));
     }
 
     @Override
@@ -46,38 +47,42 @@ public final class KeyedConfigScreen extends ConfigurationSectionScreen {
     }
 
     @Override
-    protected Element createSection(@NonNull String key, UnmodifiableConfig subconfig, @NonNull UnmodifiableConfig subsection) {
+    protected Element createSection(
+            @NonNull String key, UnmodifiableConfig subconfig, @NonNull UnmodifiableConfig subsection) {
         if (subconfig.isEmpty()) {
             return null;
         }
 
-        return new Element(getTranslationComponent(key),
+        return new Element(
+                getTranslationComponent(key),
                 getTooltipComponent(key, null),
                 buildSectionButton(key, subconfig, subsection),
-                false
-        );
+                false);
     }
 
     @Override
-    protected <T> Element createList(@NonNull String key, @NonNull ListValueSpec spec, @NonNull ConfigValue<List<T>> list) {
-        return new Element(getTranslationComponent(key),
+    protected <T> Element createList(
+            @NonNull String key, @NonNull ListValueSpec spec, @NonNull ConfigValue<List<T>> list) {
+        return new Element(
+                getTranslationComponent(key),
                 getTooltipComponent(key, null),
                 Button.builder(
-                                Component.translatable(ConfigTranslationKeys.SECTION, Component.translatable(ConfigTranslationKeys.SECTION_TEXT)),
-                                b -> openList(key, spec, list)
-                        )
+                                Component.translatable(
+                                        ConfigTranslationKeys.SECTION,
+                                        Component.translatable(ConfigTranslationKeys.SECTION_TEXT)),
+                                b -> openList(key, spec, list))
                         .tooltip(Tooltip.create(getTooltipComponent(key, null)))
                         .width(Button.DEFAULT_WIDTH)
                         .build(),
-                false
-        );
+                false);
     }
 
     private Button buildSectionButton(String key, UnmodifiableConfig subconfig, UnmodifiableConfig subsection) {
         return Button.builder(
-                        Component.translatable(ConfigTranslationKeys.SECTION, Component.translatable(ConfigTranslationKeys.SECTION_TEXT)),
-                        b -> openSection(key, subconfig, subsection)
-                )
+                        Component.translatable(
+                                ConfigTranslationKeys.SECTION,
+                                Component.translatable(ConfigTranslationKeys.SECTION_TEXT)),
+                        b -> openSection(key, subconfig, subsection))
                 .tooltip(Tooltip.create(getTooltipComponent(key, null)))
                 .width(Button.DEFAULT_WIDTH)
                 .build();
@@ -89,9 +94,9 @@ public final class KeyedConfigScreen extends ConfigurationSectionScreen {
             return;
         }
 
-        minecraft.setScreen(sectionCache.computeIfAbsent(key, k ->
-                new KeyedConfigScreen(context, this, subconfig.valueMap(), key, subsection.entrySet()).rebuild()
-        ));
+        minecraft.setScreen(sectionCache.computeIfAbsent(
+                key,
+                k -> new KeyedConfigScreen(context, this, subconfig.valueMap(), key, subsection.entrySet()).rebuild()));
     }
 
     private <T> void openList(String key, ListValueSpec spec, ConfigValue<List<T>> list) {
@@ -103,21 +108,24 @@ public final class KeyedConfigScreen extends ConfigurationSectionScreen {
                 ConfigTranslationKeys.BREADCRUMB_ORDER,
                 this.getTitle(),
                 ConfigurationScreen.CRUMB_SEPARATOR,
-                getTranslationComponent(key)
-        );
+                getTranslationComponent(key));
 
-        minecraft.setScreen(sectionCache.computeIfAbsent(key, k ->
-                new KeyedConfigListScreen<>(Context.list(context, this), key, component, spec, list).rebuilt()
-        ));
+        minecraft.setScreen(sectionCache.computeIfAbsent(
+                key,
+                k -> new KeyedConfigListScreen<>(Context.list(context, this), key, component, spec, list).rebuilt()));
     }
 
     private static MutableComponent getTranslationComponent(Context context, String key) {
-        String translationKey = ConfigScreenTranslations.getTranslationKey(context.modId(), context.modSpec(), context.valueSpecs(), context.keylist(), key);
-        return I18n.exists(translationKey) ? Component.translatable(translationKey) : Component.literal(ConfigReadableNames.fromKey(key));
+        String translationKey = ConfigScreenTranslations.getTranslationKey(
+                context.modId(), context.modSpec(), context.valueSpecs(), context.keylist(), key);
+        return I18n.exists(translationKey)
+                ? Component.translatable(translationKey)
+                : Component.literal(ConfigReadableNames.fromKey(key));
     }
 
     private static final class KeyedConfigListScreen<T> extends ConfigurationScreen.ConfigurationListScreen<T> {
-        private KeyedConfigListScreen(Context context, String key, Component title, ListValueSpec spec, ConfigValue<List<T>> valueList) {
+        private KeyedConfigListScreen(
+                Context context, String key, Component title, ListValueSpec spec, ConfigValue<List<T>> valueList) {
             super(context, key, title, spec, valueList);
         }
 

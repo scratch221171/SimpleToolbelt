@@ -9,7 +9,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.scratch221171.simpletoolbelt.common.STUtils;
 import net.scratch221171.simpletoolbelt.common.registry.*;
-import net.scratch221171.simpletoolbelt.config.ModConfigs;
+import net.scratch221171.simpletoolbelt.config.VersionedModConfigs;
 import net.scratch221171.simpletoolbelt.mdk.config.PlatformConfigRegistrar;
 import net.scratch221171.simpletoolbelt.mdk.config.VersionedConfigSpec;
 
@@ -17,7 +17,7 @@ import net.scratch221171.simpletoolbelt.mdk.config.VersionedConfigSpec;
 public class SimpleToolbelt {
     public SimpleToolbelt(IEventBus modEventBus, ModContainer modContainer) {
         Const.LOGGER.debug(Const.INITIALIZING, STUtils.id("1.21.1-neo"));
-        PlatformConfigRegistrar.registerAll(modContainer, VersionedConfigSpec.bindAll(ModConfigs.ALL));
+        PlatformConfigRegistrar.registerAll(modContainer, VersionedConfigSpec.bindAll(VersionedModConfigs.ALL));
 
         STDataComponents.register(modEventBus);
         STItems.register(modEventBus);

@@ -1,12 +1,12 @@
 package net.scratch221171.simpletoolbelt.mdk.config;
 
+import java.util.Optional;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Optional;
-
 @NullMarked
-public record ConfigDeclaration(ConfigSide side, ConfigEntries entries, @Nullable String fileName) {
+public record ConfigDeclaration(
+        ConfigSide side, ConfigEntries entries, @Nullable String fileName) {
     public ConfigDeclaration {
         if (fileName != null) {
             fileName = fileName.trim();
