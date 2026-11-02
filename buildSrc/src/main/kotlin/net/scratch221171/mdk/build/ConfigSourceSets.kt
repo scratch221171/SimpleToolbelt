@@ -1,12 +1,9 @@
 package net.scratch221171.mdk.build
 
 import org.gradle.api.Project
-import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
-import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.getByType
-import org.gradle.kotlin.dsl.named
 
 const val CONFIG_SOURCE_SET_NAME = "config"
 const val CONFIG_CLIENT_SOURCE_SET_NAME = "configClient"
@@ -23,22 +20,14 @@ data class SharedConfigSourceSets(
 
 fun Project.configureConfigSourceSet(name: String = CONFIG_SOURCE_SET_NAME): SourceSet {
     val sourceSets = extensions.getByType<SourceSetContainer>()
-    val sourceSet = sourceSets.findByName(name) ?: sourceSets.create(name) {
-        java.srcDir("src/$name/java")
-        resources.srcDir("src/$name/resources")
-    }
+    val sourceSet = sourceSets.findByName(name) ?: sourceSets.create(name)
     sourceSet.compileClasspath += configurations.getByName("compileClasspath")
     sourceSet.runtimeClasspath += sourceSet.output + sourceSet.compileClasspath
     return sourceSet
 }
 
 fun Project.includeConfigOutput(vararg sourceSets: SourceSet) {
-    tasks.named<Jar>("jar") {
-        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        for (sourceSet in sourceSets) {
-            from(sourceSet.output)
-        }
-    }
+    includeSourceSetArtifacts(*sourceSets)
 }
 
 fun Project.includeConfigOutput(sharedConfig: SharedConfigSourceSets, vararg sourceSets: SourceSet) {
@@ -52,6 +41,9 @@ fun Project.addConfigOutputTo(sourceSetName: String, vararg configSourceSets: So
             target.compileClasspath += configSourceSet.output
             target.runtimeClasspath += configSourceSet.output
             target.output.dir(configSourceSet.output)
+            // Keep sources in the same order as the outputs merged into this
+            // source set, without adding them to its Java compilation inputs.
+            target.allSource.source(configSourceSet.allSource)
         }
     }
 }

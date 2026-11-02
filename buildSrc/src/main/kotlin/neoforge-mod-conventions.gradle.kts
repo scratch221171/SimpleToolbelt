@@ -1,7 +1,8 @@
 import net.scratch221171.mdk.build.configureCiRuntimeMods
 import net.scratch221171.mdk.build.configurePlatformArtifacts
+import net.scratch221171.mdk.build.developmentModSourceSet
+import net.scratch221171.mdk.build.includeSourceSetArtifacts
 import net.scratch221171.mdk.build.supportsGameTestServer
-import org.gradle.api.file.DuplicatesStrategy
 
 plugins {
     `java-library`
@@ -62,6 +63,8 @@ configurations {
     runtimeClasspath.get().extendsFrom(localRuntime)
 }
 
+val developmentSourceSet = developmentModSourceSet()
+
 neoForge {
     version = neoVersion
     validateAccessTransformers = true
@@ -112,11 +115,7 @@ neoForge {
 
     mods {
         create(modId) {
-            // UnionFileSystem searches later entries first, so register sources
-            // from least to most specific to match the packaged jar's precedence.
-            sourceSet(project(sharedCommonProject).sourceSets.main.get())
-            sourceSet(project(commonProject).sourceSets.main.get())
-            sourceSet(sourceSets.main.get())
+            sourceSet(developmentSourceSet)
         }
     }
 }
@@ -150,8 +149,7 @@ tasks.named("sourcesJar") {
     dependsOn(generateModMetadata)
 }
 
-tasks.jar {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from(project(commonProject).sourceSets.main.get().output)
-    from(project(sharedCommonProject).sourceSets.main.get().output)
-}
+includeSourceSetArtifacts(
+    project(commonProject).sourceSets.main.get(),
+    project(sharedCommonProject).sourceSets.main.get(),
+)

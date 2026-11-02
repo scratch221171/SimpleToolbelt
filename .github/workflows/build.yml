@@ -2,6 +2,9 @@ name: Build
 
 on:
   workflow_dispatch:
+  schedule:
+    # Every Monday at 06:00 JST (Sunday at 21:00 UTC) to keep build caches warm.
+    - cron: '0 21 * * 0'
   push:
     branches:
       - main
@@ -53,6 +56,9 @@ jobs:
           echo "::group::Platform projects"
           jq . <<< "$JSON"
           echo "::endgroup::"
+
+      - name: Verify resource composition
+        run: ./gradlew -p buildSrc test --configuration-cache --no-daemon --max-workers=1
 
   build:
     needs: detect
@@ -137,7 +143,7 @@ jobs:
       - name: Run MC runtime test client
         if: ${{ matrix.run_mc_runtime_test }}
         timeout-minutes: 10
-        uses: headlesshq/mc-runtime-test@4.5.1
+        uses: headlesshq/mc-runtime-test@5.0.0
         with:
           mc: ${{ matrix.minecraft }}
           modloader: ${{ matrix.modloader }}

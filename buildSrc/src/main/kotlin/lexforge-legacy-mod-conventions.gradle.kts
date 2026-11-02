@@ -1,5 +1,4 @@
 import net.scratch221171.mdk.build.*
-import org.gradle.api.file.DuplicatesStrategy
 
 plugins {
     `java-library`
@@ -61,6 +60,8 @@ configurations {
     runtimeClasspath.get().extendsFrom(localRuntime)
 }
 
+val developmentSourceSet = developmentModSourceSet()
+
 legacyForge {
     version = forgeFullVersion
     validateAccessTransformers = true
@@ -108,11 +109,7 @@ legacyForge {
 
     mods {
         create(modId) {
-            // UnionFileSystem searches later entries first, so register sources
-            // from least to most specific to match the packaged jar's precedence.
-            sourceSet(project(sharedCommonProject).sourceSets.main.get())
-            sourceSet(project(commonProject).sourceSets.main.get())
-            sourceSet(sourceSets.main.get())
+            sourceSet(developmentSourceSet)
         }
     }
 }
@@ -171,9 +168,11 @@ tasks.named("sourcesJar") {
     dependsOn(generateModMetadata)
 }
 
+includeSourceSetArtifacts(
+    project(commonProject).sourceSets.main.get(),
+    project(sharedCommonProject).sourceSets.main.get(),
+)
+
 tasks.jar {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from(project(commonProject).sourceSets.main.get().output)
-    from(project(sharedCommonProject).sourceSets.main.get().output)
     manifest.attributes(mapOf("MixinConfigs" to "$modId.mixins.json"))
 }
