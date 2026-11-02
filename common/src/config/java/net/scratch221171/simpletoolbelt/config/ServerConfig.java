@@ -12,13 +12,19 @@ public class ServerConfig {
     public static final class Item {
         private static final ConfigEntryBuilder BUILDER = new ConfigEntryBuilder();
 
-        public static final ConfigEntry.IntEntry TOOLBELT_BASE_PAGES = BUILDER.comment("Number of pages in a Toolbelt.").defineInRange(ConfigID.Server.TOOLBELT_BASE_PAGES, 1, 1, 8);
+        public static final ConfigEntry.IntEntry TOOLBELT_BASE_PAGES = BUILDER.comment("Number of pages in a Toolbelt.")
+                .defineInRange(ConfigID.Server.TOOLBELT_BASE_PAGES, 1, 1, 8);
 
-        public static final ConfigEntry.IntEntry NETHERITE_BASE_PAGES = BUILDER.comment("Number of pages in a Netherite Toolbelt.").defineInRange(ConfigID.Server.NETHERITE_BASE_PAGES, 1, 1, 8);
+        public static final ConfigEntry.IntEntry NETHERITE_BASE_PAGES = BUILDER.comment(
+                        "Number of pages in a Netherite Toolbelt.")
+                .defineInRange(ConfigID.Server.NETHERITE_BASE_PAGES, 1, 1, 8);
 
-        public static final ConfigEntry.IntEntry MAX_EXTRA_PAGES = BUILDER.comment("Maximum number of pages you can add with item").defineInRange(ConfigID.Server.MAX_EXTRA_PAGES, 7, 0, 64);
+        public static final ConfigEntry.IntEntry MAX_EXTRA_PAGES = BUILDER.comment(
+                        "Maximum number of pages you can add with item")
+                .defineInRange(ConfigID.Server.MAX_EXTRA_PAGES, 7, 0, 64);
 
-        public static final ConfigEntry.BooleanEntry ALLOW_AUTO_SWITCH = BUILDER.define(ConfigID.Server.ALLOW_AUTO_SWITCH, true);
+        public static final ConfigEntry.BooleanEntry ALLOW_AUTO_SWITCH =
+                BUILDER.define(ConfigID.Server.ALLOW_AUTO_SWITCH, true);
 
         public static final ConfigEntries ENTRIES = BUILDER.build();
     }

@@ -61,7 +61,6 @@ public abstract class ConfigEntry<T> implements Supplier<T>, ConfigElement {
         public Range<T> range() {
             return range;
         }
-
     }
 
     public static class IntEntry extends RangedValueEntry<Integer> implements IntSupplier {

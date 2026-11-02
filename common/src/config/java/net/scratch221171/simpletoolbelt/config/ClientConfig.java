@@ -7,43 +7,46 @@ import net.scratch221171.simpletoolbelt.mdk.config.ConfigEntryBuilder;
 public class ClientConfig {
     private static final ConfigEntryBuilder BUILDER = new ConfigEntryBuilder();
 
-    public static final ConfigEntries SCREEN = BUILDER
-            .category(ConfigID.Client.SCREEN, Screen.ENTRIES);
+    public static final ConfigEntries SCREEN = BUILDER.category(ConfigID.Client.SCREEN, Screen.ENTRIES);
+
+    public static final ConfigEntries AUTO_SWITCH = BUILDER.category(ConfigID.Client.AUTO_SWITCH, AutoSwitch.ENTRIES);
 
     public static final class Screen {
         private static final ConfigEntryBuilder BUILDER = new ConfigEntryBuilder();
 
-        public static final ConfigEntries TOOLBELT_WHEEL = BUILDER
-                .category(ConfigID.Client.TOOLBELT_WHEEL, ToolbeltWheel.ENTRIES);
+        public static final ConfigEntries TOOLBELT_WHEEL =
+                BUILDER.category(ConfigID.Client.TOOLBELT_WHEEL, ToolbeltWheel.ENTRIES);
 
         public static final class ToolbeltWheel {
             private static final ConfigEntryBuilder BUILDER = new ConfigEntryBuilder();
 
-            public static final ConfigEntry.BooleanEntry PAUSE_GAME = BUILDER.comment("Works only in single-player mode. May cause some lag!").define(ConfigID.Client.PAUSE_GAME, false);
+            public static final ConfigEntry.BooleanEntry PAUSE_GAME = BUILDER.comment(
+                            "Works only in single-player mode. May cause some lag!")
+                    .define(ConfigID.Client.PAUSE_GAME, false);
 
-            public static final ConfigEntry.BooleanEntry REMEMBER_PAGE = BUILDER.comment("Remember the last page you opened.").define(ConfigID.Client.REMEMBER_PAGE, true);
+            public static final ConfigEntry.BooleanEntry REMEMBER_PAGE =
+                    BUILDER.comment("Remember the last page you opened.").define(ConfigID.Client.REMEMBER_PAGE, true);
 
-            public static final ConfigEntry.DoubleEntry WHEEL_RADIUS = BUILDER.defineInRange(
-                    ConfigID.Client.WHEEL_RADIUS, 70, 0, Double.MAX_VALUE
-            );
+            public static final ConfigEntry.DoubleEntry WHEEL_RADIUS =
+                    BUILDER.defineInRange(ConfigID.Client.WHEEL_RADIUS, 70, 0, Double.MAX_VALUE);
 
-            public static final ConfigEntry.DoubleEntry INNER_DEADZONE_RADIUS = BUILDER.defineInRange(
-                    ConfigID.Client.INNER_DEADZONE_RADIUS, 20, 0, Double.MAX_VALUE
-            );
+            public static final ConfigEntry.DoubleEntry INNER_DEADZONE_RADIUS =
+                    BUILDER.defineInRange(ConfigID.Client.INNER_DEADZONE_RADIUS, 20, 0, Double.MAX_VALUE);
 
-            public static final ConfigEntry.DoubleEntry OUTER_STOW_ZONE_RADIUS = BUILDER.defineInRange(
-                    ConfigID.Client.OUTER_STOW_ZONE_RADIUS, 150, 0, Double.MAX_VALUE
-            );
+            public static final ConfigEntry.DoubleEntry OUTER_STOW_ZONE_RADIUS =
+                    BUILDER.defineInRange(ConfigID.Client.OUTER_STOW_ZONE_RADIUS, 150, 0, Double.MAX_VALUE);
 
-            public static final ConfigEntry.BooleanEntry ENABLE_HIGHLIGHT = BUILDER
-                    .comment("Enable highlighting for the selected item.")
+            public static final ConfigEntry.BooleanEntry ENABLE_HIGHLIGHT = BUILDER.comment(
+                            "Enable highlighting for the selected item.")
                     .define(ConfigID.Client.ENABLE_HIGHLIGHT, true);
 
-            public static final ConfigEntry.BooleanEntry ENABLE_BLUR = BUILDER
-                    .comment("Enable the blur effect on the background.")
+            public static final ConfigEntry.BooleanEntry ENABLE_BLUR = BUILDER.comment(
+                            "Enable the blur effect on the background.")
                     .define(ConfigID.Client.ENABLE_BLUR, true);
 
-            public static final ConfigEntry.BooleanEntry SHOW_KEY_BINDINGS = BUILDER.comment("The i-th key on the hotbar corresponds to the i-th key on the wheel.").define(ConfigID.Client.SHOW_KEY_BINDINGS, true);
+            public static final ConfigEntry.BooleanEntry SHOW_KEY_BINDINGS = BUILDER.comment(
+                            "The i-th key on the hotbar corresponds to the i-th key on the wheel.")
+                    .define(ConfigID.Client.SHOW_KEY_BINDINGS, true);
 
             public static final ConfigEntries ENTRIES = BUILDER.build();
         }
@@ -51,5 +54,24 @@ public class ClientConfig {
         public static final ConfigEntries ENTRIES = BUILDER.build();
     }
 
+    public static final class AutoSwitch {
+        private static final ConfigEntryBuilder BUILDER = new ConfigEntryBuilder();
+
+        //        public static final ConfigEntry.ListEntry<String> HELD_ITEM_WHITELIST = BUILDER.comment("Leave this
+        // blank to keep Auto-Switching enabled at all times.").defineList(ConfigID.Client.HELD_ITEM_WHITELIST,
+        // List.of("#c:tools"), () -> "#c:tools", ClientConfig::isValidRL);
+
+        public static final ConfigEntry.BooleanEntry ALLOW_EMPTY_HAND =
+                BUILDER.define(ConfigID.Client.ALLOW_EMPTY_HAND, false);
+
+        public static final ConfigEntries ENTRIES = BUILDER.build();
+    }
+
     public static final ConfigEntries ENTRIES = BUILDER.build();
+
+    private static boolean isValidRL(Object obj) {
+        if (!(obj instanceof String rl) || rl.isEmpty()) return false;
+
+        return rl.matches("^#?[a-z0-9_.-]+:[a-z0-9/._-]+$");
+    }
 }

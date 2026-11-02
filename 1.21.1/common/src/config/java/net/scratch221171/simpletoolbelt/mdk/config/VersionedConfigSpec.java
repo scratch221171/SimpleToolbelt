@@ -1,30 +1,25 @@
 package net.scratch221171.simpletoolbelt.mdk.config;
 
-import net.neoforged.neoforge.common.ModConfigSpec;
-import org.jspecify.annotations.Nullable;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import org.jspecify.annotations.Nullable;
 
 public final class VersionedConfigSpec {
     private VersionedConfigSpec() {}
 
     public static BoundConfig bind(ConfigDeclaration declaration) {
-        return new BoundConfig(
-                declaration.side(),
-                bind(declaration.entries()),
-                declaration.fileName());
+        return new BoundConfig(declaration.side(), bind(declaration.entries()), declaration.fileName());
     }
 
     public static List<BoundConfig> bindAll(List<ConfigDeclaration> declarations) {
-        return declarations.stream()
-                .map(VersionedConfigSpec::bind)
-                .toList();
+        return declarations.stream().map(VersionedConfigSpec::bind).toList();
     }
 
-    public record BoundConfig(ConfigSide side, ModConfigSpec spec, @Nullable String fileName) {
+    public record BoundConfig(
+            ConfigSide side, ModConfigSpec spec, @Nullable String fileName) {
         public Optional<String> optionalFileName() {
             return Optional.ofNullable(fileName);
         }
@@ -118,11 +113,10 @@ public final class VersionedConfigSpec {
             return ConfigEntryBinding.of(value::get, value::set, value::save);
         }
 
-        private static <T> ConfigEntryBinding<List<T>> bindListValue(ModConfigSpec.ConfigValue<List<? extends T>> value) {
+        private static <T> ConfigEntryBinding<List<T>> bindListValue(
+                ModConfigSpec.ConfigValue<List<? extends T>> value) {
             return ConfigEntryBinding.of(
-                    () -> List.copyOf(value.get()),
-                    nextValue -> value.set(List.copyOf(nextValue)),
-                    value::save);
+                    () -> List.copyOf(value.get()), nextValue -> value.set(List.copyOf(nextValue)), value::save);
         }
     }
 }

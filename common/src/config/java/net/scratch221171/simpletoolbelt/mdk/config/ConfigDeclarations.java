@@ -1,20 +1,16 @@
 package net.scratch221171.simpletoolbelt.mdk.config;
 
-import org.jspecify.annotations.NullMarked;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import org.jspecify.annotations.NullMarked;
 
 @NullMarked
 public final class ConfigDeclarations {
     private ConfigDeclarations() {}
 
     public static List<ConfigDeclaration> append(
-            List<ConfigDeclaration> declarations,
-            ConfigDeclaration target,
-            ConfigEntries entries
-    ) {
+            List<ConfigDeclaration> declarations, ConfigDeclaration target, ConfigEntries entries) {
         var appended = new ArrayList<ConfigDeclaration>(declarations.size());
         var matchedCount = 0;
         for (var declaration : declarations) {

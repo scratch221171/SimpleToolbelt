@@ -20,5 +20,8 @@ public class ConfigID {
         public static final String ENABLE_BLUR = "enable_blur";
         public static final String ENABLE_HIGHLIGHT = "enable_highlight";
         public static final String SHOW_KEY_BINDINGS = "show_key_bindings";
+        public static final String AUTO_SWITCH = "auto_switch";
+        public static final String HELD_ITEM_WHITELIST = "held_item_whitelist";
+        public static final String ALLOW_EMPTY_HAND = "allow_empty_hand";
     }
 }

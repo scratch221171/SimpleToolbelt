@@ -254,7 +254,7 @@ subprojects {
 
 spotless {
     java {
-        target("**/src/main/java/net/scratch221171/simpletoolbelt/**/*.java")
+        target("**/java/net/scratch221171/simpletoolbelt/**/*.java")
         palantirJavaFormat()
 
         formatAnnotations()

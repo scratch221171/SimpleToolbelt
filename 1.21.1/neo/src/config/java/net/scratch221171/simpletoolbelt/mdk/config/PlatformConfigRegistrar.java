@@ -1,18 +1,18 @@
 package net.scratch221171.simpletoolbelt.mdk.config;
 
+import java.util.List;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.config.ModConfig;
-
-import java.util.List;
 
 public final class PlatformConfigRegistrar {
     private PlatformConfigRegistrar() {}
 
     public static void registerAll(ModContainer modContainer, List<VersionedConfigSpec.BoundConfig> configs) {
         for (var config : configs) {
-            config.optionalFileName().ifPresentOrElse(
-                    fileName -> modContainer.registerConfig(toType(config.side()), config.spec(), fileName),
-                    () -> modContainer.registerConfig(toType(config.side()), config.spec()));
+            config.optionalFileName()
+                    .ifPresentOrElse(
+                            fileName -> modContainer.registerConfig(toType(config.side()), config.spec(), fileName),
+                            () -> modContainer.registerConfig(toType(config.side()), config.spec()));
         }
     }
 
