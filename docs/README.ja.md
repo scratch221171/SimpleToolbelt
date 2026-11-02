@@ -20,6 +20,7 @@
 | 26.1      |   ✅   |    ❌    |    ✅    |
 | 26.1.2    |   🌟   |    ❌    |    🌟    |
 | 26.2      |   ✅   |    🚫    |    ✅    |
+| 26.3      |   ✅   |    🚫    |    ✅    |
 
 🌟 主要サポート | ✅ サポート済み | 🚧 部分的サポート | ⏳ 対応予定 | ❌ 未対応 | 🚫 対応対象外
 
@@ -88,6 +89,7 @@ Fabricの`fabric.mod.json`は、`gradle.properties`、`version.txt`、Fabric規�
 
 ## 要件
 
+- 全Fabric対象でFabric Loader 0.19.5以降が必要です。
 - Gradleの設定にはJDK 25を推奨します。GitHub Actionsのビルド環境にも一致します。
 - LinuxおよびAppleシリコン搭載macOSでは、`nix develop`によりJDK 25とリポジトリの開発ツールを利用できます。
 - Gradleは、各Minecraftバージョンに必要なツールチェーンをFoojay Toolchain Resolverでダウンロードします。
@@ -95,7 +97,7 @@ Fabricの`fabric.mod.json`は、`gradle.properties`、`version.txt`、Fabric規�
   - Java 8: `1.7.10`
   - Java 17: `common`、`1.18.2`、`1.19.2`、`1.20.1`
   - Java 21: `1.21.1`、`1.21.8`、`1.21.11`
-  - Java 25: `26.1`、`26.1.2`
+  - Java 25: `26.1`、`26.1.2`、`26.2`、`26.3`
 
 ## ビルド
 
@@ -174,6 +176,14 @@ CIランタイムへの配置方法は、すべてのターゲットで共通で
 ### Minecraft 1.7.10の依存関係
 
 GTNHGradleを使用する1.7.10プロジェクトでは、依存関係の宣言を`1.7.10/forge/dependencies.gradle`に、追加のリポジトリを`1.7.10/forge/repositories.gradle`に保持します。`dependencies.gradle`に記載された設定を使用してください。たとえば、コンパイル時とローカル実行時に必要でMaven依存関係として公開しない依存関係には`devOnlyNonPublishable`を、ローカル実行時だけ必要な依存関係には`runtimeOnlyNonPublishable`を使用します。ターゲット、Forge、マッピング、GTNHGradleのオプションは`1.7.10/forge/gradle.properties`に保持してください。
+
+## リソースの優先順位
+
+同じ相対パスのリソースが複数ある場合、`platform > versioned-common > root-common`の順で採用します。同じプロジェクト内では`configClient > client > config > main`の順です。有効なソースセットだけが対象になります。プロジェクト間の優先順位を先に適用するため、platformの`main`リソースもroot-commonの`config`リソースより優先されます。選択されたファイルでリソース全体を置き換え、JSONの内容はマージしません。
+
+この選択規則は、配布jar、sources jar内のリソース、`runClient`・`runServer`・データ生成などの開発実行で共通です。生成リソースとローダーメタデータも、リソース処理後に同じ規則で扱います。開発実行には独立したmodディレクトリを使用し、コンパイル出力を上書きしません。単独の1.7.10 Forgeプロジェクトは、この共有リソース合成を使用しません。
+
+古い規約でForgeGradle 7ターゲットを実行したことがある場合は、以前の規約がコンパイル出力へコピーした共通ファイルを削除するため、`./gradlew clean`を一度実行してください。
 
 ## 設定システム
 
@@ -287,6 +297,15 @@ public final class ServerConfig {
                     value -> value instanceof String
             );
 
+    public static final ConfigEntry.ListEntry<String> EXCLUDED_ITEMS = BUILDER
+            .comment("Item ids excluded from the feature (may be empty).")
+            .defineListAllowEmpty(
+                    "excludedItems",
+                    List.of(),
+                    () -> "minecraft:stone",
+                    value -> value instanceof String
+            );
+
     public static final ConfigEntries ADVANCED = BUILDER
             .comment("Advanced server settings.")
             .category("advanced", Advanced.ENTRIES);
@@ -329,6 +348,7 @@ public final class ServerConfig {
 enableFeature = true
 maxStoredItems = 64
 allowedItems = ["minecraft:stone"]
+excludedItems = []
 
 [advanced]
 enableDebugLog = false
@@ -343,7 +363,7 @@ cacheSize = 256
 ```java
 public final class ModConfigs {
     public static final ConfigDeclaration SERVER =
-            ConfigDeclaration.of(ConfigSide.SERVER, ServerConfig.ENTRIES);
+            ConfigDeclaration.of(ConfigSide.SYNCED, ServerConfig.ENTRIES);
     public static final ConfigDeclaration CLIENT =
             ConfigDeclaration.of(ConfigSide.CLIENT, ClientConfig.ENTRIES, "examplemod-client-special.toml");
 
@@ -359,7 +379,9 @@ if (ServerConfig.ENABLE_FEATURE.getAsBoolean()) {
 }
 ```
 
-`ConfigSide.SERVER`、`ConfigSide.CLIENT`、`ConfigSide.COMMON`は、各プラットフォームによってローダー固有の設定種別に割り当てられます。ワールドまたはサーバーが管理するゲームプレイルールやバランス値には`SERVER`、描画やUIなどのローカル設定には`CLIENT`、物理サイドごとに独立して読み込むインストール全体のデフォルト値には`COMMON`を使用します。任意のファイル名はローダーAPIへそのまま渡されます。ローダーのデフォルトを使う場合は省略してください。
+`ConfigSide.SYNCED`、`ConfigSide.CLIENT`、`ConfigSide.LOCAL`は、各プラットフォームによってローダー固有の設定種別に割り当てられます。ワールドまたはサーバーが管理するゲームプレイルールやバランス値には`SYNCED`、描画やUIなどのローカル設定には`CLIENT`、物理サイドごとに独立して読み込むインストール全体のデフォルト値には`LOCAL`を使用します。任意のファイル名はローダーAPIへそのまま渡されます。ローダーのデフォルトを使う場合は省略してください。
+
+`SYNCED`の値は接続したクライアントへ送信されるため、シークレットを保存しないでください。`LOCAL`と`SYNCED`は、それぞれ旧名の`COMMON`と`SERVER`に対応します。現在の対象では、ローダーへの対応付け、設定の保存先、デフォルトのファイル名、同期動作は変わりません。
 
 共通設定の宣言はローダーに依存しません。各プラットフォームは、対象に必要な依存関係と登録処理に加えて、設定画面を公開する場合は任意のクライアント側ヘルパーを提供します。
 

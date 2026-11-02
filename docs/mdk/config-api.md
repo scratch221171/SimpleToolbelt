@@ -56,6 +56,10 @@ classes solely for style. They add noise and do not clarify the config API.
 - `define(...)` defines unrestricted primitive, boolean, or string values. Supported overloads are `int`, `long`, `double`, `boolean`, and `String`.
 - `defineInRange(...)` defines ranged numeric values. Supported overloads are `int`, `long`, and `double`.
 - `defineList(...)` defines a list from a default value, a new-element supplier for config screens, and an element validator.
+- `defineListAllowEmpty(...)` takes the same arguments as `defineList(...)`, but
+  allows empty lists in NeoForge-style config screens. Elsewhere, including
+  Configured and direct config file editing, the underlying implementations
+  currently allow empty lists with either method.
 - `defineEnum(...)` defines an enum value from its default enum constant.
 - `category(String key, ConfigEntries children)` appends a nested section and should be preferred for hierarchy.
 - `push(String key)`, `pop()`, and `pop(int count)` manually open and close
@@ -97,11 +101,11 @@ Expose files from a `ModConfigs`-style class:
 
 - `ConfigDeclaration.of(ConfigSide side, ConfigEntries entries)`
 - `ConfigDeclaration.of(ConfigSide side, ConfigEntries entries, String fileName)`
-- `ConfigSide.SERVER` maps to the loader server config type.
+- `ConfigSide.SYNCED` maps to the loader server/synced config type.
 - `ConfigSide.CLIENT` maps to the loader client config type.
-- `ConfigSide.COMMON` maps to the loader common config type.
+- `ConfigSide.LOCAL` maps to the loader common/local config type.
 
-Use `ConfigSide.SERVER` for values owned by a server or world: gameplay rules,
+Use `ConfigSide.SYNCED` for values owned by a server or world: gameplay rules,
 balance values, world behavior toggles, and anything a dedicated server owner
 should control for connected players. Forge stores server configs under the
 world/server config location and syncs them to clients during connection;
@@ -112,13 +116,22 @@ input, accessibility, local-only integration settings, and config screen
 preferences. These values belong to the player installation, are not present on
 dedicated servers, and should not affect server-authoritative gameplay.
 
-Use `ConfigSide.COMMON` for installation-wide defaults that are meaningful on
+Use `ConfigSide.LOCAL` for installation-wide defaults that are meaningful on
 both physical sides but are still independently owned by each installation:
 startup-independent feature defaults, logging/detail level choices used by both
 client and server code, or values that are safe for singleplayer and dedicated
-server installations to choose separately. Do not use common config just because
+server installations to choose separately. Do not use local config just because
 both sides read a value; if multiplayer behavior must follow the server's
-choice, use server config.
+choice, use synced config.
+
+Never store secrets in `SYNCED` configs: their values are sent to connected clients.
+
+`LOCAL` and `SYNCED` were formerly named `COMMON` and `SERVER`. All current
+loader adapters retain their existing loader types, storage locations, default
+file names, and synchronization behavior.
+
+The old names remain deprecated static field aliases with `forRemoval = false`.
+They resolve to the new constants and are not themselves enum constants.
 
 This template does not expose NeoForge's `STARTUP` config type through
 `ConfigSide`; add a new abstraction deliberately if a future change needs it.

@@ -20,6 +20,7 @@ A Minecraft mod template for multi-version and multi-loader development, powered
 | 26.1      |   ✅   |    ❌    |    ✅    |
 | 26.1.2    |   🌟   |    ❌    |    🌟    |
 | 26.2      |   ✅   |    🚫    |    ✅    |
+| 26.3      |   ✅   |    🚫    |    ✅    |
 
 🌟 Primary support | ✅ Supported | 🚧 Partial support | ⏳ Planned | ❌ Not supported yet | 🚫 Unsupported
 
@@ -91,6 +92,7 @@ The standalone 1.7.10 Forge project uses `1.7.10/forge/src/main/resources/mcmod.
 
 ## Requirements
 
+- All Fabric targets require Fabric Loader 0.19.5 or newer.
 - JDK 25 is recommended for configuring Gradle and matches the GitHub Actions build environment.
 - On Linux and Apple silicon macOS, `nix develop` provides JDK 25 and the repository development tools.
 - Gradle downloads the toolchain needed by each Minecraft version through Foojay Toolchain Resolver.
@@ -98,7 +100,7 @@ The standalone 1.7.10 Forge project uses `1.7.10/forge/src/main/resources/mcmod.
   - Java 8: `1.7.10`
   - Java 17: `common`, `1.18.2`, `1.19.2`, `1.20.1`
   - Java 21: `1.21.1`, `1.21.8`, `1.21.11`
-  - Java 25: `26.1`, `26.1.2`
+  - Java 25: `26.1`, `26.1.2`, `26.2`, `26.3`
 
 ## Building
 
@@ -197,6 +199,26 @@ needed at compile time and in local runs without publishing it as a Maven
 dependency, or `runtimeOnlyNonPublishable` for a local runtime-only dependency.
 Keep target, Forge, mapping, and GTNHGradle options in
 `1.7.10/forge/gradle.properties`.
+
+## Resource Precedence
+
+When resources have the same relative path, the loader project takes precedence
+over version-specific common, which takes precedence over root common:
+`platform > versioned-common > root-common`. Within each project, the order is
+`configClient > client > config > main`; only enabled source sets participate.
+Project precedence is applied first, so a platform `main` resource also overrides
+a root-common `config` resource. The selected file replaces the whole resource;
+JSON contents are not merged.
+
+The same selection applies to distribution jars, resources in sources jars, and
+development runs such as `runClient`, `runServer`, and data generation. Generated
+resources and loader metadata participate after resource processing. Development
+runs use a separate staged mod directory, leaving compilation outputs intact.
+The standalone 1.7.10 Forge project does not use the shared resource composition.
+
+If you previously ran a ForgeGradle 7 target with the older conventions, run
+`./gradlew clean` once to remove shared files that those conventions copied into
+compilation outputs.
 
 ## Configuration System
 
@@ -328,6 +350,15 @@ public final class ServerConfig {
                     value -> value instanceof String
             );
 
+    public static final ConfigEntry.ListEntry<String> EXCLUDED_ITEMS = BUILDER
+            .comment("Item ids excluded from the feature (may be empty).")
+            .defineListAllowEmpty(
+                    "excludedItems",
+                    List.of(),
+                    () -> "minecraft:stone",
+                    value -> value instanceof String
+            );
+
     public static final ConfigEntries ADVANCED = BUILDER
             .comment("Advanced server settings.")
             .category("advanced", Advanced.ENTRIES);
@@ -370,6 +401,7 @@ This produces a structure like:
 enableFeature = true
 maxStoredItems = 64
 allowedItems = ["minecraft:stone"]
+excludedItems = []
 
 [advanced]
 enableDebugLog = false
@@ -384,7 +416,7 @@ Expose config files through `ConfigDeclaration` in `ModConfigs`:
 ```java
 public final class ModConfigs {
     public static final ConfigDeclaration SERVER =
-            ConfigDeclaration.of(ConfigSide.SERVER, ServerConfig.ENTRIES);
+            ConfigDeclaration.of(ConfigSide.SYNCED, ServerConfig.ENTRIES);
     public static final ConfigDeclaration CLIENT =
             ConfigDeclaration.of(ConfigSide.CLIENT, ClientConfig.ENTRIES, "examplemod-client-special.toml");
 
@@ -400,7 +432,9 @@ if (ServerConfig.ENABLE_FEATURE.getAsBoolean()) {
 }
 ```
 
-`ConfigSide.SERVER`, `ConfigSide.CLIENT`, and `ConfigSide.COMMON` are mapped to the loader-specific config type by each platform. Use `SERVER` for world/server-owned gameplay rules and balance values, `CLIENT` for local preferences such as rendering or UI options, and `COMMON` for installation-wide defaults that both physical sides load independently. The optional file name is passed through to the loader API; omit it to use the loader default.
+`ConfigSide.SYNCED`, `ConfigSide.CLIENT`, and `ConfigSide.LOCAL` are mapped to the loader-specific config type by each platform. Use `SYNCED` for world/server-owned gameplay rules and balance values, `CLIENT` for local preferences such as rendering or UI options, and `LOCAL` for installation-wide defaults that both physical sides load independently. The optional file name is passed through to the loader API; omit it to use the loader default.
+
+`SYNCED` values are sent to connected clients; never store secrets in them. The names `LOCAL` and `SYNCED` replace `COMMON` and `SERVER`. Loader mappings, config file locations, default file names, and synchronization behavior remain unchanged for the current targets.
 
 The common config declarations are loader-neutral. Each platform provides the dependency and registrar needed for its target, plus optional client-side helpers when it exposes a config screen:
 

@@ -1,4 +1,4 @@
-import net.meatwo310.mdk.build.req
+import net.scratch221171.mdk.build.req
 
 plugins {
     id("lexforge-legacy-mod-conventions")

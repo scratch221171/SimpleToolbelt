@@ -1,6 +1,6 @@
 import com.gtnewhorizons.gtnhgradle.GTNHGradlePlugin.GTNHExtension
 import com.gtnewhorizons.gtnhgradle.modules.ToolchainModule
-import net.meatwo310.mdk.build.configurePlatformArtifacts
+import net.scratch221171.mdk.build.configurePlatformArtifacts
 
 plugins {
     id("com.gtnewhorizons.gtnhconvention") version "2.0.20" apply false

@@ -1,6 +1,5 @@
 import groovy.json.JsonOutput
 import net.scratch221171.mdk.build.*
-import org.gradle.api.file.DuplicatesStrategy
 
 plugins {
     `java-library`
@@ -74,6 +73,14 @@ val generateModMetadata = tasks.register<GenerateFabricModMetadata>("generateMod
     templateFile.set(layout.projectDirectory.file("src/main/templates/fabric.mod.json"))
     outputFile.set(generatedModMetadataDir.map { it.file("fabric.mod.json") })
     defaultModMetadataJson.set(fabricModMetadata.depends.map { JsonOutput.toJson(defaultModMetadata(it)) })
+    mixinConfigFiles.from(
+        fileTree("src/main/resources") {
+            include("$modId.mixins.json", "$modId.client.mixins.json")
+        },
+        fileTree("src/client/resources") {
+            include("$modId.mixins.json", "$modId.client.mixins.json")
+        },
+    )
 }
 
 tasks.processResources {
@@ -98,8 +105,7 @@ tasks.named("sourcesJar") {
     dependsOn(generateModMetadata)
 }
 
-tasks.jar {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from(project(commonProject).sourceSets.main.get().output)
-    from(project(sharedCommonProject).sourceSets.main.get().output)
-}
+includeSourceSetArtifacts(
+    project(commonProject).sourceSets.main.get(),
+    project(sharedCommonProject).sourceSets.main.get(),
+)
