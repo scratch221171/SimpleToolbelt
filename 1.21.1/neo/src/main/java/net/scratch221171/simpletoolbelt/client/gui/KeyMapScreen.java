@@ -135,7 +135,8 @@ public class KeyMapScreen extends Screen {
                 g.renderTooltip(font, stack, mouseX, mouseY);
             }
         } else if (hovered == STOW_SLOT) {
-            g.renderTooltip(font, Component.translatable(Const.LangKey.Screen.WHEEL_TOOLTIP_STOW_ALL), mouseX, mouseY);
+            g.renderTooltip(
+                    font, Component.translatable(Const.LangKey.Screen.RADIAL_MENU_TOOLTIP_STOW_ALL), mouseX, mouseY);
         }
     }
 
@@ -247,6 +248,8 @@ public class KeyMapScreen extends Screen {
 
     @Override
     public void onClose() {
-        minecraft.setScreen(parent);
+        if (minecraft != null) {
+            minecraft.setScreen(parent);
+        }
     }
 }

@@ -8,7 +8,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.scratch221171.simpletoolbelt.Const;
-import net.scratch221171.simpletoolbelt.client.gui.ToolbeltWheelScreen;
+import net.scratch221171.simpletoolbelt.client.gui.ToolbeltRadialMenuScreen;
 import net.scratch221171.simpletoolbelt.common.network.SelectBeltSlotPayload;
 import org.lwjgl.glfw.GLFW;
 
@@ -28,7 +28,7 @@ public final class ToolbeltKeyDispatcher {
 
     private static void dispatch(InputConstants.Key key) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player != null && (mc.screen == null || mc.screen instanceof ToolbeltWheelScreen)) {
+        if (mc.player != null && (mc.screen == null || mc.screen instanceof ToolbeltRadialMenuScreen)) {
             ToolbeltKeyMap.get(key)
                     .ifPresent(
                             ref -> PacketDistributor.sendToServer(new SelectBeltSlotPayload(ref.beltId(), ref.slot())));

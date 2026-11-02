@@ -21,14 +21,17 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderTooltipEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.scratch221171.simpletoolbelt.Const;
-import net.scratch221171.simpletoolbelt.client.gui.ToolbeltWheelScreen;
+import net.scratch221171.simpletoolbelt.client.gui.ToolbeltRadialMenuScreen;
 import net.scratch221171.simpletoolbelt.client.network.ClientBeltCache;
 import net.scratch221171.simpletoolbelt.client.tooltip.ToolbeltTooltip;
+import net.scratch221171.simpletoolbelt.common.STUtils;
 import net.scratch221171.simpletoolbelt.common.item.ToolbeltItem;
 import net.scratch221171.simpletoolbelt.common.network.ToggleAutoSwitchPayload;
 import net.scratch221171.simpletoolbelt.common.registry.STDataComponents;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltStorage;
+import net.scratch221171.simpletoolbelt.config.ClientConfig;
 import net.scratch221171.simpletoolbelt.config.ServerConfig;
+import net.scratch221171.simpletoolbelt.config.VersionedClientConfig;
 
 @EventBusSubscriber(modid = Const.MOD_ID, value = Dist.CLIENT)
 public class STClientEvents {
@@ -38,16 +41,28 @@ public class STClientEvents {
         Minecraft mc = Minecraft.getInstance();
 
         if (mc.screen == null && mc.player != null) {
-            if (STKeyMappings.OPEN_WHEEL.consumeClick()) {
-                ToolbeltStorage.findAnyBelt(mc.player)
-                        .map(belt -> belt.get(STDataComponents.BELT_ID))
-                        .ifPresent(id -> mc.setScreen(new ToolbeltWheelScreen(id)));
+            if (STKeyMappings.OPEN_RADIAL_MENU.consumeClick()) {
+                if (allows(mc.player.getMainHandItem())) {
+                    ToolbeltStorage.findAnyBelt(mc.player)
+                            .map(belt -> belt.get(STDataComponents.BELT_ID))
+                            .ifPresent(id -> mc.setScreen(new ToolbeltRadialMenuScreen(id)));
+                }
             }
             if (STKeyMappings.TOGGLE_AUTO_SWITCH.consumeClick()) {
                 if (ServerConfig.Item.ALLOW_AUTO_SWITCH.getAsBoolean()) {
                     PacketDistributor.sendToServer(new ToggleAutoSwitchPayload());
                 }
             }
+        }
+    }
+
+    private static boolean allows(ItemStack held) {
+        if (held.isEmpty()) return ClientConfig.RadialMenuOpenCondition.ALLOW_EMPTY_HAND.getAsBoolean();
+        List<String> entries = VersionedClientConfig.RadialMenuOpenCondition.HELD_ITEM_WHITELIST.get();
+        if (entries.isEmpty()) {
+            return true;
+        } else {
+            return STUtils.anyMatch(held, entries);
         }
     }
 

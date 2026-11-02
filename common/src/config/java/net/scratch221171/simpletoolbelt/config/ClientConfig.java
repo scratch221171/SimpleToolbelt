@@ -9,15 +9,19 @@ public class ClientConfig {
 
     public static final ConfigEntries SCREEN = BUILDER.category(ConfigID.Client.SCREEN, Screen.ENTRIES);
 
-    public static final ConfigEntries AUTO_SWITCH = BUILDER.category(ConfigID.Client.AUTO_SWITCH, AutoSwitch.ENTRIES);
+    public static final ConfigEntries RADIAL_MENU_OPEN_CONDITION =
+            BUILDER.category(ConfigID.Client.RADIAL_MENU_OPEN_CONDITION, RadialMenuOpenCondition.ENTRIES);
+
+    public static final ConfigEntries AUTO_SWITCH_CONDITION =
+            BUILDER.category(ConfigID.Client.AUTO_SWITCH_CONDITION, AutoSwitchCondition.ENTRIES);
 
     public static final class Screen {
         private static final ConfigEntryBuilder BUILDER = new ConfigEntryBuilder();
 
-        public static final ConfigEntries TOOLBELT_WHEEL =
-                BUILDER.category(ConfigID.Client.TOOLBELT_WHEEL, ToolbeltWheel.ENTRIES);
+        public static final ConfigEntries TOOLBELT_RADIAL_MENU =
+                BUILDER.category(ConfigID.Client.RADIAL_MENU, ToolbeltRadialMenu.ENTRIES);
 
-        public static final class ToolbeltWheel {
+        public static final class ToolbeltRadialMenu {
             private static final ConfigEntryBuilder BUILDER = new ConfigEntryBuilder();
 
             public static final ConfigEntry.BooleanEntry PAUSE_GAME = BUILDER.comment(
@@ -44,9 +48,8 @@ public class ClientConfig {
                             "Enable the blur effect on the background.")
                     .define(ConfigID.Client.ENABLE_BLUR, true);
 
-            public static final ConfigEntry.BooleanEntry SHOW_KEY_BINDINGS = BUILDER.comment(
-                            "The i-th key on the hotbar corresponds to the i-th key on the wheel.")
-                    .define(ConfigID.Client.SHOW_KEY_BINDINGS, true);
+            public static final ConfigEntry.BooleanEntry SHOW_KEY_BINDINGS =
+                    BUILDER.define(ConfigID.Client.SHOW_KEY_BINDINGS, true);
 
             public static final ConfigEntries ENTRIES = BUILDER.build();
         }
@@ -54,12 +57,17 @@ public class ClientConfig {
         public static final ConfigEntries ENTRIES = BUILDER.build();
     }
 
-    public static final class AutoSwitch {
+    public static final class RadialMenuOpenCondition {
         private static final ConfigEntryBuilder BUILDER = new ConfigEntryBuilder();
 
-        //        public static final ConfigEntry.ListEntry<String> HELD_ITEM_WHITELIST = BUILDER.comment("Leave this
-        // blank to keep Auto-Switching enabled at all times.").defineList(ConfigID.Client.HELD_ITEM_WHITELIST,
-        // List.of("#c:tools"), () -> "#c:tools", ClientConfig::isValidRL);
+        public static final ConfigEntry.BooleanEntry ALLOW_EMPTY_HAND =
+                BUILDER.define(ConfigID.Client.ALLOW_EMPTY_HAND, true);
+
+        public static final ConfigEntries ENTRIES = BUILDER.build();
+    }
+
+    public static final class AutoSwitchCondition {
+        private static final ConfigEntryBuilder BUILDER = new ConfigEntryBuilder();
 
         public static final ConfigEntry.BooleanEntry ALLOW_EMPTY_HAND =
                 BUILDER.define(ConfigID.Client.ALLOW_EMPTY_HAND, false);
@@ -68,10 +76,4 @@ public class ClientConfig {
     }
 
     public static final ConfigEntries ENTRIES = BUILDER.build();
-
-    private static boolean isValidRL(Object obj) {
-        if (!(obj instanceof String rl) || rl.isEmpty()) return false;
-
-        return rl.matches("^#?[a-z0-9_.-]+:[a-z0-9/._-]+$");
-    }
 }

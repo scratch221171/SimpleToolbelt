@@ -27,10 +27,10 @@ public class STJapaneseLangProvider extends STLangProvider {
 
         // スクリーン
         add(Const.LangKey.Screen.TOOLBELT_SCREEN_TITLE, "ツールベルト");
-        add(Const.LangKey.Screen.WHEEL_SCREEN_TITLE, "ホイール");
-        add(Const.LangKey.Screen.WHEEL_TOOLTIP_STOW, "これをしまう");
-        add(Const.LangKey.Screen.WHEEL_TOOLTIP_STOW_ALL, "全てしまう");
-        add(Const.LangKey.Screen.WHEEL_PAGE_INDEX, "ページ %s / %s");
+        add(Const.LangKey.Screen.RADIAL_MENU_SCREEN_TITLE, "ラジアルメニュー");
+        add(Const.LangKey.Screen.RADIAL_MENU_TOOLTIP_STOW, "これをしまう");
+        add(Const.LangKey.Screen.RADIAL_MENU_TOOLTIP_STOW_ALL, "全てしまう");
+        add(Const.LangKey.Screen.RADIAL_MENU_PAGE_INDEX, "ページ %s / %s");
         add(Const.LangKey.Screen.KEYMAP_OPEN, "ホットキー");
         add(Const.LangKey.Screen.KEYMAP_TITLE, "ホットキーの割り当て");
         add(Const.LangKey.Screen.KEYMAP_HINT, "キー設定はベルトごとに独立していますが、同じキーを複数のベルトのスロットに割り当てることはできません。");
@@ -42,7 +42,7 @@ public class STJapaneseLangProvider extends STLangProvider {
 
         // キー
         add(Const.LangKey.Key.CATEGORY, "Simple Toolbelt");
-        add(Const.LangKey.Key.WHEEL, "ホイールメニューを開く");
+        add(Const.LangKey.Key.RADIAL_MENU, "ラジアルメニューを開く");
         add(Const.LangKey.Key.TOGGLE_AUTO_SWITCH, "ツールの自動切り替え");
     }
 }

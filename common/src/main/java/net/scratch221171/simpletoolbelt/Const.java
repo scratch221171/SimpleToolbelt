@@ -66,10 +66,10 @@ public final class Const {
             public static final String PREFIX = "gui";
 
             public static final String TOOLBELT_SCREEN_TITLE = define(PREFIX, "toolbelt.title");
-            public static final String WHEEL_SCREEN_TITLE = define(PREFIX, "wheel.title");
-            public static final String WHEEL_TOOLTIP_STOW_ALL = define(PREFIX, "wheel.tooltip.stowAll");
-            public static final String WHEEL_TOOLTIP_STOW = define(PREFIX, "wheel.tooltip.stow");
-            public static final String WHEEL_PAGE_INDEX = define(PREFIX, "wheel.pageIndex");
+            public static final String RADIAL_MENU_SCREEN_TITLE = define(PREFIX, "radialMenu.title");
+            public static final String RADIAL_MENU_TOOLTIP_STOW_ALL = define(PREFIX, "radialMenu.tooltip.stowAll");
+            public static final String RADIAL_MENU_TOOLTIP_STOW = define(PREFIX, "radialMenu.tooltip.stow");
+            public static final String RADIAL_MENU_PAGE_INDEX = define(PREFIX, "radialMenu.pageIndex");
             public static final String KEYMAP_OPEN = define(PREFIX, "keymap.open");
             public static final String KEYMAP_TITLE = define(PREFIX, "keymap.title");
             public static final String KEYMAP_HINT = define(PREFIX, "keymap.hint");
@@ -87,7 +87,7 @@ public final class Const {
             public static final String PREFIX = "key";
 
             public static final String CATEGORY = define(PREFIX, "category");
-            public static final String WHEEL = define(PREFIX, "wheel");
+            public static final String RADIAL_MENU = define(PREFIX, "radial_menu");
             public static final String TOGGLE_AUTO_SWITCH = define(PREFIX, "toggle_auto_switch");
         }
 

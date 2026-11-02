@@ -45,8 +45,8 @@ public class SimpleToolbeltClient {
         mc.execute(() -> {
             if (mc.getConnection() == null) return;
             PacketDistributor.sendToServer(new AutoSwitchSettingsPayload(
-                    List.copyOf(VersionedClientConfig.AutoSwitch.HELD_ITEM_WHITELIST.get()),
-                    ClientConfig.AutoSwitch.ALLOW_EMPTY_HAND.get()));
+                    List.copyOf(VersionedClientConfig.AutoSwitchCondition.HELD_ITEM_WHITELIST.get()),
+                    ClientConfig.AutoSwitchCondition.ALLOW_EMPTY_HAND.get()));
         });
     }
 }

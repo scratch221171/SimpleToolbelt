@@ -31,7 +31,7 @@ import net.scratch221171.simpletoolbelt.config.ClientConfig;
 import org.joml.Matrix4f;
 import org.jspecify.annotations.NonNull;
 
-public class ToolbeltWheelScreen extends Screen {
+public class ToolbeltRadialMenuScreen extends Screen {
 
     private static final int ICON_SIZE = 16;
     private static final int HIGHLIGHT_COLOR = 0x50FFFFFF;
@@ -51,14 +51,15 @@ public class ToolbeltWheelScreen extends Screen {
     private int tickCount = 0;
     private double scrollAccumulator = 0;
 
-    public ToolbeltWheelScreen(UUID uuid) {
-        super(Component.translatable(Const.LangKey.Screen.WHEEL_SCREEN_TITLE));
+    public ToolbeltRadialMenuScreen(UUID uuid) {
+        super(Component.translatable(Const.LangKey.Screen.RADIAL_MENU_SCREEN_TITLE));
         this.beltId = uuid;
-        this.pageIndex =
-                ClientConfig.Screen.ToolbeltWheel.REMEMBER_PAGE.getAsBoolean() ? LAST_PAGE.getOrDefault(uuid, 0) : 0;
-        this.wheelRadius = (float) ClientConfig.Screen.ToolbeltWheel.WHEEL_RADIUS.getAsDouble();
-        this.innerDeadzoneRadius = (float) ClientConfig.Screen.ToolbeltWheel.INNER_DEADZONE_RADIUS.getAsDouble();
-        this.outerStowZoneRadius = (float) ClientConfig.Screen.ToolbeltWheel.OUTER_STOW_ZONE_RADIUS.getAsDouble();
+        this.pageIndex = ClientConfig.Screen.ToolbeltRadialMenu.REMEMBER_PAGE.getAsBoolean()
+                ? LAST_PAGE.getOrDefault(uuid, 0)
+                : 0;
+        this.wheelRadius = (float) ClientConfig.Screen.ToolbeltRadialMenu.WHEEL_RADIUS.getAsDouble();
+        this.innerDeadzoneRadius = (float) ClientConfig.Screen.ToolbeltRadialMenu.INNER_DEADZONE_RADIUS.getAsDouble();
+        this.outerStowZoneRadius = (float) ClientConfig.Screen.ToolbeltRadialMenu.OUTER_STOW_ZONE_RADIUS.getAsDouble();
     }
 
     @Override
@@ -68,7 +69,7 @@ public class ToolbeltWheelScreen extends Screen {
 
     @Override
     public boolean isPauseScreen() {
-        return ClientConfig.Screen.ToolbeltWheel.PAUSE_GAME.getAsBoolean();
+        return ClientConfig.Screen.ToolbeltRadialMenu.PAUSE_GAME.getAsBoolean();
     }
 
     @Override
@@ -86,7 +87,7 @@ public class ToolbeltWheelScreen extends Screen {
             return;
         }
 
-        if (ClientConfig.Screen.ToolbeltWheel.ENABLE_BLUR.getAsBoolean()) {
+        if (ClientConfig.Screen.ToolbeltRadialMenu.ENABLE_BLUR.getAsBoolean()) {
             renderBackground(guiGraphics, mouseX, mouseY, partialTick);
         } else {
             renderMenuBackground(guiGraphics);
@@ -101,7 +102,7 @@ public class ToolbeltWheelScreen extends Screen {
         float stowThreshold = Math.min(outerStowZoneRadius, Math.min(this.width, this.height) * 0.45f);
 
         boolean stowHover = distance > stowThreshold;
-        if (ClientConfig.Screen.ToolbeltWheel.ENABLE_HIGHLIGHT.getAsBoolean()) {
+        if (ClientConfig.Screen.ToolbeltRadialMenu.ENABLE_HIGHLIGHT.getAsBoolean()) {
             renderHoverHighlight(guiGraphics, centerX, centerY, stowThreshold, stowHover);
         }
 
@@ -109,7 +110,7 @@ public class ToolbeltWheelScreen extends Screen {
         if (stowHover) {
             hoverState = HoverState.stow();
             guiGraphics.renderTooltip(
-                    font, Component.translatable(Const.LangKey.Screen.WHEEL_TOOLTIP_STOW_ALL), mouseX, mouseY);
+                    font, Component.translatable(Const.LangKey.Screen.RADIAL_MENU_TOOLTIP_STOW_ALL), mouseX, mouseY);
         } else if (distance < innerDeadzoneRadius) {
             hoverState = HoverState.noAction();
         } else {
@@ -129,7 +130,7 @@ public class ToolbeltWheelScreen extends Screen {
                 }
                 if (cached.pagesSize() > 1) {
                     Component text = Component.translatable(
-                            Const.LangKey.Screen.WHEEL_PAGE_INDEX, pageIndex + 1, cached.pagesSize());
+                            Const.LangKey.Screen.RADIAL_MENU_PAGE_INDEX, pageIndex + 1, cached.pagesSize());
                     guiGraphics.drawString(
                             font, text, centerX - font.width(text) / 2, centerY - font.lineHeight / 2, 16777215);
                 }
@@ -187,7 +188,7 @@ public class ToolbeltWheelScreen extends Screen {
                             selected = curStack;
                         }
                     }
-                    if (ClientConfig.Screen.ToolbeltWheel.SHOW_KEY_BINDINGS.getAsBoolean()) {
+                    if (ClientConfig.Screen.ToolbeltRadialMenu.SHOW_KEY_BINDINGS.getAsBoolean()) {
                         ToolbeltKeyMap.getKey(beltId, pageIndex * ToolbeltContents.PAGE_SIZE + i)
                                 .map(InputConstants.Key::getDisplayName)
                                 .ifPresent(label -> renderKeyLabel(guiGraphics, mc, label, 0, 0));
@@ -207,7 +208,10 @@ public class ToolbeltWheelScreen extends Screen {
                             && cur.getStack(hoverState.index()).isEmpty()
                             && !init.getStack(hoverState.index()).isEmpty()) {
                         guiGraphics.renderTooltip(
-                                font, Component.translatable(Const.LangKey.Screen.WHEEL_TOOLTIP_STOW), mouseX, mouseY);
+                                font,
+                                Component.translatable(Const.LangKey.Screen.RADIAL_MENU_TOOLTIP_STOW),
+                                mouseX,
+                                mouseY);
                     }
                 }
             }
@@ -283,7 +287,7 @@ public class ToolbeltWheelScreen extends Screen {
 
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        if (STKeyMappings.OPEN_WHEEL.matches(keyCode, scanCode)) {
+        if (STKeyMappings.OPEN_RADIAL_MENU.matches(keyCode, scanCode)) {
             confirmSelection();
             return true;
         }
@@ -293,7 +297,7 @@ public class ToolbeltWheelScreen extends Screen {
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         // サイドボタン対応
-        if (STKeyMappings.OPEN_WHEEL.matchesMouse(button)) {
+        if (STKeyMappings.OPEN_RADIAL_MENU.matchesMouse(button)) {
             confirmSelection();
             return true;
         }

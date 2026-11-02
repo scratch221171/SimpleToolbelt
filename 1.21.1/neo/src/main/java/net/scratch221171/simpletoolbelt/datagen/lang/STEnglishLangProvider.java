@@ -27,10 +27,10 @@ public class STEnglishLangProvider extends STLangProvider {
 
         // スクリーン
         add(Const.LangKey.Screen.TOOLBELT_SCREEN_TITLE, "Toolbelt");
-        add(Const.LangKey.Screen.WHEEL_SCREEN_TITLE, "Wheel");
-        add(Const.LangKey.Screen.WHEEL_TOOLTIP_STOW, "Stow This");
-        add(Const.LangKey.Screen.WHEEL_TOOLTIP_STOW_ALL, "Stow All");
-        add(Const.LangKey.Screen.WHEEL_PAGE_INDEX, "Page %s / %s");
+        add(Const.LangKey.Screen.RADIAL_MENU_SCREEN_TITLE, "Radial Menu");
+        add(Const.LangKey.Screen.RADIAL_MENU_TOOLTIP_STOW, "Stow This");
+        add(Const.LangKey.Screen.RADIAL_MENU_TOOLTIP_STOW_ALL, "Stow All");
+        add(Const.LangKey.Screen.RADIAL_MENU_PAGE_INDEX, "Page %s / %s");
         add(Const.LangKey.Screen.KEYMAP_OPEN, "Hotkeys");
         add(Const.LangKey.Screen.KEYMAP_TITLE, "Hotkey Assignment");
         add(
@@ -44,7 +44,7 @@ public class STEnglishLangProvider extends STLangProvider {
 
         // キー
         add(Const.LangKey.Key.CATEGORY, "Simple Toolbelt");
-        add(Const.LangKey.Key.WHEEL, "Open Wheel Menu");
+        add(Const.LangKey.Key.RADIAL_MENU, "Open Radial Menu");
         add(Const.LangKey.Key.TOGGLE_AUTO_SWITCH, "Automatic Tool Switching");
     }
 }

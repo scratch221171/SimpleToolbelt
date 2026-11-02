@@ -13,8 +13,8 @@ import org.lwjgl.glfw.GLFW;
 @EventBusSubscriber(modid = Const.MOD_ID, value = Dist.CLIENT)
 public class STKeyMappings {
 
-    public static final KeyMapping OPEN_WHEEL = new KeyMapping(
-            Const.LangKey.Key.WHEEL,
+    public static final KeyMapping OPEN_RADIAL_MENU = new KeyMapping(
+            Const.LangKey.Key.RADIAL_MENU,
             KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_R,
@@ -29,7 +29,7 @@ public class STKeyMappings {
 
     @SubscribeEvent
     public static void register(RegisterKeyMappingsEvent event) {
-        event.register(OPEN_WHEEL);
+        event.register(OPEN_RADIAL_MENU);
         event.register(TOGGLE_AUTO_SWITCH);
     }
 }

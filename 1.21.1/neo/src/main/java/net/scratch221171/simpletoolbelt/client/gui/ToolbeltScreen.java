@@ -44,8 +44,8 @@ public class ToolbeltScreen extends AbstractContainerScreen<ToolbeltMenu> {
         // ToolbeltMenuのToolbeltSlotとの辻褄あわせ
         int x = leftPos + (8 + ToolbeltContents.PAGE_SIZE * 18);
         int y = topPos + (20);
-        addRenderableWidget(
-                new BeltStowButton(x, y, 16, 16, Component.translatable(Const.LangKey.Screen.WHEEL_TOOLTIP_STOW_ALL)));
+        addRenderableWidget(new BeltStowButton(
+                x, y, 16, 16, Component.translatable(Const.LangKey.Screen.RADIAL_MENU_TOOLTIP_STOW_ALL)));
         addRenderableWidget(
                 new BeltKeyMapButton(x, topPos + 4, 16, 14, Component.translatable(Const.LangKey.Screen.KEYMAP_OPEN)));
     }
@@ -128,7 +128,9 @@ public class ToolbeltScreen extends AbstractContainerScreen<ToolbeltMenu> {
 
         @Override
         public void onPress() {
-            ToolbeltScreen.this.minecraft.setScreen(new KeyMapScreen(ToolbeltScreen.this, menu));
+            if (ToolbeltScreen.this.minecraft != null) {
+                ToolbeltScreen.this.minecraft.setScreen(new KeyMapScreen(ToolbeltScreen.this, menu));
+            }
         }
 
         @Override
