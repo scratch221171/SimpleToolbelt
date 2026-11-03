@@ -24,6 +24,9 @@ public class STJapaneseLangProvider extends STLangProvider {
         add(Const.LangKey.Item.TOGGLE_AUTO_SWITCH, "自動切り替え: %s");
         add(Const.LangKey.Item.INVENTORY_FULL, "インベントリがいっぱいです！");
         add(Const.LangKey.Item.AUTO_SWITCH_FAILED, "自動持ち替え失敗：%s");
+        addItem(STItems.MENU_OPENER, "メニューオープナー");
+        add(Const.LangKey.Item.EMPTY, "空っぽ");
+        add(Const.LangKey.Item.CONTAINS, "内容物：%s");
 
         // スクリーン
         add(Const.LangKey.Screen.TOOLBELT_SCREEN_TITLE, "ツールベルト");

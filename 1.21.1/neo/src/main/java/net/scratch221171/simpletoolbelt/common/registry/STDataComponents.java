@@ -7,6 +7,7 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.item.component.ItemContainerContents;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -23,6 +24,10 @@ public class STDataComponents {
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> EXTRA_PAGES =
             register(Const.ID.DataComponent.EXTRA_PAGES, b -> b.persistent(ExtraCodecs.POSITIVE_INT)
                     .networkSynchronized(ByteBufCodecs.VAR_INT));
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<ItemContainerContents>> WRAPPED_ITEM =
+            register(Const.ID.DataComponent.WRAPPED_ITEM, b -> b.persistent(ItemContainerContents.CODEC)
+                    .networkSynchronized(ItemContainerContents.STREAM_CODEC));
 
     private static <T> DeferredHolder<DataComponentType<?>, DataComponentType<T>> register(
             String name, UnaryOperator<DataComponentType.Builder<T>> builderOperator) {

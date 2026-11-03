@@ -24,6 +24,7 @@ import net.scratch221171.simpletoolbelt.client.STKeyMappings;
 import net.scratch221171.simpletoolbelt.client.keymap.ToolbeltKeyMap;
 import net.scratch221171.simpletoolbelt.client.network.ClientBeltCache;
 import net.scratch221171.simpletoolbelt.common.STUtils;
+import net.scratch221171.simpletoolbelt.common.item.MenuOpenerItem;
 import net.scratch221171.simpletoolbelt.common.network.SelectBeltSlotPayload;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltContents;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltStorage;
@@ -182,9 +183,11 @@ public class ToolbeltRadialMenuScreen extends Screen {
                                     24,
                                     24);
                         }
-                        guiGraphics.renderItem(curStack, 0, 0);
-                        guiGraphics.renderItemDecorations(this.font, curStack, 0, 0);
+                        ItemStack displayStack = MenuOpenerItem.getDisplayStack(curStack);
+                        guiGraphics.renderItem(displayStack, 0, 0);
+                        guiGraphics.renderItemDecorations(this.font, displayStack, 0, 0);
                         if (isSelected) {
+                            // ツールチップはMenuOpenerのまま
                             selected = curStack;
                         }
                     }

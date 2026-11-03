@@ -2,12 +2,14 @@ package net.scratch221171.simpletoolbelt.client;
 
 import java.util.List;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.item.ItemProperties;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.config.ModConfigEvent;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
@@ -18,7 +20,10 @@ import net.scratch221171.simpletoolbelt.client.gui.ToolbeltScreen;
 import net.scratch221171.simpletoolbelt.client.mdk.config.KeyedConfigScreen;
 import net.scratch221171.simpletoolbelt.client.tooltip.ClientToolbeltTooltip;
 import net.scratch221171.simpletoolbelt.client.tooltip.ToolbeltTooltip;
+import net.scratch221171.simpletoolbelt.common.STUtils;
+import net.scratch221171.simpletoolbelt.common.item.MenuOpenerItem;
 import net.scratch221171.simpletoolbelt.common.network.AutoSwitchSettingsPayload;
+import net.scratch221171.simpletoolbelt.common.registry.STItems;
 import net.scratch221171.simpletoolbelt.common.registry.STMenus;
 import net.scratch221171.simpletoolbelt.config.ClientConfig;
 import net.scratch221171.simpletoolbelt.config.VersionedClientConfig;
@@ -38,6 +43,11 @@ public class SimpleToolbeltClient {
             if (event instanceof ModConfigEvent.Reloading && event.getConfig().getType() == ModConfig.Type.CLIENT)
                 sendAutoSwitchSettings();
         });
+        modEventBus.addListener((FMLClientSetupEvent event) -> event.enqueueWork(() -> ItemProperties.register(
+                STItems.MENU_OPENER.get(),
+                STUtils.id("filled"),
+                (stack, level, entity, seed) ->
+                        MenuOpenerItem.getContained(stack).isEmpty() ? 0.0f : 1.0f)));
     }
 
     static void sendAutoSwitchSettings() {

@@ -3,7 +3,10 @@
   "minVersion": "0.8",
   "package": "net.scratch221171.simpletoolbelt.mixin",
   "compatibilityLevel": "JAVA_21",
-  "mixins": [],
+  "mixins": [
+       "AbstractContainerMenuMixin",
+       "ItemCombinerMenuMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   },

@@ -5,6 +5,7 @@ import java.util.UUID;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.TickTask;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -137,7 +138,7 @@ public class ToolbeltItem extends Item {
     public static void applySelection(ServerPlayer player, UUID beltId, int requestedSlot, Component failed) {
         ToolbeltStorage.findBelt(player, beltId).ifPresent(belt -> {
             ToolbeltContents stored = ToolbeltStorage.get(player.server).resolve(player, beltId, belt);
-            ItemStack mainHand = player.getMainHandItem();
+            ItemStack mainHandStack = player.getMainHandItem();
 
             if (requestedSlot == SelectBeltSlotPayload.STOW_INDEX) {
                 for (int i = 0; i < stored.totalSlots(); i++) {
@@ -149,39 +150,43 @@ public class ToolbeltItem extends Item {
                 }
             } else {
                 if (requestedSlot < 0 || requestedSlot >= stored.totalSlots()) return;
-                if (stored.getCurrentFlat(requestedSlot).isEmpty()) {
+                ItemStack requestedStack = stored.getCurrentFlat(requestedSlot);
+                if (requestedStack.isEmpty()) {
                     stored = findAndStow(player, stored, requestedSlot);
                     player.playNotifySound(SoundEvents.BUNDLE_INSERT, SoundSource.PLAYERS, 1, 1);
                 } else {
 
-                    if (!mainHand.isEmpty()) {
-                        int origin = -1;
-                        for (int i = 0; i < stored.totalSlots(); i++) {
-                            if (ItemStack.isSameItem(stored.getInitialFlat(i), mainHand)
-                                    && stored.getCurrentFlat(i).isEmpty()) {
-                                origin = i;
-                                break;
+                    if (requestedStack.getItem() instanceof MenuOpenerItem) {
+                        MenuOpenerItem.use((ServerLevel) player.level(), player, requestedStack);
+                    } else {
+                        if (!mainHandStack.isEmpty()) {
+                            int origin = -1;
+                            for (int i = 0; i < stored.totalSlots(); i++) {
+                                if (ItemStack.isSameItem(stored.getInitialFlat(i), mainHandStack)
+                                        && stored.getCurrentFlat(i).isEmpty()) {
+                                    origin = i;
+                                    break;
+                                }
+                            }
+                            if (origin >= 0) {
+                                stored = stored.withCurrentFlat(origin, mainHandStack.copy());
+                            } else {
+                                Inventory inv = player.getInventory();
+                                IItemHandler target =
+                                        new ExcludeSlotHandler(new PlayerMainInvWrapper(inv), inv.selected);
+                                ItemStack moving = mainHandStack.copy();
+                                if (!ItemHandlerHelper.insertItemStacked(target, moving, true)
+                                        .isEmpty()) {
+                                    player.displayClientMessage(failed, true);
+                                    return;
+                                }
+                                ItemHandlerHelper.insertItemStacked(target, moving, false);
                             }
                         }
-                        if (origin >= 0) {
-                            stored = stored.withCurrentFlat(origin, mainHand.copy());
-                        } else {
-                            Inventory inv = player.getInventory();
-                            IItemHandler target = new ExcludeSlotHandler(new PlayerMainInvWrapper(inv), inv.selected);
-                            ItemStack moving = mainHand.copy();
-                            if (!ItemHandlerHelper.insertItemStacked(target, moving, true)
-                                    .isEmpty()) {
-                                player.displayClientMessage(failed, true);
-                                return;
-                            }
-                            ItemHandlerHelper.insertItemStacked(target, moving, false);
-                        }
+                        player.setItemInHand(InteractionHand.MAIN_HAND, requestedStack.copy());
+                        player.playNotifySound(SoundEvents.ARMOR_EQUIP_GENERIC.value(), SoundSource.PLAYERS, 1, 1);
+                        stored = stored.withCurrentFlat(requestedSlot, ItemStack.EMPTY);
                     }
-                    player.setItemInHand(
-                            InteractionHand.MAIN_HAND,
-                            stored.getCurrentFlat(requestedSlot).copy());
-                    player.playNotifySound(SoundEvents.ARMOR_EQUIP_GENERIC.value(), SoundSource.PLAYERS, 1, 1);
-                    stored = stored.withCurrentFlat(requestedSlot, ItemStack.EMPTY);
                 }
             }
 

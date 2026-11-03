@@ -15,12 +15,14 @@ public final class Const {
 
             public static final String TOOLBELT = "toolbelt";
             public static final String NETHERITE_TOOLBELT = "netherite_toolbelt";
+            public static final String MENU_OPENER = "menu_opener";
         }
 
         public static final class DataComponent {
 
             public static final String BELT_ID = "belt_id";
             public static final String EXTRA_PAGES = "extra_pages";
+            public static final String WRAPPED_ITEM = "wrapped_item";
         }
 
         public static final class Menu {
@@ -60,6 +62,8 @@ public final class Const {
             public static final String TOGGLE_AUTO_SWITCH = define(PREFIX, ID.Item.TOOLBELT + "toggleAutoSwitch");
             public static final String INVENTORY_FULL = define(PREFIX, ID.Item.TOOLBELT + "inventoryFull");
             public static final String AUTO_SWITCH_FAILED = define(PREFIX, ID.Item.TOOLBELT + "autoSwitchFailed");
+            public static final String EMPTY = define(PREFIX, ID.Item.MENU_OPENER + "empty");
+            public static final String CONTAINS = define(PREFIX, ID.Item.MENU_OPENER + "contains");
         }
 
         final class Screen {

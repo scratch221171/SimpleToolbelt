@@ -1,0 +1,14 @@
+{
+  "parent": "minecraft:item/generated",
+  "overrides": [
+    {
+      "model": "simpletoolbelt:item/menu_opener_filled",
+      "predicate": {
+        "simpletoolbelt:filled": 1.0
+      }
+    }
+  ],
+  "textures": {
+    "layer0": "simpletoolbelt:item/menu_opener"
+  }
+}

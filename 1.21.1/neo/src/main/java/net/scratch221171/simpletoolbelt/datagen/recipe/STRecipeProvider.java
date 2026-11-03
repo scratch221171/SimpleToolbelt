@@ -42,5 +42,12 @@ public class STRecipeProvider extends RecipeProvider {
                         Ingredient.of(Items.IRON_NUGGET))
                 .unlockedBy("has_toolbelt", has(STTags.Items.TOOLBELT))
                 .save(output, STUtils.id("toolbelt_page_upgrade"));
+
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, STItems.MENU_OPENER)
+                .requires(Tags.Items.STRINGS)
+                .requires(Tags.Items.LEATHERS)
+                .requires(Items.SPYGLASS)
+                .unlockedBy("has_toolbelt", has(STTags.Items.TOOLBELT))
+                .save(output);
     }
 }
