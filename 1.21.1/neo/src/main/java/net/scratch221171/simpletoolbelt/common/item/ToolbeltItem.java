@@ -31,6 +31,7 @@ import net.scratch221171.simpletoolbelt.common.menu.ToolbeltMenu;
 import net.scratch221171.simpletoolbelt.common.network.SelectBeltSlotPayload;
 import net.scratch221171.simpletoolbelt.common.registry.STDataComponents;
 import net.scratch221171.simpletoolbelt.common.registry.STItems;
+import net.scratch221171.simpletoolbelt.common.storage.SyncedClientSettings;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltContents;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltStorage;
 import net.scratch221171.simpletoolbelt.config.ServerConfig;
@@ -92,7 +93,7 @@ public class ToolbeltItem extends Item {
                             Component.literal("Shift").withStyle(ChatFormatting.WHITE))
                     .withStyle(ChatFormatting.DARK_GRAY));
             tooltipComponents.add(
-                    Component.translatable(Const.LangKey.Item.HINT).withStyle(ChatFormatting.GRAY));
+                    Component.translatable(Const.LangKey.Item.TOOLBELT_HINT).withStyle(ChatFormatting.GRAY));
             int extra = stack.getOrDefault(STDataComponents.EXTRA_PAGES, 0);
             if (extra > 0) {
                 tooltipComponents.add(Component.translatable(
@@ -145,7 +146,6 @@ public class ToolbeltItem extends Item {
     public static void applySelection(ServerPlayer player, UUID beltId, int requestedSlot, Component failed) {
         ToolbeltStorage.findBelt(player, beltId).ifPresent(belt -> {
             ToolbeltContents stored = ToolbeltStorage.get(player.server).resolve(player, beltId, belt);
-            ItemStack mainHandStack = player.getMainHandItem();
 
             if (requestedSlot == SelectBeltSlotPayload.STOW_INDEX) {
                 for (int i = 0; i < stored.totalSize(); i++) {
@@ -156,6 +156,7 @@ public class ToolbeltItem extends Item {
                 }
             } else {
                 if (requestedSlot < 0 || requestedSlot >= stored.totalSize()) return;
+
                 ItemStack requestedStack = stored.getCurrent(requestedSlot);
                 if (requestedStack.isEmpty()) {
                     stored = findAndStow(player, stored, requestedSlot);
@@ -165,6 +166,11 @@ public class ToolbeltItem extends Item {
                     if (requestedStack.getItem() instanceof MenuOpenerItem) {
                         MenuOpenerItem.use((ServerLevel) player.level(), player, requestedStack);
                     } else {
+
+                        SyncedClientSettings.ForcedHotbarSlotSettings.get(player)
+                                .apply(player);
+                        ItemStack mainHandStack = player.getMainHandItem();
+
                         if (!mainHandStack.isEmpty()) {
                             int origin = -1;
                             for (int i = 0; i < stored.totalSize(); i++) {

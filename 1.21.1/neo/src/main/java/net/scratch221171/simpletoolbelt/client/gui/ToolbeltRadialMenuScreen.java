@@ -3,10 +3,7 @@ package net.scratch221171.simpletoolbelt.client.gui;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -50,19 +47,22 @@ public class ToolbeltRadialMenuScreen extends Screen {
     private HoverState hoverState = HoverState.noAction();
     private int pageIndex;
     private final UUID beltId;
-    private int pageSize;
+    private int pageSize = 8;
+    private int[] visibleSlots = new int[0];
     private int tickCount = 0;
     private double scrollAccumulator = 0;
 
     public ToolbeltRadialMenuScreen(UUID uuid) {
         super(Component.translatable(Const.LangKey.Screen.RADIAL_MENU_SCREEN_TITLE));
         this.beltId = uuid;
-        this.pageIndex = ClientConfig.Screen.ToolbeltRadialMenu.REMEMBER_PAGE.getAsBoolean()
+        this.pageIndex = ClientConfig.Appearance.Screen.ToolbeltRadialMenu.REMEMBER_PAGE.getAsBoolean()
                 ? LAST_PAGE.getOrDefault(uuid, 0)
                 : 0;
-        this.wheelRadius = (float) ClientConfig.Screen.ToolbeltRadialMenu.WHEEL_RADIUS.getAsDouble();
-        this.innerDeadzoneRadius = (float) ClientConfig.Screen.ToolbeltRadialMenu.INNER_DEADZONE_RADIUS.getAsDouble();
-        this.outerStowZoneRadius = (float) ClientConfig.Screen.ToolbeltRadialMenu.OUTER_STOW_ZONE_RADIUS.getAsDouble();
+        this.wheelRadius = (float) ClientConfig.Appearance.Screen.ToolbeltRadialMenu.WHEEL_RADIUS.getAsDouble();
+        this.innerDeadzoneRadius =
+                (float) ClientConfig.Appearance.Screen.ToolbeltRadialMenu.INNER_DEADZONE_RADIUS.getAsDouble();
+        this.outerStowZoneRadius =
+                (float) ClientConfig.Appearance.Screen.ToolbeltRadialMenu.OUTER_STOW_ZONE_RADIUS.getAsDouble();
     }
 
     @Override
@@ -72,7 +72,7 @@ public class ToolbeltRadialMenuScreen extends Screen {
 
     @Override
     public boolean isPauseScreen() {
-        return ClientConfig.Screen.ToolbeltRadialMenu.PAUSE_GAME.getAsBoolean();
+        return ClientConfig.Appearance.Screen.ToolbeltRadialMenu.PAUSE_GAME.getAsBoolean();
     }
 
     @Override
@@ -90,8 +90,9 @@ public class ToolbeltRadialMenuScreen extends Screen {
             this.onClose();
             return;
         }
+        updateVisibleSlots();
 
-        if (ClientConfig.Screen.ToolbeltRadialMenu.ENABLE_BLUR.getAsBoolean()) {
+        if (ClientConfig.Appearance.Screen.ToolbeltRadialMenu.ENABLE_BLUR.getAsBoolean()) {
             renderBackground(guiGraphics, mouseX, mouseY, partialTick);
         } else {
             renderMenuBackground(guiGraphics);
@@ -106,7 +107,7 @@ public class ToolbeltRadialMenuScreen extends Screen {
         float stowThreshold = Math.min(outerStowZoneRadius, Math.min(this.width, this.height) * 0.45f);
 
         boolean stowHover = distance > stowThreshold;
-        if (ClientConfig.Screen.ToolbeltRadialMenu.ENABLE_HIGHLIGHT.getAsBoolean()) {
+        if (ClientConfig.Appearance.Screen.ToolbeltRadialMenu.ENABLE_HIGHLIGHT.getAsBoolean()) {
             renderHoverHighlight(guiGraphics, centerX, centerY, stowThreshold, stowHover);
         }
 
@@ -117,10 +118,13 @@ public class ToolbeltRadialMenuScreen extends Screen {
                     font, Component.translatable(Const.LangKey.Screen.RADIAL_MENU_TOOLTIP_STOW_ALL), mouseX, mouseY);
         } else if (distance < innerDeadzoneRadius) {
             hoverState = HoverState.noAction();
+        } else if (visibleSlots.length == 0) {
+            hoverState = HoverState.noAction();
         } else {
             double angleDeg = Math.toDegrees(Math.atan2(dx, -dy));
             if (angleDeg < 0) angleDeg += 360;
-            hoverState = HoverState.select(Math.floorMod(Math.round((float) angleDeg / (360.0 / pageSize)), pageSize));
+            int pos = Math.floorMod(Math.round((float) angleDeg / (360.0 / visibleSlots.length)), visibleSlots.length);
+            hoverState = HoverState.select(visibleSlots[pos]);
         }
         if (!hoverState.equals(prevHoverState)) {
             mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_HAT.value(), 2f, 0.1f));
@@ -129,9 +133,6 @@ public class ToolbeltRadialMenuScreen extends Screen {
         ClientBeltCache.read(beltId).ifPresent(cached -> {
             if (cached.totalSize() > 0) {
                 int totalPages = cached.totalSize() / pageSize;
-                if (pageIndex >= totalPages) {
-                    pageIndex = Math.max(0, totalPages - 1);
-                }
                 if (totalPages > 1) {
                     Component text = Component.translatable(
                             Const.LangKey.Screen.RADIAL_MENU_PAGE_INDEX, pageIndex + 1, totalPages);
@@ -145,8 +146,9 @@ public class ToolbeltRadialMenuScreen extends Screen {
                 float smoothPartial = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
                 double progress = Math.clamp((tickCount + smoothPartial) / 10.0, 0.0, 1.0);
                 double animatedRad = wheelRadius - 5 * (Math.pow(1 - progress, 8));
-                for (int i = 0; i < pageSize; i++) {
-                    double angleRad = Math.toRadians(i * 360.0 / pageSize);
+                for (int j = 0; j < visibleSlots.length; j++) {
+                    int i = visibleSlots[j];
+                    double angleRad = Math.toRadians(j * 360.0 / visibleSlots.length);
                     double x = centerX + (animatedRad * Math.sin(angleRad)) - ICON_SIZE / 2.0;
                     double y = centerY - (animatedRad * Math.cos(angleRad)) - ICON_SIZE / 2.0;
                     boolean isSelected =
@@ -192,7 +194,7 @@ public class ToolbeltRadialMenuScreen extends Screen {
                             selected = curStack;
                         }
                     }
-                    if (ClientConfig.Screen.ToolbeltRadialMenu.SHOW_KEY_BINDINGS.getAsBoolean()) {
+                    if (ClientConfig.Appearance.Screen.ToolbeltRadialMenu.SHOW_KEY_BINDINGS.getAsBoolean()) {
                         ToolbeltKeyMap.getKey(beltId, pageIndex * pageSize + i)
                                 .map(InputConstants.Key::getDisplayName)
                                 .ifPresent(label -> renderKeyLabel(guiGraphics, mc, label, 0, 0));
@@ -223,33 +225,6 @@ public class ToolbeltRadialMenuScreen extends Screen {
             }
         });
     }
-
-    //    @Override
-    //    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-    //        Minecraft mc = this.minecraft;
-    //        if (mc != null) {
-    //            KeyMapping[] hotbar = mc.options.keyHotbarSlots;
-    //            int count = Math.min(ToolbeltContents.PAGE_SIZE, hotbar.length);
-    //            for (int i = 0; i < count; i++) {
-    //                if (hotbar[i].matches(keyCode, scanCode)) {
-    //                    final int index = i;
-    //                    if (ClientBeltCache.read(beltId)
-    //                            .filter(c -> pageIndex < c.pagesSize())
-    //                            .map(c -> !c.getPage(pageIndex)
-    //                                    .current()
-    //                                    .getStack(index)
-    //                                    .isEmpty())
-    //                            .orElse(false)) {
-    //                        PacketDistributor.sendToServer(
-    //                                new SelectBeltSlotPayload(beltId, pageIndex * ToolbeltContents.PAGE_SIZE + i));
-    //                        this.onClose();
-    //                    }
-    //                    return true;
-    //                }
-    //            }
-    //        }
-    //        return super.keyPressed(keyCode, scanCode, modifiers);
-    //    }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
@@ -322,6 +297,31 @@ public class ToolbeltRadialMenuScreen extends Screen {
         this.onClose();
     }
 
+    private void updateVisibleSlots() {
+        Optional<ToolbeltContents> opt = ClientBeltCache.read(beltId);
+        if (opt.isEmpty() || opt.get().totalSize() <= 0) {
+            visibleSlots = new int[0];
+            return;
+        }
+        ToolbeltContents cached = opt.get();
+        int totalPages = cached.totalSize() / pageSize;
+        if (pageIndex >= totalPages) {
+            pageIndex = Math.max(0, totalPages - 1);
+        }
+        boolean showUnused = ClientConfig.Appearance.Screen.ToolbeltRadialMenu.SHOW_UNUSED_SLOTS.getAsBoolean();
+        int[] buf = new int[pageSize];
+        int n = 0;
+        for (int i = 0; i < pageSize; i++) {
+            int idx = pageIndex * pageSize + i;
+            if (showUnused
+                    || !cached.getCurrent(idx).isEmpty()
+                    || !cached.getInitial(idx).isEmpty()) {
+                buf[n++] = i;
+            }
+        }
+        visibleSlots = Arrays.copyOf(buf, n);
+    }
+
     private void renderKeyLabel(GuiGraphics g, Minecraft mc, Component label, int slotX, int slotY) {
 
         int width = mc.font.width(label);
@@ -343,15 +343,18 @@ public class ToolbeltRadialMenuScreen extends Screen {
             float far = (float) Math.hypot(this.width, this.height);
             drawAnnularSector(guiGraphics, centerX, centerY, stowThreshold, far, 0f, 360f, STOW_SEGMENTS);
         } else if (hoverState.action() == HoverState.HoverAction.SELECT) {
-            float center = hoverState.index() * (360f / pageSize);
+            int pos = Arrays.binarySearch(visibleSlots, hoverState.index());
+            if (pos < 0) return;
+            float step = 360f / visibleSlots.length;
+            float center = pos * step;
             drawAnnularSector(
                     guiGraphics,
                     centerX,
                     centerY,
                     innerDeadzoneRadius,
                     stowThreshold,
-                    center - (360f / pageSize) / 2,
-                    center + (360f / pageSize) / 2,
+                    center - step / 2,
+                    center + step / 2,
                     SECTOR_SEGMENTS);
         }
     }

@@ -19,12 +19,13 @@ public class STJapaneseLangProvider extends STLangProvider {
         addItem(STItems.NETHERITE_TOOLBELT, "ネザライトのツールベルト");
         add(Const.LangKey.Item.INITIALIZING_UUID, "初期化中...");
         add(Const.LangKey.Item.SHIFT_FOR_MORE_INFO, "[%s]を押してさらに表示");
-        add(Const.LangKey.Item.HINT, "手に持って使用するか、GUI内で右クリックしてメニューを開きます。");
+        add(Const.LangKey.Item.TOOLBELT_HINT, "手に持って使用するか、GUI内で右クリックしてメニューを開きます。");
         add(Const.LangKey.Item.EXTRA_PAGE, "追加ページ: %s");
         add(Const.LangKey.Item.TOGGLE_AUTO_SWITCH, "自動切り替え: %s");
         add(Const.LangKey.Item.INVENTORY_FULL, "インベントリがいっぱいです！");
         add(Const.LangKey.Item.AUTO_SWITCH_FAILED, "自動持ち替え失敗：%s");
         addItem(STItems.MENU_OPENER, "メニューオープナー");
+        add(Const.LangKey.Item.MENU_OPENER_HINT, "作業台など、メニューを持つブロックを入れられます。");
         add(Const.LangKey.Item.EMPTY, "空っぽ");
         add(Const.LangKey.Item.CONTAINS, "内容物：%s");
 

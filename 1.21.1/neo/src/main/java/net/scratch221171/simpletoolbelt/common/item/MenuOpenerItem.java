@@ -35,10 +35,6 @@ public class MenuOpenerItem extends Item {
         super(properties.stacksTo(1));
     }
 
-    // ------------------------------------------------------------------
-    // 中身の読み書き
-    // ------------------------------------------------------------------
-
     public static ItemStack getContained(ItemStack wrapper) {
         return wrapper.getOrDefault(STDataComponents.WRAPPED_ITEM.get(), ItemContainerContents.EMPTY)
                 .copyOne();
@@ -62,10 +58,6 @@ public class MenuOpenerItem extends Item {
         return stack;
     }
 
-    // ------------------------------------------------------------------
-    // メニューの取得
-    // ------------------------------------------------------------------
-
     /**
      * ブロックアイテムからメニューを取得する。取得できなければnull(=対応外)。
      * 位置はプレイヤーの足元を使う。ブロックはその位置に存在しないため、
@@ -85,10 +77,6 @@ public class MenuOpenerItem extends Item {
         return findMenuProvider(player.level(), player, stack) != null;
     }
 
-    // ------------------------------------------------------------------
-    // 右クリックで使用
-    // ------------------------------------------------------------------
-
     @Override
     public @NonNull InteractionResultHolder<ItemStack> use(
             @NonNull Level level, Player player, @NonNull InteractionHand hand) {
@@ -100,7 +88,7 @@ public class MenuOpenerItem extends Item {
         if (provider == null) return InteractionResultHolder.pass(wrapper);
 
         if (level.isClientSide) {
-            // 実際の起動はサーバー側。クライアントは腕を振るだけ
+            // クライアントは腕を振るだけ
             return InteractionResultHolder.sidedSuccess(wrapper, true);
         }
 
@@ -123,11 +111,7 @@ public class MenuOpenerItem extends Item {
         }
     }
 
-    // ------------------------------------------------------------------
-    // バンドル同様のインベントリ操作(右クリックのみ)
-    // ------------------------------------------------------------------
-
-    /** ラッパーをカーソルで持ち、スロットを右クリックした時 */
+    /** オープナーをカーソルで持ち、スロットを右クリックした時 */
     @Override
     public boolean overrideStackedOnOther(
             @NonNull ItemStack wrapper, @NonNull Slot slot, @NonNull ClickAction action, @NonNull Player player) {
@@ -154,7 +138,7 @@ public class MenuOpenerItem extends Item {
         return true;
     }
 
-    /** スロット内のラッパーを、アイテムを持ったカーソルで右クリックした時 */
+    /** スロット内のオープナーを、アイテムを持ったカーソルで右クリックした時 */
     @Override
     public boolean overrideOtherStackedOnMe(
             @NonNull ItemStack wrapper,
@@ -195,10 +179,6 @@ public class MenuOpenerItem extends Item {
                 0.8F + player.level().getRandom().nextFloat() * 0.4F);
     }
 
-    // ------------------------------------------------------------------
-    // ツールチップ
-    // ------------------------------------------------------------------
-
     @Override
     public void appendHoverText(
             @NonNull ItemStack stack,
@@ -206,6 +186,7 @@ public class MenuOpenerItem extends Item {
             @NonNull List<Component> tooltip,
             @NonNull TooltipFlag flag) {
         ItemStack inner = getContained(stack);
+        tooltip.add(Component.translatable(Const.LangKey.Item.MENU_OPENER_HINT).withStyle(ChatFormatting.GRAY));
         if (inner.isEmpty()) {
             tooltip.add(Component.translatable(Const.LangKey.Item.EMPTY).withStyle(ChatFormatting.GRAY));
         } else {

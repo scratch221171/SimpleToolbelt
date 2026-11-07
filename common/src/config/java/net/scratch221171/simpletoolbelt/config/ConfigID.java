@@ -10,6 +10,8 @@ public class ConfigID {
     }
 
     public static final class Client {
+        public static final String APPEARANCE = "appearance";
+        public static final String BEHAVIOR = "behavior";
         public static final String SCREEN = "screen";
         public static final String RADIAL_MENU = "radial_menu";
         public static final String PAUSE_GAME = "pause_game";
@@ -20,9 +22,11 @@ public class ConfigID {
         public static final String ENABLE_BLUR = "enable_blur";
         public static final String ENABLE_HIGHLIGHT = "enable_highlight";
         public static final String SHOW_KEY_BINDINGS = "show_key_bindings";
+        public static final String SHOW_UNUSED_SLOTS = "show_unused_slots";
         public static final String AUTO_SWITCH_CONDITION = "auto_switch_condition";
         public static final String HELD_ITEM_WHITELIST = "held_item_whitelist";
         public static final String ALLOW_EMPTY_HAND = "allow_empty_hand";
         public static final String RADIAL_MENU_OPEN_CONDITION = "radial_menu_open_condition";
+        public static final String FORCED_HOTBAR_SLOT = "forced_hotbar_slot";
     }
 }

@@ -1,6 +1,6 @@
 package net.scratch221171.simpletoolbelt.client;
 
-import static net.scratch221171.simpletoolbelt.client.SimpleToolbeltClient.sendAutoSwitchSettings;
+import static net.scratch221171.simpletoolbelt.client.SimpleToolbeltClient.sendClientSettings;
 
 import com.mojang.datafixers.util.Either;
 import java.util.List;
@@ -57,8 +57,8 @@ public class STClientEvents {
     }
 
     private static boolean allows(ItemStack held) {
-        if (held.isEmpty()) return ClientConfig.RadialMenuOpenCondition.ALLOW_EMPTY_HAND.getAsBoolean();
-        List<String> entries = VersionedClientConfig.RadialMenuOpenCondition.HELD_ITEM_WHITELIST.get();
+        if (held.isEmpty()) return ClientConfig.Behaviour.RadialMenuOpenCondition.ALLOW_EMPTY_HAND.getAsBoolean();
+        List<String> entries = VersionedClientConfig.Behaviour.RadialMenuOpenCondition.HELD_ITEM_WHITELIST.get();
         if (entries.isEmpty()) {
             return true;
         } else {
@@ -101,6 +101,6 @@ public class STClientEvents {
 
     @SubscribeEvent
     public static void onLogin(ClientPlayerNetworkEvent.LoggingIn e) {
-        sendAutoSwitchSettings();
+        sendClientSettings();
     }
 }

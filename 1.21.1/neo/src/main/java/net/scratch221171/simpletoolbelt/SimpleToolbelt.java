@@ -41,5 +41,9 @@ public class SimpleToolbelt {
                 STItems.TOOLBELT.toStack(),
                 STItems.NETHERITE_TOOLBELT.toStack(),
                 CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+        event.insertAfter(
+                STItems.NETHERITE_TOOLBELT.toStack(),
+                STItems.MENU_OPENER.toStack(),
+                CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
     }
 }

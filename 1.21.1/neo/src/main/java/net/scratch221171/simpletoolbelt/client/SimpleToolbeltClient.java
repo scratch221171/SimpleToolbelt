@@ -23,6 +23,7 @@ import net.scratch221171.simpletoolbelt.client.tooltip.ToolbeltTooltip;
 import net.scratch221171.simpletoolbelt.common.STUtils;
 import net.scratch221171.simpletoolbelt.common.item.MenuOpenerItem;
 import net.scratch221171.simpletoolbelt.common.network.AutoSwitchSettingsPayload;
+import net.scratch221171.simpletoolbelt.common.network.ForcedHotbarSlotSettingsPayload;
 import net.scratch221171.simpletoolbelt.common.registry.STItems;
 import net.scratch221171.simpletoolbelt.common.registry.STMenus;
 import net.scratch221171.simpletoolbelt.config.ClientConfig;
@@ -41,7 +42,7 @@ public class SimpleToolbeltClient {
                 event.register(ToolbeltTooltip.class, ClientToolbeltTooltip::new));
         modEventBus.addListener((ModConfigEvent event) -> {
             if (event instanceof ModConfigEvent.Reloading && event.getConfig().getType() == ModConfig.Type.CLIENT)
-                sendAutoSwitchSettings();
+                sendClientSettings();
         });
         modEventBus.addListener((FMLClientSetupEvent event) -> event.enqueueWork(() -> ItemProperties.register(
                 STItems.MENU_OPENER.get(),
@@ -50,13 +51,18 @@ public class SimpleToolbeltClient {
                         MenuOpenerItem.getContained(stack).isEmpty() ? 0.0f : 1.0f)));
     }
 
-    static void sendAutoSwitchSettings() {
+    static void sendClientSettings() {
         Minecraft mc = Minecraft.getInstance();
         mc.execute(() -> {
             if (mc.getConnection() == null) return;
             PacketDistributor.sendToServer(new AutoSwitchSettingsPayload(
-                    List.copyOf(VersionedClientConfig.AutoSwitchCondition.HELD_ITEM_WHITELIST.get()),
-                    ClientConfig.AutoSwitchCondition.ALLOW_EMPTY_HAND.get()));
+                    List.copyOf(VersionedClientConfig.Behaviour.AutoSwitchCondition.HELD_ITEM_WHITELIST.get()),
+                    ClientConfig.Behaviour.AutoSwitchCondition.ALLOW_EMPTY_HAND.get()));
+        });
+        mc.execute(() -> {
+            if (mc.getConnection() == null) return;
+            PacketDistributor.sendToServer(
+                    new ForcedHotbarSlotSettingsPayload(ClientConfig.Behaviour.FORCED_HOTBAR_SLOT.getAsInt()));
         });
     }
 }

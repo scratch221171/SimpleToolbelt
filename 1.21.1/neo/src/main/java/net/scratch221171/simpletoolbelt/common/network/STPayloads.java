@@ -1,14 +1,11 @@
 package net.scratch221171.simpletoolbelt.common.network;
 
-import java.util.List;
-import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.scratch221171.simpletoolbelt.Const;
 import net.scratch221171.simpletoolbelt.client.network.ClientBeltCache;
-import net.scratch221171.simpletoolbelt.common.storage.AutoSwitchSettings;
 
 @EventBusSubscriber(modid = Const.MOD_ID)
 public class STPayloads {
@@ -36,13 +33,12 @@ public class STPayloads {
                 ToggleAutoSwitchPayload.STREAM_CODEC,
                 (payload, ctx) -> ToggleAutoSwitchPayload.toggleAutoSwitch(ctx));
         registrar.playToServer(
-                AutoSwitchSettingsPayload.TYPE, AutoSwitchSettingsPayload.STREAM_CODEC, (payload, ctx) -> {
-                    if (ctx.player() instanceof ServerPlayer sp) {
-                        AutoSwitchSettings.set(
-                                sp,
-                                new AutoSwitchSettings.Settings(
-                                        List.copyOf(payload.entries()), payload.allowEmptyHand()));
-                    }
-                });
+                AutoSwitchSettingsPayload.TYPE,
+                AutoSwitchSettingsPayload.STREAM_CODEC,
+                AutoSwitchSettingsPayload::refresh);
+        registrar.playToServer(
+                ForcedHotbarSlotSettingsPayload.TYPE,
+                ForcedHotbarSlotSettingsPayload.STREAM_CODEC,
+                ForcedHotbarSlotSettingsPayload::refresh);
     }
 }

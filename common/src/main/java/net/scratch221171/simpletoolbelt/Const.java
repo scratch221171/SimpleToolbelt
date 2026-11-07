@@ -37,6 +37,8 @@ public final class Const {
             public static final String OPEN_BELT_MENU_IN_CREATIVE = "open_belt_menu_in_creative";
             public static final String SYNC_BELT_CONTENTS = "sync_belt_contents";
             public static final String TOGGLE_AUTO_SWITCH = "toggle_auto_switch";
+            public static final String AUTO_SWITCH_SETTINGS = "auto_switch_settings";
+            public static final String FORCED_HOTBAR_SLOT_SETTINGS = "forced_hotbar_slot_settings";
         }
 
         public static final class Recipe {
@@ -55,15 +57,16 @@ public final class Const {
         final class Item implements LangKey {
             public static final String PREFIX = "item";
 
-            public static final String INITIALIZING_UUID = define(PREFIX, ID.Item.TOOLBELT + "initializingUUID");
-            public static final String SHIFT_FOR_MORE_INFO = define(PREFIX, ID.Item.TOOLBELT + "shiftKey");
-            public static final String HINT = define(PREFIX, ID.Item.TOOLBELT + "hint");
-            public static final String EXTRA_PAGE = define(PREFIX, ID.Item.TOOLBELT + "extraPage");
-            public static final String TOGGLE_AUTO_SWITCH = define(PREFIX, ID.Item.TOOLBELT + "toggleAutoSwitch");
-            public static final String INVENTORY_FULL = define(PREFIX, ID.Item.TOOLBELT + "inventoryFull");
-            public static final String AUTO_SWITCH_FAILED = define(PREFIX, ID.Item.TOOLBELT + "autoSwitchFailed");
-            public static final String EMPTY = define(PREFIX, ID.Item.MENU_OPENER + "empty");
-            public static final String CONTAINS = define(PREFIX, ID.Item.MENU_OPENER + "contains");
+            public static final String INITIALIZING_UUID = define(PREFIX, ID.Item.TOOLBELT + "InitializingUUID");
+            public static final String SHIFT_FOR_MORE_INFO = define(PREFIX, ID.Item.TOOLBELT + "ShiftKey");
+            public static final String TOOLBELT_HINT = define(PREFIX, ID.Item.TOOLBELT + "Hint");
+            public static final String EXTRA_PAGE = define(PREFIX, ID.Item.TOOLBELT + "ExtraPage");
+            public static final String TOGGLE_AUTO_SWITCH = define(PREFIX, ID.Item.TOOLBELT + "ToggleAutoSwitch");
+            public static final String INVENTORY_FULL = define(PREFIX, ID.Item.TOOLBELT + "InventoryFull");
+            public static final String AUTO_SWITCH_FAILED = define(PREFIX, ID.Item.TOOLBELT + "AutoSwitchFailed");
+            public static final String MENU_OPENER_HINT = define(PREFIX, ID.Item.MENU_OPENER + "Hint");
+            public static final String EMPTY = define(PREFIX, ID.Item.MENU_OPENER + "Empty");
+            public static final String CONTAINS = define(PREFIX, ID.Item.MENU_OPENER + "Contains");
         }
 
         final class Screen {
@@ -91,8 +94,8 @@ public final class Const {
             public static final String PREFIX = "key";
 
             public static final String CATEGORY = define(PREFIX, "category");
-            public static final String RADIAL_MENU = define(PREFIX, "radial_menu");
-            public static final String TOGGLE_AUTO_SWITCH = define(PREFIX, "toggle_auto_switch");
+            public static final String RADIAL_MENU = define(PREFIX, "radialMenu");
+            public static final String TOGGLE_AUTO_SWITCH = define(PREFIX, "toggleAutoSwitch");
         }
 
         static String define(String prefix, String key) {

@@ -19,12 +19,13 @@ public class STEnglishLangProvider extends STLangProvider {
         addItem(STItems.NETHERITE_TOOLBELT, "Netherite Toolbelt");
         add(Const.LangKey.Item.INITIALIZING_UUID, "Initializing...");
         add(Const.LangKey.Item.SHIFT_FOR_MORE_INFO, "Hold [%s] for more");
-        add(Const.LangKey.Item.HINT, "Use while held, or right-click in a GUI to open the menu.");
+        add(Const.LangKey.Item.TOOLBELT_HINT, "Use while held, or right-click in a GUI to open the menu.");
         add(Const.LangKey.Item.EXTRA_PAGE, "Extra Pages: %s");
         add(Const.LangKey.Item.TOGGLE_AUTO_SWITCH, "Auto Switch: %s");
         add(Const.LangKey.Item.INVENTORY_FULL, "Inventory full!");
         add(Const.LangKey.Item.AUTO_SWITCH_FAILED, "Auto switch failed: %s");
         addItem(STItems.MENU_OPENER, "Menu Opener");
+        add(Const.LangKey.Item.MENU_OPENER_HINT, "Can hold blocks with menus, such as crafting tables.");
         add(Const.LangKey.Item.EMPTY, "Empty");
         add(Const.LangKey.Item.CONTAINS, "Contains: %s");
 
