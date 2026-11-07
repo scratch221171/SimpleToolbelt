@@ -73,6 +73,8 @@ public class STClientEvents {
             Slot slot = screen.getSlotUnderMouse();
             if (slot != null) stack = slot.getItem();
         }
+
+        final ItemStack beltStack = stack;
         if (stack.getItem() instanceof ToolbeltItem && Screen.hasShiftDown()) {
             ClientBeltCache.read(stack).ifPresent(contents -> {
                 if (contents.isEmpty()) return;
@@ -87,7 +89,7 @@ public class STClientEvents {
                     }
                 }
                 if (index < 0) return;
-                elements.add(index + 1, Either.right(new ToolbeltTooltip(contents)));
+                elements.add(index + 1, Either.right(new ToolbeltTooltip(contents, beltStack)));
             });
         }
     }

@@ -12,6 +12,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.scratch221171.simpletoolbelt.common.item.ToolbeltItem;
 import net.scratch221171.simpletoolbelt.common.registry.STMenus;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltContents;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltStorage;
@@ -21,35 +22,36 @@ public class ToolbeltMenu extends AbstractContainerMenu {
 
     private final Container beltContainer;
     private final UUID beltId;
+    private final int pageSize;
     private final Player player;
     private ToolbeltContents clientContents;
-    private final int pages;
-    private final int beltTotalSlots;
+    private final int totalSize;
     private boolean suppressWriteBack = false;
 
     /** Client-side constructor */
     public ToolbeltMenu(int id, Inventory inv, RegistryFriendlyByteBuf buf) {
-        this(id, inv, buf.readUUID(), ToolbeltContents.STREAM_CODEC.decode(buf), false);
+        this(id, inv, buf.readUUID(), buf.readInt(), ToolbeltContents.STREAM_CODEC.decode(buf), false);
     }
 
     /** Server-side constructor */
     public static ToolbeltMenu forUUID(int containerId, Inventory inv, UUID beltId, ItemStack stack) {
         ServerPlayer player = (ServerPlayer) inv.player;
         ToolbeltContents contents = ToolbeltStorage.get(player.server).resolve(player, beltId, stack);
-        return new ToolbeltMenu(containerId, inv, beltId, contents, true);
+        return new ToolbeltMenu(containerId, inv, beltId, ToolbeltItem.getPageSize(stack), contents, true);
     }
 
-    private ToolbeltMenu(int containerId, Inventory inv, UUID beltId, ToolbeltContents contents, boolean isServer) {
+    private ToolbeltMenu(
+            int containerId, Inventory inv, UUID beltId, int pageSize, ToolbeltContents contents, boolean isServer) {
         super(STMenus.TOOLBELT.get(), containerId);
         this.beltId = beltId;
+        this.pageSize = pageSize;
         this.player = inv.player;
-        this.pages = contents.pagesSize();
-        this.beltTotalSlots = contents.totalSlots();
+        this.totalSize = contents.totalSize();
         this.clientContents = contents;
 
-        SimpleContainer container = new SimpleContainer(beltTotalSlots);
-        for (int i = 0; i < beltTotalSlots; i++) {
-            container.setItem(i, contents.getCurrentFlat(i).copy());
+        SimpleContainer container = new SimpleContainer(totalSize);
+        for (int i = 0; i < totalSize; i++) {
+            container.setItem(i, contents.getCurrent(i).copy());
         }
         if (isServer) {
             container.addListener(c -> {
@@ -60,29 +62,24 @@ public class ToolbeltMenu extends AbstractContainerMenu {
         }
 
         this.beltContainer = container;
-        for (int i = 0; i < beltTotalSlots; i++) {
-            final int idx = i;
+        for (int i = 0; i < totalSize; i++) {
+            final int index = i;
             Supplier<ItemStack> initial = isServer
                     ? () -> ToolbeltStorage.get(((ServerPlayer) player).server)
-                            .getOrInit(beltId, pages)
-                            .getInitialFlat(idx)
-                    : () -> clientContents.getInitialFlat(idx);
-            this.addSlot(new ToolbeltSlot(
-                    container,
-                    i,
-                    8 + i % ToolbeltContents.PAGE_SIZE * 18,
-                    20 + i / ToolbeltContents.PAGE_SIZE * 18,
-                    initial));
+                            .getOrInit(beltId, totalSize)
+                            .getInitial(index)
+                    : () -> clientContents.getInitial(index);
+            this.addSlot(new ToolbeltSlot(container, i, 8 + i % pageSize * 18, 20 + i / pageSize * 18, initial));
         }
 
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
                 this.addSlot(
-                        new Slot(inv, col + row * 9 + 9, 8 + col * 18, 51 + (row + contents.pagesSize() - 1) * 18));
+                        new Slot(inv, col + row * 9 + 9, 8 + col * 18, 51 + (row + totalSize / pageSize - 1) * 18));
             }
         }
         for (int col = 0; col < 9; col++) {
-            this.addSlot(new Slot(inv, col, 8 + col * 18, 109 + (contents.pagesSize() - 1) * 18));
+            this.addSlot(new Slot(inv, col, 8 + col * 18, 109 + (totalSize / pageSize - 1) * 18));
         }
     }
 
@@ -95,11 +92,11 @@ public class ToolbeltMenu extends AbstractContainerMenu {
         ItemStack original = slot.getItem();
         ItemStack copy = original.copy();
 
-        if (index < beltTotalSlots) {
-            if (!this.moveItemStackTo(original, beltTotalSlots, this.slots.size(), true)) {
+        if (index < totalSize) {
+            if (!this.moveItemStackTo(original, totalSize, this.slots.size(), true)) {
                 return ItemStack.EMPTY;
             }
-        } else if (!(this.moveItemStackTo(original, 0, beltTotalSlots, false))) {
+        } else if (!(this.moveItemStackTo(original, 0, totalSize, false))) {
             return ItemStack.EMPTY;
         }
 
@@ -118,16 +115,17 @@ public class ToolbeltMenu extends AbstractContainerMenu {
     public void clicked(int slotId, int button, @NonNull ClickType clickType, @NonNull Player player) {
 
         if (player instanceof ServerPlayer serverPlayer) {
-            applyExternalUpdate(ToolbeltStorage.get(serverPlayer.server).getOrInit(beltId, pages));
+            applyExternalUpdate(ToolbeltStorage.get(serverPlayer.server).getOrInit(beltId, totalSize));
             if ((clickType == ClickType.PICKUP || clickType == ClickType.QUICK_MOVE)
                     && slotId >= 0
-                    && slotId < beltTotalSlots
+                    && slotId < totalSize
                     && getCarried().isEmpty()) {
+                // applyExternalUpdateで更新済みの可能性
                 ToolbeltContents stored =
-                        ToolbeltStorage.get(serverPlayer.server).getOrInit(beltId, pages);
-                if (!stored.getInitialFlat(slotId).isEmpty()
-                        && stored.getCurrentFlat(slotId).isEmpty()) {
-                    ToolbeltStorage.update(serverPlayer, beltId, stored.withInitialFlat(slotId, ItemStack.EMPTY));
+                        ToolbeltStorage.get(serverPlayer.server).getOrInit(beltId, totalSize);
+                if (!stored.getInitial(slotId).isEmpty()
+                        && stored.getCurrent(slotId).isEmpty()) {
+                    ToolbeltStorage.update(serverPlayer, beltId, stored.withInitial(slotId, ItemStack.EMPTY));
                     return;
                 }
             }
@@ -143,7 +141,7 @@ public class ToolbeltMenu extends AbstractContainerMenu {
     @Override
     public void broadcastChanges() {
         if (player instanceof ServerPlayer serverPlayer) {
-            applyExternalUpdate(ToolbeltStorage.get(serverPlayer.server).getOrInit(beltId, pages));
+            applyExternalUpdate(ToolbeltStorage.get(serverPlayer.server).getOrInit(beltId, totalSize));
         }
         super.broadcastChanges();
     }
@@ -152,8 +150,12 @@ public class ToolbeltMenu extends AbstractContainerMenu {
         return beltId;
     }
 
-    public int getPages() {
-        return pages;
+    public int getTotalPages() {
+        return totalSize / pageSize;
+    }
+
+    public int getPageSize() {
+        return pageSize;
     }
 
     public ToolbeltContents getClientContents() {
@@ -161,7 +163,7 @@ public class ToolbeltMenu extends AbstractContainerMenu {
     }
 
     public void applyClientSync(ToolbeltContents contents) {
-        if (contents.pagesSize() >= pages) {
+        if (contents.totalSize() >= totalSize) {
             this.clientContents = contents;
         }
     }
@@ -175,8 +177,8 @@ public class ToolbeltMenu extends AbstractContainerMenu {
     private void applyExternalUpdate(ToolbeltContents contents) {
         suppressWriteBack = true;
         try {
-            for (int i = 0; i < beltTotalSlots; i++) {
-                ItemStack fresh = contents.getCurrentFlat(i);
+            for (int i = 0; i < totalSize; i++) {
+                ItemStack fresh = contents.getCurrent(i);
                 if (!ItemStack.isSameItemSameComponents(beltContainer.getItem(i), fresh)) {
                     beltContainer.setItem(i, fresh.copy());
                 }
@@ -188,15 +190,15 @@ public class ToolbeltMenu extends AbstractContainerMenu {
 
     private void writeBack(Container container) {
         ServerPlayer serverPlayer = (ServerPlayer) player;
-        ToolbeltContents stored = ToolbeltStorage.get(serverPlayer.server).getOrInit(beltId, pages);
-        for (int i = 0; i < beltTotalSlots; i++) {
+        ToolbeltContents stored = ToolbeltStorage.get(serverPlayer.server).getOrInit(beltId, totalSize);
+        for (int i = 0; i < totalSize; i++) {
             ItemStack now = container.getItem(i);
-            if (ItemStack.matches(now, stored.getCurrentFlat(i))) {
+            if (ItemStack.matches(now, stored.getCurrent(i))) {
                 continue; // 変化なし -> 無視
             }
-            stored = stored.withCurrentFlat(i, now.copy());
-            if (!now.isEmpty() && !ItemStack.isSameItemSameComponents(stored.getInitialFlat(i), now)) {
-                stored = stored.withInitialFlat(i, now.copy()); // 変更 -> 更新
+            stored = stored.withCurrent(i, now.copy());
+            if (!now.isEmpty() && !ItemStack.isSameItemSameComponents(stored.getInitial(i), now)) {
+                stored = stored.withInitial(i, now.copy()); // 変更 -> 更新
             } // 返却 ->、無視
         }
 

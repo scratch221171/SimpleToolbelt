@@ -46,9 +46,8 @@ public class STEvents {
 
                 UUID beltId = storage.ensureId(player, belt);
                 ToolbeltContents stored = storage.resolve(player, beltId, belt);
-                for (int i = 0; i < stored.totalSlots(); i++) {
-                    if (isSuitableTool(
-                            player, stored.getCurrentFlat(i), state, event.getLevel(), event.getPos(), bare)) {
+                for (int i = 0; i < stored.totalSize(); i++) {
+                    if (isSuitableTool(player, stored.getCurrent(i), state, event.getLevel(), event.getPos(), bare)) {
                         ToolbeltItem.applySelection(
                                 player,
                                 beltId,

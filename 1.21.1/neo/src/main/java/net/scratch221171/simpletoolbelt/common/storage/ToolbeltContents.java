@@ -13,99 +13,63 @@ import net.minecraft.world.item.ItemStack;
 /**
  * Toolbeltの中身を管理するためのレコード
  *
- * @param pages 1周につき1ring。将来的にList<Ring>に変更するかも
+ * @param initial ベルトに入れたアイテムの原本
+ * @param current 今入っているアイテム
  */
-public record ToolbeltContents(List<Page> pages) {
+public record ToolbeltContents(List<ItemStack> initial, List<ItemStack> current) {
 
-    public static final int PAGE_SIZE = 8;
-    public static final ToolbeltContents EMPTY = new ToolbeltContents(List.of());
+    private static final ToolbeltContents EMPTY = new ToolbeltContents(List.of(), List.of());
 
-    public static final Codec<ToolbeltContents> CODEC =
-            Page.CODEC.listOf().xmap(ToolbeltContents::new, ToolbeltContents::pages);
+    public static final Codec<ToolbeltContents> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                    ItemStack.OPTIONAL_CODEC.listOf().fieldOf("initial").forGetter(ToolbeltContents::initial),
+                    ItemStack.OPTIONAL_CODEC.listOf().fieldOf("current").forGetter(ToolbeltContents::current))
+            .apply(instance, ToolbeltContents::new));
+
     public static final StreamCodec<RegistryFriendlyByteBuf, ToolbeltContents> STREAM_CODEC =
             ByteBufCodecs.fromCodecWithRegistries(ToolbeltContents.CODEC);
 
-    public record Page(StackGroup initial, StackGroup current) {
-        public static final Page EMPTY = new Page(StackGroup.EMPTY, StackGroup.EMPTY);
-
-        public static final Codec<Page> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                        StackGroup.CODEC.fieldOf("initial").forGetter(Page::initial),
-                        StackGroup.CODEC.fieldOf("current").forGetter(Page::current))
-                .apply(instance, Page::new));
-
-        public Page withInitial(int index, ItemStack stack) {
-            return new Page(initial.withStack(index, stack), current);
-        }
-
-        public Page withCurrent(int index, ItemStack stack) {
-            return new Page(initial, current.withStack(index, stack));
-        }
+    public static ToolbeltContents create(int size) {
+        return EMPTY.addSlot(size);
     }
 
-    public record StackGroup(List<ItemStack> stacks) {
-        public static final StackGroup EMPTY = new StackGroup(Collections.nCopies(PAGE_SIZE, ItemStack.EMPTY));
-
-        public static final Codec<StackGroup> CODEC =
-                ItemStack.OPTIONAL_CODEC.listOf(PAGE_SIZE, PAGE_SIZE).xmap(StackGroup::new, StackGroup::stacks);
-
-        public ItemStack getStack(int index) {
-            return stacks.get(index);
-        }
-
-        public StackGroup withStack(int index, ItemStack stack) {
-            List<ItemStack> copy = new ArrayList<>(stacks);
-            copy.set(index, stack);
-            return new StackGroup(copy);
-        }
+    public int totalSize() {
+        if (initial.size() != current.size())
+            throw new IllegalStateException("The sizes of 'initial' and 'current' don't match!");
+        return initial().size();
     }
 
-    public int pagesSize() {
-        return pages.size();
+    public ItemStack getInitial(int index) {
+        return initial.get(index);
     }
 
-    public Page getPage(int index) {
-        return pages.get(index);
+    public ToolbeltContents withInitial(int index, ItemStack stack) {
+        List<ItemStack> copy = new ArrayList<>(initial);
+        copy.set(index, stack);
+        return new ToolbeltContents(copy, current);
     }
 
-    public ToolbeltContents withPage(int index, Page page) {
-        List<Page> copy = new ArrayList<>(pages);
-        copy.set(index, page);
-        return new ToolbeltContents(copy);
+    public ItemStack getCurrent(int index) {
+        return current.get(index);
     }
 
-    public int totalSlots() {
-        return pages.size() * PAGE_SIZE;
+    public ToolbeltContents withCurrent(int index, ItemStack stack) {
+        List<ItemStack> copy = new ArrayList<>(current);
+        copy.set(index, stack);
+        return new ToolbeltContents(initial, copy);
     }
 
-    public ItemStack getInitialFlat(int flatIndex) {
-        return pages.get(flatIndex / PAGE_SIZE).initial().getStack(flatIndex % PAGE_SIZE);
-    }
-
-    public ToolbeltContents withInitialFlat(int flatIndex, ItemStack stack) {
-        return withPage(
-                flatIndex / PAGE_SIZE, getPage(flatIndex / PAGE_SIZE).withInitial(flatIndex % PAGE_SIZE, stack));
-    }
-
-    public ItemStack getCurrentFlat(int flatIndex) {
-        return pages.get(flatIndex / PAGE_SIZE).current().getStack(flatIndex % PAGE_SIZE);
-    }
-
-    public ToolbeltContents withCurrentFlat(int flatIndex, ItemStack stack) {
-        return withPage(
-                flatIndex / PAGE_SIZE, getPage(flatIndex / PAGE_SIZE).withCurrent(flatIndex % PAGE_SIZE, stack));
-    }
-
-    public ToolbeltContents increasePageTo(int n) {
-        List<Page> copy = new ArrayList<>(pages);
-        while (copy.size() < n) {
-            copy.add(Page.EMPTY);
-        }
-        return new ToolbeltContents(copy);
+    public ToolbeltContents addSlot(int n) {
+        List<ItemStack> add = Collections.nCopies(n, ItemStack.EMPTY);
+        List<ItemStack> ini = new ArrayList<>(initial);
+        List<ItemStack> cur = new ArrayList<>(current);
+        ini.addAll(add);
+        cur.addAll(add);
+        return new ToolbeltContents(ini, cur);
     }
 
     public boolean isEmpty() {
-        for (int i = 0; i < totalSlots(); i++) {
-            if (!getInitialFlat(i).isEmpty() || !getCurrentFlat(i).isEmpty()) {
+        for (int i = 0; i < totalSize(); i++) {
+            if (!getInitial(i).isEmpty() || !getCurrent(i).isEmpty()) {
                 return false;
             }
         }

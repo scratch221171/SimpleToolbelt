@@ -22,7 +22,9 @@ public class ToolbeltScreen extends AbstractContainerScreen<ToolbeltMenu> {
 
     private static final int BASE_HEIGHT = 133;
 
-    private static final ResourceLocation TEXTURE = STUtils.id("textures/gui/toolbelt/toolbelt.png");
+    private static final ResourceLocation NORMAL_TEXTURE = STUtils.id("textures/gui/toolbelt/normal_toolbelt.png");
+    private static final ResourceLocation NETHERITE_TEXTURE =
+            STUtils.id("textures/gui/toolbelt/netherite_toolbelt.png");
     private static final ResourceLocation BUTTON = STUtils.id("textures/gui/toolbelt/button/button.png");
     private static final ResourceLocation BUTTON_HIGHLIGHTED =
             STUtils.id("textures/gui/toolbelt/button/button_highlighted.png");
@@ -31,10 +33,14 @@ public class ToolbeltScreen extends AbstractContainerScreen<ToolbeltMenu> {
     static final ResourceLocation STOW = STUtils.id("textures/gui/toolbelt/button/stow.png");
     private final ResourceLocation KEY = STUtils.id("textures/gui/toolbelt/button/key.png");
 
+    private final ResourceLocation texture;
+
     public ToolbeltScreen(ToolbeltMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
+        if (menu.getPageSize() == 4) texture = NORMAL_TEXTURE;
+        else texture = NETHERITE_TEXTURE;
         imageWidth = 176;
-        imageHeight = BASE_HEIGHT + (menu.getPages() - 1) * 18;
+        imageHeight = BASE_HEIGHT + (menu.getTotalPages() - 1) * 18;
         inventoryLabelY = imageHeight - 94;
     }
 
@@ -42,8 +48,8 @@ public class ToolbeltScreen extends AbstractContainerScreen<ToolbeltMenu> {
     protected void init() {
         super.init();
         // ToolbeltMenuのToolbeltSlotとの辻褄あわせ
-        int x = leftPos + (8 + ToolbeltContents.PAGE_SIZE * 18);
-        int y = topPos + (20);
+        int x = leftPos + 152;
+        int y = topPos + 20;
         addRenderableWidget(new BeltStowButton(
                 x, y, 16, 16, Component.translatable(Const.LangKey.Screen.RADIAL_MENU_TOOLTIP_STOW_ALL)));
         addRenderableWidget(
@@ -52,21 +58,21 @@ public class ToolbeltScreen extends AbstractContainerScreen<ToolbeltMenu> {
 
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY) {
-        int rows = menu.getPages();
+        int rows = menu.getTotalPages();
         int x = leftPos, y = topPos;
         // 上部（ベルト1行目より上
-        guiGraphics.blit(TEXTURE, x, y, 0, 0, imageWidth, 19);
+        guiGraphics.blit(texture, x, y, 0, 0, imageWidth, 19);
         // ベルトのスロット行をページ数分だけ繰り返す
         for (int r = 0; r < rows; r++) {
-            guiGraphics.blit(TEXTURE, x, y + 19 + r * 18, 0, 19, imageWidth, 18);
+            guiGraphics.blit(texture, x, y + 19 + r * 18, 0, 19, imageWidth, 18);
         }
         // 下部（インベントリ側
-        guiGraphics.blit(TEXTURE, x, y + 19 + rows * 18, 0, 37, imageWidth, BASE_HEIGHT - 37);
+        guiGraphics.blit(texture, x, y + 19 + rows * 18, 0, 37, imageWidth, BASE_HEIGHT - 37);
 
         ToolbeltContents synced = menu.getClientContents();
-        for (int i = 0; i < menu.getPages() * ToolbeltContents.PAGE_SIZE; i++) {
+        for (int i = 0; i < synced.totalSize(); i++) {
             Slot slot = menu.getSlot(i);
-            ItemStack init = synced.getInitialFlat(i);
+            ItemStack init = synced.getInitial(i);
             if (!slot.hasItem() && !init.isEmpty()) {
                 GhostItemRenderer.render(guiGraphics, init, leftPos + slot.x, topPos + slot.y, true);
             }

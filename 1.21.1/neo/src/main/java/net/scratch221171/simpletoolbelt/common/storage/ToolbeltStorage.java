@@ -64,23 +64,24 @@ public class ToolbeltStorage extends SavedData {
         }
     }
 
-    public ToolbeltContents getOrInit(UUID id, int pages) {
-        ToolbeltContents cur = belts.get(id);
-        if (cur == null || cur.pagesSize() < pages) {
-            cur = (cur == null ? ToolbeltContents.EMPTY : cur).increasePageTo(pages);
-            set(id, cur);
+    public ToolbeltContents getOrInit(UUID id, int slots) {
+        ToolbeltContents contents = belts.get(id);
+        if (contents == null || contents.totalSize() < slots) {
+            contents =
+                    contents == null ? ToolbeltContents.create(slots) : contents.addSlot(slots - contents.totalSize());
+            set(id, contents);
         }
-        return cur;
+        return contents;
     }
 
     public ToolbeltContents resolve(ServerPlayer player, UUID id, ItemStack stack) {
-        int capacity = stack.getItem() instanceof ToolbeltItem ? ToolbeltItem.getPageCount(stack) : 0;
+        int requiredSize = ToolbeltItem.getRequiredSize(stack);
         ToolbeltContents before = belts.get(id);
-        ToolbeltContents cur = getOrInit(id, capacity);
-        if (cur != before) {
-            PacketDistributor.sendToPlayer(player, new SyncBeltContentsPayload(id, cur));
+        ToolbeltContents updated = getOrInit(id, requiredSize);
+        if (updated != before) {
+            PacketDistributor.sendToPlayer(player, new SyncBeltContentsPayload(id, updated));
         }
-        return cur;
+        return updated;
     }
 
     /** 初回使用時にUUIDを初期化　ServerOnly */

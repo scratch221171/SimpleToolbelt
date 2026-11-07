@@ -51,15 +51,15 @@ public class KeyMapScreen extends Screen {
     }
 
     private int visibleRows() {
-        return Math.clamp(menu.getPages(), 1, (height - HEADER - FOOTER) / ROW_H);
+        return Math.clamp(menu.getTotalPages(), 1, (height - HEADER - FOOTER) / ROW_H);
     }
 
     private int maxScroll() {
-        return Math.max(0, menu.getPages() - visibleRows());
+        return Math.max(0, menu.getTotalPages() - visibleRows());
     }
 
     private int gridLeft() {
-        return (width - (ToolbeltContents.PAGE_SIZE * COL_W - GAP)) / 2;
+        return (width - (menu.getPageSize() * COL_W - GAP)) / 2;
     }
 
     private int stowX() {
@@ -76,10 +76,10 @@ public class KeyMapScreen extends Screen {
         int rx = ix - gridLeft(), ry = iy - HEADER;
         if (rx < 0 || ry < 0) return NONE;
         int col = rx / COL_W, row = ry / ROW_H;
-        if (col >= ToolbeltContents.PAGE_SIZE || row >= visibleRows()) return NONE;
+        if (col >= menu.getPageSize() || row >= visibleRows()) return NONE;
         if (rx % COL_W >= CELL_W || ry % ROW_H >= CELL_H) return NONE;
-        int slot = (scrollRow + row) * ToolbeltContents.PAGE_SIZE + col;
-        return slot < menu.getClientContents().totalSlots() ? slot : NONE;
+        int slot = (scrollRow + row) * menu.getPageSize() + col;
+        return slot < menu.getClientContents().totalSize() ? slot : NONE;
     }
 
     @Override
@@ -95,12 +95,12 @@ public class KeyMapScreen extends Screen {
             int page = scrollRow + r;
             int y = HEADER + r * ROW_H;
             g.drawString(font, String.valueOf(page + 1), gridLeft() - 15, y + CELL_H / 2 - 4, 0xAAAAAA, false);
-            for (int c = 0; c < ToolbeltContents.PAGE_SIZE; c++) {
-                int slot = page * ToolbeltContents.PAGE_SIZE + c;
+            for (int c = 0; c < menu.getPageSize(); c++) {
+                int slot = page * menu.getPageSize() + c;
                 int x = gridLeft() + c * COL_W;
                 renderCell(g, x, y, slot, hovered, beltId);
 
-                ItemStack stack = contents.getInitialFlat(slot);
+                ItemStack stack = contents.getInitial(slot);
                 if (!stack.isEmpty()) {
                     g.renderItem(stack, x + 5, y + 3);
                 }
@@ -130,7 +130,7 @@ public class KeyMapScreen extends Screen {
         }
 
         if (hovered >= 0) {
-            ItemStack stack = contents.getInitialFlat(hovered);
+            ItemStack stack = contents.getInitial(hovered);
             if (!stack.isEmpty()) {
                 g.renderTooltip(font, stack, mouseX, mouseY);
             }
