@@ -21,11 +21,11 @@ public class STBootStrap {
                         STResourceKeys.Enchantments.HANDY,
                         Enchantment.enchantment(new Enchantment.EnchantmentDefinition(
                                         bootstrap.lookup(Registries.ITEM).getOrThrow(STTags.Items.TOOLBELT),
-                                        Optional.empty(),
+                                        Optional.of(bootstrap.lookup(Registries.ITEM).getOrThrow(STTags.Items.TOOLBELT)),
                                         30,
                                         1,
-                                        new Enchantment.Cost(3, 1),
-                                        new Enchantment.Cost(4, 2),
+                                        new Enchantment.Cost(10, 0),
+                                        new Enchantment.Cost(50, 0),
                                         2,
                                         List.of(EquipmentSlotGroup.ANY)))
                                 .build(STUtils.id(Const.ID.Enchantments.HANDY))));

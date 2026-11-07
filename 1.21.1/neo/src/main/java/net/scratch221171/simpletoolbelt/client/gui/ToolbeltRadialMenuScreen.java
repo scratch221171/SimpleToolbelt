@@ -354,7 +354,7 @@ public class ToolbeltRadialMenuScreen extends Screen {
                     stowThreshold,
                     center - step / 2,
                     center + step / 2,
-                    SECTOR_SEGMENTS);
+                    SECTOR_SEGMENTS * 8 / visibleSlots.length);
         }
     }
 

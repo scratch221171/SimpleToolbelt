@@ -113,6 +113,16 @@ public class ToolbeltItem extends Item {
         }
     }
 
+    @Override
+    public int getEnchantmentValue(@NonNull ItemStack stack) {
+        return 10;
+    }
+
+    @Override
+    public boolean isEnchantable(@NonNull ItemStack stack) {
+        return true;
+    }
+
     public static void openMenuNextTick(ServerPlayer player, ItemStack beltStack) {
         UUID id = ToolbeltStorage.get(player.server).ensureId(player, beltStack);
         player.server.tell(new TickTask(player.server.getTickCount(), () -> openMenu(player, id, beltStack)));
