@@ -73,7 +73,7 @@ public class STCommands {
             stack.set(STDataComponents.BELT_ID.get(), id);
             stack.set(
                     STDataComponents.EXTRA_PAGES,
-                    contents.totalSize() / ToolbeltItem.getPageSize(stack) - ToolbeltItem.getRequiredSize(stack));
+                    (contents.totalSize() / ToolbeltItem.getPageSize(stack)) - 1);
             boolean added = player.getInventory().add(stack);
             if (!added) {
                 player.drop(stack, false);
