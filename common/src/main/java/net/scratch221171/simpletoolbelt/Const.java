@@ -25,6 +25,11 @@ public final class Const {
             public static final String WRAPPED_ITEM = "wrapped_item";
         }
 
+        public static final class Enchantments {
+
+            public static final String HANDY = "handy";
+        }
+
         public static final class Menu {
 
             public static final String TOOLBELT = "toolbelt";
@@ -50,11 +55,11 @@ public final class Const {
         }
     }
 
-    public interface LangKey {
+    public static final class LangKey {
 
-        String MOD_MENU = "modmenu.descriptionTranslation." + MOD_ID;
+        public static String MOD_MENU = "modmenu.descriptionTranslation." + MOD_ID;
 
-        final class Item implements LangKey {
+        public static final class Item {
             public static final String PREFIX = "item";
 
             public static final String INITIALIZING_UUID = define(PREFIX, ID.Item.TOOLBELT + "InitializingUUID");
@@ -69,7 +74,13 @@ public final class Const {
             public static final String CONTAINS = define(PREFIX, ID.Item.MENU_OPENER + "Contains");
         }
 
-        final class Screen {
+        public static final class Enchantment {
+            public static final String PREFIX = "enchantment";
+
+            public static final String HANDY = define(PREFIX, ID.Enchantments.HANDY);
+        }
+
+        public static final class Screen {
             public static final String PREFIX = "gui";
 
             public static final String TOOLBELT_SCREEN_TITLE = define(PREFIX, "toolbelt.title");
@@ -82,7 +93,7 @@ public final class Const {
             public static final String KEYMAP_HINT = define(PREFIX, "keymap.hint");
         }
 
-        final class Command {
+        public static final class Command {
             public static final String PREFIX = "commands";
 
             public static final String NOT_FOUND = define(PREFIX, "list.failed.notfound");
@@ -90,7 +101,7 @@ public final class Const {
             public static final String RESTORED = define(PREFIX, "restore.success.restored");
         }
 
-        final class Key {
+        public static final class Key {
             public static final String PREFIX = "key";
 
             public static final String CATEGORY = define(PREFIX, "category");
@@ -98,7 +109,7 @@ public final class Const {
             public static final String TOGGLE_AUTO_SWITCH = define(PREFIX, "toggleAutoSwitch");
         }
 
-        static String define(String prefix, String key) {
+        private static String define(String prefix, String key) {
             return prefix + "." + MOD_ID + "." + key;
         }
     }

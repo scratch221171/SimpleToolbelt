@@ -29,6 +29,9 @@ public class STEnglishLangProvider extends STLangProvider {
         add(Const.LangKey.Item.EMPTY, "Empty");
         add(Const.LangKey.Item.CONTAINS, "Contains: %s");
 
+        // エンチャント
+        add(Const.LangKey.Enchantment.HANDY, "Handy");
+
         // スクリーン
         add(Const.LangKey.Screen.TOOLBELT_SCREEN_TITLE, "Toolbelt");
         add(Const.LangKey.Screen.RADIAL_MENU_SCREEN_TITLE, "Radial Menu");

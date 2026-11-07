@@ -15,7 +15,7 @@ public class STTags {
 
     public static final class Items {
 
-        public static final TagKey<Item> TOOLBELT = createItem(STUtils.id("toolbelt"));
+        public static final TagKey<Item> TOOLBELT = createItem(STCommonUtils.id("toolbelt"));
         public static final TagKey<Item> CURIOS_BELT =
                 createItem(ResourceLocation.fromNamespaceAndPath("curios", "belt"));
     }

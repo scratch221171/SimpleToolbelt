@@ -25,7 +25,6 @@ import net.scratch221171.simpletoolbelt.common.item.MenuOpenerItem;
 import net.scratch221171.simpletoolbelt.common.item.ToolbeltItem;
 import net.scratch221171.simpletoolbelt.common.network.SelectBeltSlotPayload;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltContents;
-import net.scratch221171.simpletoolbelt.common.storage.ToolbeltStorage;
 import net.scratch221171.simpletoolbelt.config.ClientConfig;
 import org.joml.Matrix4f;
 import org.jspecify.annotations.NonNull;
@@ -392,7 +391,7 @@ public class ToolbeltRadialMenuScreen extends Screen {
     }
 
     private boolean isValid(@NonNull Player player) {
-        Optional<ItemStack> optional = ToolbeltStorage.findBelt(player, this.beltId);
+        Optional<ItemStack> optional = STUtils.findBelt(player, this.beltId);
         if (optional.isEmpty()) {
             return false;
         }

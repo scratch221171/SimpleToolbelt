@@ -29,6 +29,9 @@ public class STJapaneseLangProvider extends STLangProvider {
         add(Const.LangKey.Item.EMPTY, "空っぽ");
         add(Const.LangKey.Item.CONTAINS, "内容物：%s");
 
+        // エンチャント
+        add(Const.LangKey.Enchantment.HANDY, "手際");
+
         // スクリーン
         add(Const.LangKey.Screen.TOOLBELT_SCREEN_TITLE, "ツールベルト");
         add(Const.LangKey.Screen.RADIAL_MENU_SCREEN_TITLE, "ラジアルメニュー");

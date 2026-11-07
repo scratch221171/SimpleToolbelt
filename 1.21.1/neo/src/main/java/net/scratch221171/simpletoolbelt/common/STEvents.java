@@ -2,10 +2,13 @@ package net.scratch221171.simpletoolbelt.common;
 
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -41,24 +44,30 @@ public class STEvents {
             float bare = progressWith(player, ItemStack.EMPTY, state, event.getLevel(), event.getPos());
             if (isSuitableTool(player, tool, state, event.getLevel(), event.getPos(), bare)) return;
 
-            ToolbeltStorage.findAnyNetheriteBelt(player).ifPresent(belt -> {
-                ToolbeltStorage storage = ToolbeltStorage.get(player.server);
+            Holder<Enchantment> holder = player.level()
+                    .registryAccess()
+                    .lookupOrThrow(Registries.ENCHANTMENT)
+                    .getOrThrow(STResourceKeys.Enchantments.HANDY);
+            STUtils.findAnyBeltWithCondition(player, stack -> stack.getEnchantmentLevel(holder) > 0)
+                    .ifPresent(belt -> {
+                        ToolbeltStorage storage = ToolbeltStorage.get(player.server);
 
-                UUID beltId = storage.ensureId(player, belt);
-                ToolbeltContents stored = storage.resolve(player, beltId, belt);
-                for (int i = 0; i < stored.totalSize(); i++) {
-                    if (isSuitableTool(player, stored.getCurrent(i), state, event.getLevel(), event.getPos(), bare)) {
-                        ToolbeltItem.applySelection(
-                                player,
-                                beltId,
-                                i,
-                                Component.translatable(
-                                        Const.LangKey.Item.AUTO_SWITCH_FAILED,
-                                        Component.translatable(Const.LangKey.Item.INVENTORY_FULL)));
-                        return;
-                    }
-                }
-            });
+                        UUID beltId = storage.ensureId(player, belt);
+                        ToolbeltContents stored = storage.resolve(player, beltId, belt);
+                        for (int i = 0; i < stored.totalSize(); i++) {
+                            if (isSuitableTool(
+                                    player, stored.getCurrent(i), state, event.getLevel(), event.getPos(), bare)) {
+                                ToolbeltItem.applySelection(
+                                        player,
+                                        beltId,
+                                        i,
+                                        Component.translatable(
+                                                Const.LangKey.Item.AUTO_SWITCH_FAILED,
+                                                Component.translatable(Const.LangKey.Item.INVENTORY_FULL)));
+                                return;
+                            }
+                        }
+                    });
         }
     }
 

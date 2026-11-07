@@ -24,7 +24,7 @@ public record RequestBeltContentsPayload(UUID id) implements CustomPacketPayload
     public static void requestBeltContent(RequestBeltContentsPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
             if (context.player() instanceof ServerPlayer serverPlayer) {
-                ToolbeltStorage.findBelt(serverPlayer, payload.id())
+                STUtils.findBelt(serverPlayer, payload.id())
                         .ifPresent(stack -> PacketDistributor.sendToPlayer(
                                 serverPlayer,
                                 new SyncBeltContentsPayload(

@@ -2,6 +2,7 @@
   "commands.simpletoolbelt.list.failed.notfound": "Belt not found",
   "commands.simpletoolbelt.list.success.printall": "UUID stored in storage: %s",
   "commands.simpletoolbelt.restore.success.restored": "Restored the belt with the following UUID: %s",
+  "enchantment.simpletoolbelt.handy": "Handy",
   "gui.simpletoolbelt.keymap.hint": "Key settings are independent for each belt, but you cannot assign the same key to slots on multiple belts.",
   "gui.simpletoolbelt.keymap.open": "Hotkeys",
   "gui.simpletoolbelt.keymap.title": "Hotkey Assignment",

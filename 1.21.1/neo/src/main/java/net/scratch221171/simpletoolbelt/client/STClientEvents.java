@@ -28,7 +28,6 @@ import net.scratch221171.simpletoolbelt.common.STUtils;
 import net.scratch221171.simpletoolbelt.common.item.ToolbeltItem;
 import net.scratch221171.simpletoolbelt.common.network.ToggleAutoSwitchPayload;
 import net.scratch221171.simpletoolbelt.common.registry.STDataComponents;
-import net.scratch221171.simpletoolbelt.common.storage.ToolbeltStorage;
 import net.scratch221171.simpletoolbelt.config.ClientConfig;
 import net.scratch221171.simpletoolbelt.config.ServerConfig;
 import net.scratch221171.simpletoolbelt.config.VersionedClientConfig;
@@ -43,7 +42,7 @@ public class STClientEvents {
         if (mc.screen == null && mc.player != null) {
             if (STKeyMappings.OPEN_RADIAL_MENU.consumeClick()) {
                 if (allows(mc.player.getMainHandItem())) {
-                    ToolbeltStorage.findAnyBelt(mc.player)
+                    STUtils.findAnyBelt(mc.player)
                             .map(belt -> belt.get(STDataComponents.BELT_ID))
                             .ifPresent(id -> mc.setScreen(new ToolbeltRadialMenuScreen(id)));
                 }

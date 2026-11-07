@@ -27,6 +27,7 @@ import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.neoforged.neoforge.items.wrapper.PlayerMainInvWrapper;
 import net.scratch221171.simpletoolbelt.Const;
 import net.scratch221171.simpletoolbelt.client.ClientBeltActions;
+import net.scratch221171.simpletoolbelt.common.STUtils;
 import net.scratch221171.simpletoolbelt.common.menu.ToolbeltMenu;
 import net.scratch221171.simpletoolbelt.common.network.SelectBeltSlotPayload;
 import net.scratch221171.simpletoolbelt.common.registry.STDataComponents;
@@ -144,7 +145,7 @@ public class ToolbeltItem extends Item {
     }
 
     public static void applySelection(ServerPlayer player, UUID beltId, int requestedSlot, Component failed) {
-        ToolbeltStorage.findBelt(player, beltId).ifPresent(belt -> {
+        STUtils.findBelt(player, beltId).ifPresent(belt -> {
             ToolbeltContents stored = ToolbeltStorage.get(player.server).resolve(player, beltId, belt);
 
             if (requestedSlot == SelectBeltSlotPayload.STOW_INDEX) {
@@ -162,11 +163,9 @@ public class ToolbeltItem extends Item {
                     stored = findAndStow(player, stored, requestedSlot);
                     player.playNotifySound(SoundEvents.BUNDLE_INSERT, SoundSource.PLAYERS, 1, 1);
                 } else {
-
                     if (requestedStack.getItem() instanceof MenuOpenerItem) {
                         MenuOpenerItem.use((ServerLevel) player.level(), player, requestedStack);
                     } else {
-
                         SyncedClientSettings.ForcedHotbarSlotSettings.get(player)
                                 .apply(player);
                         ItemStack mainHandStack = player.getMainHandItem();
@@ -196,7 +195,7 @@ public class ToolbeltItem extends Item {
                             }
                         }
                         player.setItemInHand(InteractionHand.MAIN_HAND, requestedStack.copy());
-                        player.playNotifySound(SoundEvents.ARMOR_EQUIP_GENERIC.value(), SoundSource.PLAYERS, 1, 1);
+                        player.playNotifySound(SoundEvents.BUNDLE_REMOVE_ONE, SoundSource.PLAYERS, 1, 1);
                         stored = stored.withCurrent(requestedSlot, ItemStack.EMPTY);
                     }
                 }

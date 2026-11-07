@@ -2,6 +2,7 @@
   "commands.simpletoolbelt.list.failed.notfound": "ベルトが見つかりません",
   "commands.simpletoolbelt.list.success.printall": "以下のUUIDが保存されています: %s",
   "commands.simpletoolbelt.restore.success.restored": "以下のUUIDのベルトを復元しました: %s",
+  "enchantment.simpletoolbelt.handy": "手際",
   "gui.simpletoolbelt.keymap.hint": "キー設定はベルトごとに独立していますが、同じキーを複数のベルトのスロットに割り当てることはできません。",
   "gui.simpletoolbelt.keymap.open": "ホットキー",
   "gui.simpletoolbelt.keymap.title": "ホットキーの割り当て",

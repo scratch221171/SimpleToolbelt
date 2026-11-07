@@ -5,11 +5,13 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.scratch221171.simpletoolbelt.Const;
+import net.scratch221171.simpletoolbelt.datagen.boostrap.STBootStrap;
 import net.scratch221171.simpletoolbelt.datagen.compat.curios.STCuriosDatagenCompat;
 import net.scratch221171.simpletoolbelt.datagen.lang.STEnglishLangProvider;
 import net.scratch221171.simpletoolbelt.datagen.lang.STJapaneseLangProvider;
 import net.scratch221171.simpletoolbelt.datagen.model.STItemModelProvider;
 import net.scratch221171.simpletoolbelt.datagen.recipe.STRecipeProvider;
+import net.scratch221171.simpletoolbelt.datagen.tag.STEnchantmentTagsProvider;
 import net.scratch221171.simpletoolbelt.datagen.tag.STItemTagsProvider;
 
 @EventBusSubscriber(modid = Const.MOD_ID)
@@ -19,8 +21,11 @@ public class STDataGenerators {
         Const.LOGGER.info("Loading DataGenerators");
         ExistingFileHelper fileHelper = event.getExistingFileHelper();
 
+        event.createDatapackRegistryObjects(STBootStrap.getRegistrySetBuilder());
         event.createProvider(STRecipeProvider::new);
         event.createProvider((output, lookupProvider) -> new STItemTagsProvider(output, lookupProvider, fileHelper));
+        event.createProvider(
+                (output, lookupProvider) -> new STEnchantmentTagsProvider(output, lookupProvider, fileHelper));
         STCuriosDatagenCompat.register(event);
         event.createProvider(output -> new STItemModelProvider(output, fileHelper));
         event.createProvider(STEnglishLangProvider::new);

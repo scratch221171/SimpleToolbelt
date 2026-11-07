@@ -8,8 +8,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.scratch221171.simpletoolbelt.Const;
 
-public final class STUtils {
-    private STUtils() {}
+public class STCommonUtils {
 
     public static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath(Const.MOD_ID, path);
