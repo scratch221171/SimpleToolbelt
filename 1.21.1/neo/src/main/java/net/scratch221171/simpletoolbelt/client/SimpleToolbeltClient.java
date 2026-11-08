@@ -61,8 +61,8 @@ public class SimpleToolbeltClient {
         });
         mc.execute(() -> {
             if (mc.getConnection() == null) return;
-            PacketDistributor.sendToServer(
-                    new ForcedHotbarSlotSettingsPayload(ClientConfig.Behaviour.FORCED_HOTBAR_SLOT.getAsInt()));
+            PacketDistributor.sendToServer(new ForcedHotbarSlotSettingsPayload(
+                    ClientConfig.Behaviour.RadialMenu.FORCED_HOTBAR_SLOT.getAsInt()));
         });
     }
 }

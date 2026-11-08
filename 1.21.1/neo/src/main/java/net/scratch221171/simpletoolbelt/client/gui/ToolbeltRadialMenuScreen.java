@@ -54,9 +54,8 @@ public class ToolbeltRadialMenuScreen extends Screen {
     public ToolbeltRadialMenuScreen(UUID uuid) {
         super(Component.translatable(Const.LangKey.Screen.RADIAL_MENU_SCREEN_TITLE));
         this.beltId = uuid;
-        this.pageIndex = ClientConfig.Appearance.Screen.ToolbeltRadialMenu.REMEMBER_PAGE.getAsBoolean()
-                ? LAST_PAGE.getOrDefault(uuid, 0)
-                : 0;
+        this.pageIndex =
+                ClientConfig.Behaviour.RadialMenu.REMEMBER_PAGE.getAsBoolean() ? LAST_PAGE.getOrDefault(uuid, 0) : 0;
         this.wheelRadius = (float) ClientConfig.Appearance.Screen.ToolbeltRadialMenu.WHEEL_RADIUS.getAsDouble();
         this.innerDeadzoneRadius =
                 (float) ClientConfig.Appearance.Screen.ToolbeltRadialMenu.INNER_DEADZONE_RADIUS.getAsDouble();
@@ -71,7 +70,7 @@ public class ToolbeltRadialMenuScreen extends Screen {
 
     @Override
     public boolean isPauseScreen() {
-        return ClientConfig.Appearance.Screen.ToolbeltRadialMenu.PAUSE_GAME.getAsBoolean();
+        return ClientConfig.Behaviour.RadialMenu.PAUSE_GAME.getAsBoolean();
     }
 
     @Override

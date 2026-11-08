@@ -40,6 +40,9 @@ import org.jspecify.annotations.NonNull;
 
 public class ToolbeltItem extends Item {
 
+    private static final int NORMAL_BELT_PAGE_SIZE = 4;
+    private static final int NETHERITE_BELT_PAGE_SIZE = 8;
+
     public ToolbeltItem(Properties properties) {
         super(properties.stacksTo(1));
     }
@@ -149,8 +152,8 @@ public class ToolbeltItem extends Item {
     }
 
     public static int getPageSize(ItemStack stack) {
-        if (stack.is(STItems.TOOLBELT)) return 4;
-        if (stack.is(STItems.NETHERITE_TOOLBELT)) return 8;
+        if (stack.is(STItems.TOOLBELT)) return NORMAL_BELT_PAGE_SIZE;
+        if (stack.is(STItems.NETHERITE_TOOLBELT)) return NETHERITE_BELT_PAGE_SIZE;
         throw new IllegalArgumentException("Invalid belt stack!");
     }
 

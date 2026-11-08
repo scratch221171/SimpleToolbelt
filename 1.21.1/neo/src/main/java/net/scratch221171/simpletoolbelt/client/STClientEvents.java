@@ -56,8 +56,10 @@ public class STClientEvents {
     }
 
     private static boolean allows(ItemStack held) {
-        if (held.isEmpty()) return ClientConfig.Behaviour.RadialMenuOpenCondition.ALLOW_EMPTY_HAND.getAsBoolean();
-        List<String> entries = VersionedClientConfig.Behaviour.RadialMenuOpenCondition.HELD_ITEM_WHITELIST.get();
+        if (held.isEmpty())
+            return ClientConfig.Behaviour.RadialMenu.RadialMenuOpenCondition.ALLOW_EMPTY_HAND.getAsBoolean();
+        List<String> entries =
+                VersionedClientConfig.Behaviour.RadialMenu.RadialMenuOpenCondition.HELD_ITEM_WHITELIST.get();
         if (entries.isEmpty()) {
             return true;
         } else {

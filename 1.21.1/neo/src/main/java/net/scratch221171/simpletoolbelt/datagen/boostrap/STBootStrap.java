@@ -21,7 +21,9 @@ public class STBootStrap {
                         STResourceKeys.Enchantments.HANDY,
                         Enchantment.enchantment(new Enchantment.EnchantmentDefinition(
                                         bootstrap.lookup(Registries.ITEM).getOrThrow(STTags.Items.TOOLBELT),
-                                        Optional.of(bootstrap.lookup(Registries.ITEM).getOrThrow(STTags.Items.TOOLBELT)),
+                                        Optional.of(bootstrap
+                                                .lookup(Registries.ITEM)
+                                                .getOrThrow(STTags.Items.TOOLBELT)),
                                         30,
                                         1,
                                         new Enchantment.Cost(10, 0),
