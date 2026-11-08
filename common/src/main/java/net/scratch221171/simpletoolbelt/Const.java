@@ -48,6 +48,7 @@ public final class Const {
 
         public static final class Recipe {
             public static final String TOOLBELT_PAGE_UPGRADE = "toolbelt_page_upgrade";
+            public static final String NETHERITE_TOOLBELT_CLONE = "netherite_toolbelt_clone";
         }
 
         public static final class Attachment {

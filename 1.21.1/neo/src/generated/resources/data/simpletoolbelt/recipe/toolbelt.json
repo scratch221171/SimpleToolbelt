@@ -6,7 +6,7 @@
       "item": "minecraft:leather"
     },
     ",": {
-      "item": "minecraft:gold_nugget"
+      "tag": "c:nuggets/gold"
     }
   },
   "pattern": [

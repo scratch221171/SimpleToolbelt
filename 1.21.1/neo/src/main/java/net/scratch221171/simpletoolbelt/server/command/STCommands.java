@@ -71,7 +71,8 @@ public class STCommands {
                     (BoolArgumentType.getBool(ctx, "is_netherite") ? STItems.NETHERITE_TOOLBELT : STItems.TOOLBELT)
                             .get());
             stack.set(STDataComponents.BELT_ID.get(), id);
-            stack.set(STDataComponents.EXTRA_PAGES, (contents.totalSize() / ToolbeltItem.getPageSize(stack)) - 1);
+            int extra = (contents.totalSize() / ToolbeltItem.getPageSize(stack)) - 1;
+            if (extra > 0) stack.set(STDataComponents.EXTRA_PAGES, extra);
             boolean added = player.getInventory().add(stack);
             if (!added) {
                 player.drop(stack, false);

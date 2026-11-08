@@ -18,6 +18,7 @@ import net.scratch221171.simpletoolbelt.common.item.ToolbeltItem;
 import net.scratch221171.simpletoolbelt.common.menu.ToolbeltMenu;
 import net.scratch221171.simpletoolbelt.common.network.SyncBeltContentsPayload;
 import net.scratch221171.simpletoolbelt.common.registry.STDataComponents;
+import net.scratch221171.simpletoolbelt.config.ServerConfig;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -71,6 +72,10 @@ public class ToolbeltStorage extends SavedData {
         int requiredSize = ToolbeltItem.getRequiredSize(stack);
         ToolbeltContents before = belts.get(id);
         ToolbeltContents updated = getOrInit(id, requiredSize);
+        int extra = Math.min(
+                (updated.totalSize() / ToolbeltItem.getPageSize(stack)) - 1,
+                ServerConfig.Item.MAX_EXTRA_PAGES.getAsInt());
+        if (extra > 0) stack.set(STDataComponents.EXTRA_PAGES, extra);
         if (updated != before) {
             PacketDistributor.sendToPlayer(player, new SyncBeltContentsPayload(id, updated));
         }

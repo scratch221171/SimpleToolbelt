@@ -10,6 +10,7 @@ import net.neoforged.neoforge.common.Tags;
 import net.scratch221171.simpletoolbelt.Const;
 import net.scratch221171.simpletoolbelt.common.STTags;
 import net.scratch221171.simpletoolbelt.common.STUtils;
+import net.scratch221171.simpletoolbelt.common.recipe.NetheriteToolbeltCloneRecipe;
 import net.scratch221171.simpletoolbelt.common.registry.STItems;
 import org.jspecify.annotations.NonNull;
 
@@ -23,7 +24,7 @@ public class STRecipeProvider extends RecipeProvider {
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, STItems.TOOLBELT)
                 .pattern("#,#")
                 .define('#', Items.LEATHER)
-                .define(',', Items.GOLD_NUGGET)
+                .define(',', Tags.Items.NUGGETS_GOLD)
                 .unlockedBy("has_leather", has(Items.LEATHER))
                 .save(output);
 
@@ -39,9 +40,9 @@ public class STRecipeProvider extends RecipeProvider {
         ToolbeltPageUpgradeRecipeBuilder.upgrade(
                         Ingredient.of(Items.LEATHER),
                         Ingredient.of(STTags.Items.TOOLBELT),
-                        Ingredient.of(Items.IRON_NUGGET))
+                        Ingredient.of(Tags.Items.NUGGETS_IRON))
                 .unlockedBy("has_toolbelt", has(STTags.Items.TOOLBELT))
-                .save(output, STUtils.id("toolbelt_page_upgrade"));
+                .save(output, STUtils.id(Const.ID.Recipe.TOOLBELT_PAGE_UPGRADE));
 
         ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, STItems.MENU_OPENER)
                 .requires(Tags.Items.STRINGS)
@@ -49,5 +50,8 @@ public class STRecipeProvider extends RecipeProvider {
                 .requires(Items.SPYGLASS)
                 .unlockedBy("has_toolbelt", has(STTags.Items.TOOLBELT))
                 .save(output);
+
+        SpecialRecipeBuilder.special(NetheriteToolbeltCloneRecipe::new)
+                .save(output, STUtils.id(Const.ID.Recipe.NETHERITE_TOOLBELT_CLONE));
     }
 }

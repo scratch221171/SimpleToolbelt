@@ -126,6 +126,16 @@ public class ToolbeltItem extends Item {
         return true;
     }
 
+    @Override
+    public boolean hasCraftingRemainingItem(@NonNull ItemStack stack) {
+        return this == STItems.NETHERITE_TOOLBELT.get();
+    }
+
+    @Override
+    public @NonNull ItemStack getCraftingRemainingItem(ItemStack stack) {
+        return stack.copyWithCount(1);
+    }
+
     public static void openMenuNextTick(ServerPlayer player, ItemStack beltStack) {
         UUID id = ToolbeltStorage.get(player.server).ensureId(player, beltStack);
         player.server.tell(new TickTask(player.server.getTickCount(), () -> openMenu(player, id, beltStack)));
