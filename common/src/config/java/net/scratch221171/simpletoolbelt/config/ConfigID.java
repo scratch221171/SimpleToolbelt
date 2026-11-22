@@ -13,6 +13,12 @@ public class ConfigID {
         public static final String APPEARANCE = "appearance";
         public static final String BEHAVIOR = "behavior";
         public static final String SCREEN = "screen";
+        public static final String HUD = "hud";
+        public static final String ENABLED = "enabled";
+        public static final String X_OFFSET = "x_offset";
+        public static final String Y_OFFSET = "y_offset";
+        public static final String DAMPING_RATIO = "damping_ratio";
+        public static final String LENGTH = "length";
         public static final String RADIAL_MENU = "radial_menu";
         public static final String PAUSE_GAME = "pause_game";
         public static final String REMEMBER_PAGE = "remember_page";

@@ -15,10 +15,7 @@ public final class GhostItemRenderer {
 
     public static void render(GuiGraphics g, ItemStack stack, int x, int y, boolean isGui) {
         g.renderItem(stack, x, y);
-        g.pose().pushPose();
-        g.pose().translate(0f, 0f, 200f);
-        //        g.drawString(font, "0", x + 17 - font.width("0"), y + 9, 16777215, true);
-        g.pose().popPose();
+        g.flush();
 
         g.pose().pushPose();
         RenderSystem.enableBlend();

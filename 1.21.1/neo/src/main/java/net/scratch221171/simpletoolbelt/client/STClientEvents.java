@@ -22,6 +22,7 @@ import net.neoforged.neoforge.client.event.RenderTooltipEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.scratch221171.simpletoolbelt.Const;
 import net.scratch221171.simpletoolbelt.client.gui.ToolbeltRadialMenuScreen;
+import net.scratch221171.simpletoolbelt.client.hud.ToolbeltUsageHistory;
 import net.scratch221171.simpletoolbelt.client.network.ClientBeltCache;
 import net.scratch221171.simpletoolbelt.client.tooltip.ToolbeltTooltip;
 import net.scratch221171.simpletoolbelt.common.STUtils;
@@ -98,6 +99,7 @@ public class STClientEvents {
     @SubscribeEvent
     public static void clearCache(ClientPlayerNetworkEvent.LoggingOut event) {
         ClientBeltCache.clear();
+        ToolbeltUsageHistory.clear();
     }
 
     @SubscribeEvent

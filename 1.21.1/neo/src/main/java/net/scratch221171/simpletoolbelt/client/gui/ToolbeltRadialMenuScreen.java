@@ -31,14 +31,14 @@ import org.jspecify.annotations.NonNull;
 
 public class ToolbeltRadialMenuScreen extends Screen {
 
-    private static final int ICON_SIZE = 16;
+    public static final int ICON_SIZE = 16;
     private static final int HIGHLIGHT_COLOR = 0x50FFFFFF;
     private static final int SECTOR_SEGMENTS = 12;
     private static final int STOW_SEGMENTS = 48;
 
-    private static final ResourceLocation SELECTED_FRAME_SPRITE = STUtils.id("textures/hud/selected_frame.png");
-    private static final ResourceLocation FRAME_SPRITE = STUtils.id("textures/hud/frame.png");
-    private static final ResourceLocation EMPTY_SPRITE = STUtils.id("textures/hud/empty.png");
+    public static final ResourceLocation SELECTED_FRAME_SPRITE = STUtils.id("textures/hud/selected_frame.png");
+    public static final ResourceLocation FRAME_SPRITE = STUtils.id("textures/hud/frame.png");
+    public static final ResourceLocation EMPTY_SPRITE = STUtils.id("textures/hud/empty.png");
 
     private static final Map<UUID, Integer> LAST_PAGE = new HashMap<>();
 
@@ -320,7 +320,7 @@ public class ToolbeltRadialMenuScreen extends Screen {
         visibleSlots = Arrays.copyOf(buf, n);
     }
 
-    private void renderKeyLabel(GuiGraphics g, Minecraft mc, Component label, int slotX, int slotY) {
+    public static void renderKeyLabel(GuiGraphics g, Minecraft mc, Component label, int slotX, int slotY) {
 
         int width = mc.font.width(label);
         int height = mc.font.lineHeight;
@@ -331,7 +331,7 @@ public class ToolbeltRadialMenuScreen extends Screen {
         TooltipRenderUtil.renderTooltipBackground(
                 g, -width, 0, width, height, 400, 0xF0100010, 0xF0100010, 0x505000FF, 0x5028007f);
         g.pose().translate(0f, 0f, 400f);
-        g.drawString(font, label, -width, 0, 0xFFFFFFFF);
+        g.drawString(mc.font, label, -width, 0, 0xFFFFFFFF);
         g.pose().popPose();
     }
 

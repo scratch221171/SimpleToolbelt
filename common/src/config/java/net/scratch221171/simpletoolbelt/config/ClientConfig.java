@@ -16,6 +16,8 @@ public class ClientConfig {
 
         public static final ConfigEntries SCREEN = BUILDER.category(ConfigID.Client.SCREEN, Screen.ENTRIES);
 
+        public static final ConfigEntries HUD = BUILDER.category(ConfigID.Client.HUD, Hud.ENTRIES);
+
         public static final class Screen {
             private static final ConfigEntryBuilder BUILDER = new ConfigEntryBuilder();
 
@@ -50,6 +52,27 @@ public class ClientConfig {
 
                 public static final ConfigEntries ENTRIES = BUILDER.build();
             }
+
+            public static final ConfigEntries ENTRIES = BUILDER.build();
+        }
+
+        public static final class Hud {
+            private static final ConfigEntryBuilder BUILDER = new ConfigEntryBuilder();
+
+            public static final ConfigEntry.BooleanEntry ENABLED = BUILDER.comment(
+                            "A list of tools recently used that have hotkeys assigned to them.")
+                    .define(ConfigID.Client.ENABLED, true);
+
+            public static final ConfigEntry.IntEntry X_OFFSET = BUILDER.define(ConfigID.Client.X_OFFSET, 0);
+
+            public static final ConfigEntry.IntEntry Y_OFFSET = BUILDER.define(ConfigID.Client.Y_OFFSET, 0);
+
+            public static final ConfigEntry.DoubleEntry DAMPING_RATIO = BUILDER.comment(
+                            "A constant used to sort tools by how recently they were used. The closer the value is to 0, the more weight is given to recent usage.")
+                    .defineInRange(ConfigID.Client.DAMPING_RATIO, 0.97, 0, 1);
+
+            public static final ConfigEntry.IntEntry LENGTH =
+                    BUILDER.defineInRange(ConfigID.Client.LENGTH, 3, 1, Integer.MAX_VALUE);
 
             public static final ConfigEntries ENTRIES = BUILDER.build();
         }

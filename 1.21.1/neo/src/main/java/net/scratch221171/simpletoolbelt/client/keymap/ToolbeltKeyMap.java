@@ -9,10 +9,12 @@ import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import net.minecraft.core.UUIDUtil;
 import net.neoforged.fml.loading.FMLPaths;
 import net.scratch221171.simpletoolbelt.Const;
+import net.scratch221171.simpletoolbelt.client.hud.ToolbeltUsageHistory;
 
 public final class ToolbeltKeyMap {
     public record SlotRef(UUID beltId, int slot) {
@@ -51,6 +53,7 @@ public final class ToolbeltKeyMap {
         BINDINGS.values().removeIf(ref::equals);
         BINDINGS.put(key.getName(), ref);
         save();
+        ToolbeltUsageHistory.refresh();
     }
 
     public static void unbind(UUID beltId, int slot) {
@@ -58,6 +61,7 @@ public final class ToolbeltKeyMap {
         if (BINDINGS.values().removeIf(new SlotRef(beltId, slot)::equals)) {
             save();
         }
+        ToolbeltUsageHistory.refresh();
     }
 
     private static Path path() {
@@ -72,7 +76,14 @@ public final class ToolbeltKeyMap {
         try (Reader r = Files.newBufferedReader(p)) {
             CODEC.parse(JsonOps.INSTANCE, JsonParser.parseReader(r))
                     .resultOrPartial(err -> Const.LOGGER.error("Failed to load keymap: {}", err))
-                    .ifPresent(BINDINGS::putAll);
+                    .ifPresent(m -> m.forEach((name, ref) -> {
+                        try {
+                            InputConstants.getKey(name);
+                            BINDINGS.put(name, ref);
+                        } catch (IllegalArgumentException e) {
+                            Const.LOGGER.warn("Ignoring unknown key in keymap: {}", name);
+                        }
+                    }));
         } catch (IOException | JsonParseException e) {
             Const.LOGGER.error("Failed to read keymap", e);
         }
@@ -81,7 +92,9 @@ public final class ToolbeltKeyMap {
     private static void save() {
         try {
             JsonElement json = CODEC.encodeStart(JsonOps.INSTANCE, BINDINGS).getOrThrow();
-            Files.writeString(path(), GSON.toJson(json));
+            Path tmp = path().resolveSibling(path().getFileName() + ".tmp");
+            Files.writeString(tmp, GSON.toJson(json));
+            Files.move(tmp, path(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
         } catch (IOException e) {
             Const.LOGGER.error("Failed to save keymap", e);
         }

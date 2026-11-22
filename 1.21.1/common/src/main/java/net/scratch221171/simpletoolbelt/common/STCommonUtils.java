@@ -24,4 +24,11 @@ public class STCommonUtils {
         }
         return false;
     }
+
+    public static boolean isSameItem(ItemStack stack1, ItemStack stack2) {
+        return ItemStack.isSameItem(stack1, stack2)
+                && stack1.getDisplayName()
+                        .getString()
+                        .equals(stack2.getDisplayName().getString());
+    }
 }

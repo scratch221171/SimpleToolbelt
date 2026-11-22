@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 import net.minecraft.world.Container;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.scratch221171.simpletoolbelt.common.STUtils;
 import net.scratch221171.simpletoolbelt.common.item.ToolbeltItem;
 import org.jspecify.annotations.NonNull;
 
@@ -22,7 +23,7 @@ public class ToolbeltSlot extends Slot {
         }
         ItemStack init = initial.get();
         if (!init.isEmpty()) {
-            return ItemStack.isSameItem(stack, init);
+            return STUtils.isSameItem(stack, init);
         }
         return true;
     }

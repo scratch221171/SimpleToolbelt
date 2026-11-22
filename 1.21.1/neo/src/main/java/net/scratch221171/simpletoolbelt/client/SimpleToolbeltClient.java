@@ -11,12 +11,15 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
+import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.scratch221171.simpletoolbelt.Const;
 import net.scratch221171.simpletoolbelt.client.gui.ToolbeltScreen;
+import net.scratch221171.simpletoolbelt.client.hud.ToolbeltHudLayer;
 import net.scratch221171.simpletoolbelt.client.mdk.config.KeyedConfigScreen;
 import net.scratch221171.simpletoolbelt.client.tooltip.ClientToolbeltTooltip;
 import net.scratch221171.simpletoolbelt.client.tooltip.ToolbeltTooltip;
@@ -38,6 +41,8 @@ public class SimpleToolbeltClient {
 
         modEventBus.addListener(
                 (RegisterMenuScreensEvent event) -> event.register(STMenus.TOOLBELT.get(), ToolbeltScreen::new));
+        modEventBus.addListener((RegisterGuiLayersEvent event) ->
+                event.registerAbove(VanillaGuiLayers.HOTBAR, ToolbeltHudLayer.ID, new ToolbeltHudLayer()));
         modEventBus.addListener((RegisterClientTooltipComponentFactoriesEvent event) ->
                 event.register(ToolbeltTooltip.class, ClientToolbeltTooltip::new));
         modEventBus.addListener((ModConfigEvent event) -> {

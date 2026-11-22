@@ -196,7 +196,7 @@ public class ToolbeltItem extends Item {
                         if (!mainHandStack.isEmpty()) {
                             int origin = -1;
                             for (int i = 0; i < stored.totalSize(); i++) {
-                                if (ItemStack.isSameItem(stored.getInitial(i), mainHandStack)
+                                if (STUtils.isSameItem(stored.getInitial(i), mainHandStack)
                                         && stored.getCurrent(i).isEmpty()) {
                                     origin = i;
                                     break;
@@ -231,7 +231,7 @@ public class ToolbeltItem extends Item {
 
     private static ToolbeltContents findAndStow(Player player, ToolbeltContents stored, int requestedSlot) {
         for (int i = 0; i < Inventory.INVENTORY_SIZE; i++) {
-            if (ItemStack.isSameItem(
+            if (STUtils.isSameItem(
                     stored.getInitial(requestedSlot), player.getInventory().getItem(i))) {
                 stored = stored.withCurrent(requestedSlot, player.getInventory().getItem(i));
                 player.getInventory().setItem(i, ItemStack.EMPTY);
