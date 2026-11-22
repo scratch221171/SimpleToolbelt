@@ -40,5 +40,9 @@ public class STPayloads {
                 ForcedHotbarSlotSettingsPayload.TYPE,
                 ForcedHotbarSlotSettingsPayload.STREAM_CODEC,
                 ForcedHotbarSlotSettingsPayload::refresh);
+        registrar.playToServer(
+                AlreadyTakenOutSettingsPayload.TYPE,
+                AlreadyTakenOutSettingsPayload.STREAM_CODEC,
+                AlreadyTakenOutSettingsPayload::refresh);
     }
 }

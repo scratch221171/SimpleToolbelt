@@ -36,6 +36,10 @@ public class ClientConfig {
                 public static final ConfigEntry.DoubleEntry OUTER_STOW_ZONE_RADIUS =
                         BUILDER.defineInRange(ConfigID.Client.OUTER_STOW_ZONE_RADIUS, 150, 0, Double.MAX_VALUE);
 
+                public static final ConfigEntry.DoubleEntry MAX_RADIUS_RATIO = BUILDER.comment(
+                                "Clamp the outer radius to (this value) * min(screen width, height). 0 = disabled")
+                        .defineInRange(ConfigID.Client.MAX_RADIUS_RATIO, 0.45, 0, 1);
+
                 public static final ConfigEntry.BooleanEntry ENABLE_HIGHLIGHT = BUILDER.comment(
                                 "Enable highlighting for the selected item.")
                         .define(ConfigID.Client.ENABLE_HIGHLIGHT, true);
@@ -47,8 +51,9 @@ public class ClientConfig {
                 public static final ConfigEntry.BooleanEntry SHOW_KEY_BINDINGS =
                         BUILDER.define(ConfigID.Client.SHOW_KEY_BINDINGS, true);
 
-                public static final ConfigEntry.BooleanEntry SHOW_UNUSED_SLOTS =
-                        BUILDER.define(ConfigID.Client.SHOW_UNUSED_SLOTS, true);
+                public static final ConfigEntry.BooleanEntry HIDE_UNUSED_SLOTS = BUILDER.comment(
+                                "Eliminate the space occupied by empty slots and allocate a larger area to the occupied slots.")
+                        .define(ConfigID.Client.SHOW_UNUSED_SLOTS, false);
 
                 public static final ConfigEntries ENTRIES = BUILDER.build();
             }
@@ -103,8 +108,28 @@ public class ClientConfig {
                             "Moves the selected hotbar slot to the specified position when switching tools. 0 = disabled")
                     .defineInRange(ConfigID.Client.FORCED_HOTBAR_SLOT, 0, 0, 9);
 
+            public static final ConfigEntry.EnumEntry<AlreadyTakenOutMode> ALREADY_TAKEN_OUT = BUILDER.comment(
+                            "What happens when an item in a slot selected via the radial menu or a hotkey has already been extracted.")
+                    .defineEnum(ConfigID.Client.ALREADY_TAKEN_OUT, AlreadyTakenOutMode.FIND_AND_EQUIP);
+
             public static final ConfigEntries RADIAL_MENU_OPEN_CONDITION =
                     BUILDER.category(ConfigID.Client.RADIAL_MENU_OPEN_CONDITION, RadialMenuOpenCondition.ENTRIES);
+
+            public enum AlreadyTakenOutMode {
+                DO_NOTHING(0),
+                FIND_AND_STOW(1),
+                FIND_AND_EQUIP(2);
+
+                private final int id;
+
+                AlreadyTakenOutMode(int id) {
+                    this.id = id;
+                }
+
+                public int getId() {
+                    return id;
+                }
+            }
 
             public static final class RadialMenuOpenCondition {
                 private static final ConfigEntryBuilder BUILDER = new ConfigEntryBuilder();

@@ -181,18 +181,42 @@ public class ToolbeltItem extends Item {
             } else {
                 if (requestedSlot < 0 || requestedSlot >= stored.totalSize()) return;
 
-                ItemStack requestedStack = stored.getCurrent(requestedSlot);
-                if (requestedStack.isEmpty()) {
-                    stored = findAndStow(player, stored, requestedSlot);
-                    player.playNotifySound(SoundEvents.BUNDLE_INSERT, SoundSource.PLAYERS, 1, 1);
+                ItemStack curStack = stored.getCurrent(requestedSlot);
+                ItemStack initStack = stored.getInitial(requestedSlot);
+                ItemStack mainHandStack = player.getMainHandItem();
+
+                if (curStack.isEmpty()) {
+                    if (initStack.isEmpty()) return;
+
+                    switch (SyncedClientSettings.AlreadyTakenOutSettings.get(player)
+                            .getMode()) {
+                        case DO_NOTHING -> {}
+                        case FIND_AND_STOW -> {
+                            stored = findAndStow(player, stored, requestedSlot);
+                            player.playNotifySound(SoundEvents.BUNDLE_INSERT, SoundSource.PLAYERS, 1, 1);
+                        }
+                        case FIND_AND_EQUIP -> {
+                            if (!STUtils.isSameItem(initStack, mainHandStack)) {
+                                for (int i = 0; i < Inventory.INVENTORY_SIZE; i++) {
+                                    ItemStack stack = player.getInventory().getItem(i);
+                                    if (STUtils.isSameItem(initStack, stack)) {
+                                        player.setItemInHand(InteractionHand.MAIN_HAND, stack);
+                                        player.getInventory().setItem(i, ItemStack.EMPTY);
+                                        player.addItem(mainHandStack);
+                                        player.playNotifySound(
+                                                SoundEvents.BUNDLE_REMOVE_ONE, SoundSource.PLAYERS, 1, 1);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 } else {
-                    if (requestedStack.getItem() instanceof MenuOpenerItem) {
-                        MenuOpenerItem.use((ServerLevel) player.level(), player, requestedStack);
+                    if (curStack.getItem() instanceof MenuOpenerItem) {
+                        MenuOpenerItem.use((ServerLevel) player.level(), player, curStack);
                     } else {
                         SyncedClientSettings.ForcedHotbarSlotSettings.get(player)
                                 .apply(player);
-                        ItemStack mainHandStack = player.getMainHandItem();
-
                         if (!mainHandStack.isEmpty()) {
                             int origin = -1;
                             for (int i = 0; i < stored.totalSize(); i++) {
@@ -217,7 +241,7 @@ public class ToolbeltItem extends Item {
                                 ItemHandlerHelper.insertItemStacked(target, moving, false);
                             }
                         }
-                        player.setItemInHand(InteractionHand.MAIN_HAND, requestedStack.copy());
+                        player.setItemInHand(InteractionHand.MAIN_HAND, curStack.copy());
                         player.playNotifySound(SoundEvents.BUNDLE_REMOVE_ONE, SoundSource.PLAYERS, 1, 1);
                         stored = stored.withCurrent(requestedSlot, ItemStack.EMPTY);
                     }

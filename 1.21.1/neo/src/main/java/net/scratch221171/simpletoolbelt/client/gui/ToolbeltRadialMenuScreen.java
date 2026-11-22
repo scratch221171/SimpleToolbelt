@@ -102,7 +102,10 @@ public class ToolbeltRadialMenuScreen extends Screen {
         float dx = mouseX - centerX;
         float dy = mouseY - centerY;
         float distance = (float) Math.sqrt(dx * dx + dy * dy);
-        float stowThreshold = Math.min(outerStowZoneRadius, Math.min(this.width, this.height) * 0.45f);
+        double ratio = ClientConfig.Appearance.Screen.ToolbeltRadialMenu.MAX_RADIUS_RATIO.getAsDouble();
+        float stowThreshold = ratio > 0
+                ? (float) Math.min(outerStowZoneRadius, Math.min(this.width, this.height) * ratio)
+                : outerStowZoneRadius;
 
         boolean stowHover = distance > stowThreshold;
         if (ClientConfig.Appearance.Screen.ToolbeltRadialMenu.ENABLE_HIGHLIGHT.getAsBoolean()) {
@@ -213,11 +216,21 @@ public class ToolbeltRadialMenuScreen extends Screen {
                                     .isEmpty()
                             && !cached.getInitial(pageIndex * pageSize + hoverState.index())
                                     .isEmpty()) {
-                        guiGraphics.renderTooltip(
-                                font,
-                                Component.translatable(Const.LangKey.Screen.RADIAL_MENU_TOOLTIP_STOW),
-                                mouseX,
-                                mouseY);
+                        switch (ClientConfig.Behaviour.RadialMenu.ALREADY_TAKEN_OUT.get()) {
+                            case DO_NOTHING -> {}
+                            case FIND_AND_STOW ->
+                                guiGraphics.renderTooltip(
+                                        font,
+                                        Component.translatable(Const.LangKey.Screen.RADIAL_MENU_TOOLTIP_STOW),
+                                        mouseX,
+                                        mouseY);
+                            case FIND_AND_EQUIP ->
+                                guiGraphics.renderTooltip(
+                                        this.font,
+                                        cached.getInitial(pageIndex * pageSize + hoverState.index()),
+                                        mouseX,
+                                        mouseY);
+                        }
                     }
                 }
             }
@@ -306,7 +319,7 @@ public class ToolbeltRadialMenuScreen extends Screen {
         if (pageIndex >= totalPages) {
             pageIndex = Math.max(0, totalPages - 1);
         }
-        boolean showUnused = ClientConfig.Appearance.Screen.ToolbeltRadialMenu.SHOW_UNUSED_SLOTS.getAsBoolean();
+        boolean showUnused = !ClientConfig.Appearance.Screen.ToolbeltRadialMenu.HIDE_UNUSED_SLOTS.getAsBoolean();
         int[] buf = new int[pageSize];
         int n = 0;
         for (int i = 0; i < pageSize; i++) {

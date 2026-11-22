@@ -25,6 +25,7 @@ import net.scratch221171.simpletoolbelt.client.tooltip.ClientToolbeltTooltip;
 import net.scratch221171.simpletoolbelt.client.tooltip.ToolbeltTooltip;
 import net.scratch221171.simpletoolbelt.common.STUtils;
 import net.scratch221171.simpletoolbelt.common.item.MenuOpenerItem;
+import net.scratch221171.simpletoolbelt.common.network.AlreadyTakenOutSettingsPayload;
 import net.scratch221171.simpletoolbelt.common.network.AutoSwitchSettingsPayload;
 import net.scratch221171.simpletoolbelt.common.network.ForcedHotbarSlotSettingsPayload;
 import net.scratch221171.simpletoolbelt.common.registry.STItems;
@@ -63,11 +64,10 @@ public class SimpleToolbeltClient {
             PacketDistributor.sendToServer(new AutoSwitchSettingsPayload(
                     List.copyOf(VersionedClientConfig.Behaviour.AutoSwitchCondition.HELD_ITEM_WHITELIST.get()),
                     ClientConfig.Behaviour.AutoSwitchCondition.ALLOW_EMPTY_HAND.get()));
-        });
-        mc.execute(() -> {
-            if (mc.getConnection() == null) return;
             PacketDistributor.sendToServer(new ForcedHotbarSlotSettingsPayload(
                     ClientConfig.Behaviour.RadialMenu.FORCED_HOTBAR_SLOT.getAsInt()));
+            PacketDistributor.sendToServer(
+                    new AlreadyTakenOutSettingsPayload(ClientConfig.Behaviour.RadialMenu.ALREADY_TAKEN_OUT.get()));
         });
     }
 }

@@ -1,11 +1,9 @@
 package net.scratch221171.simpletoolbelt.client.hud;
 
 import com.mojang.blaze3d.platform.InputConstants;
-
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
 import net.scratch221171.simpletoolbelt.client.keymap.ToolbeltKeyMap;
 import net.scratch221171.simpletoolbelt.common.network.SelectBeltSlotPayload;
 import net.scratch221171.simpletoolbelt.config.ClientConfig;
@@ -22,7 +20,8 @@ public class ToolbeltUsageHistory {
     public static List<InputConstants.Key> getRecentKeys(int n, Predicate<InputConstants.Key> valid) {
         Set<InputConstants.Key> top = KEYS.entrySet().stream()
                 .filter(e -> valid.test(e.getKey()))
-                .sorted(Map.Entry.<InputConstants.Key, Double>comparingByValue().reversed()
+                .sorted(Map.Entry.<InputConstants.Key, Double>comparingByValue()
+                        .reversed()
                         .thenComparing(e -> e.getKey().getName()))
                 .limit(Math.max(0, n))
                 .map(Map.Entry::getKey)

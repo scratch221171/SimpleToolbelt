@@ -25,6 +25,7 @@ public class ConfigID {
         public static final String WHEEL_RADIUS = "wheel_radius";
         public static final String INNER_DEADZONE_RADIUS = "inner_deadzone_radius";
         public static final String OUTER_STOW_ZONE_RADIUS = "outer_stow_zone_radius";
+        public static final String MAX_RADIUS_RATIO = "max_radius_ratio";
         public static final String ENABLE_BLUR = "enable_blur";
         public static final String ENABLE_HIGHLIGHT = "enable_highlight";
         public static final String SHOW_KEY_BINDINGS = "show_key_bindings";
@@ -34,5 +35,6 @@ public class ConfigID {
         public static final String ALLOW_EMPTY_HAND = "allow_empty_hand";
         public static final String RADIAL_MENU_OPEN_CONDITION = "radial_menu_open_condition";
         public static final String FORCED_HOTBAR_SLOT = "forced_hotbar_slot";
+        public static final String ALREADY_TAKEN_OUT = "already_taken_out";
     }
 }

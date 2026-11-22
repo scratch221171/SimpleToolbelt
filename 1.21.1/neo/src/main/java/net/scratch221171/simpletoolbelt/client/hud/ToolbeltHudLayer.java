@@ -1,6 +1,5 @@
 package net.scratch221171.simpletoolbelt.client.hud;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -32,8 +31,7 @@ public final class ToolbeltHudLayer implements LayeredDraw.Layer {
         if (!ClientConfig.Appearance.Hud.ENABLED.getAsBoolean()) return;
 
         var entries = ToolbeltUsageHistory.getRecentKeys(
-                ClientConfig.Appearance.Hud.LENGTH.getAsInt(),
-                k -> ToolbeltKeyMap.get(k)
+                ClientConfig.Appearance.Hud.LENGTH.getAsInt(), k -> ToolbeltKeyMap.get(k)
                         .filter(r -> r.slot() != SelectBeltSlotPayload.STOW_INDEX)
                         .flatMap(r -> ClientBeltCache.read(r.beltId()))
                         .isPresent());

@@ -44,6 +44,7 @@ public final class Const {
             public static final String TOGGLE_AUTO_SWITCH = "toggle_auto_switch";
             public static final String AUTO_SWITCH_SETTINGS = "auto_switch_settings";
             public static final String FORCED_HOTBAR_SLOT_SETTINGS = "forced_hotbar_slot_settings";
+            public static final String ALREADY_TAKEN_OUT_SETTINGS = "already_taken_out_settings";
         }
 
         public static final class Recipe {
