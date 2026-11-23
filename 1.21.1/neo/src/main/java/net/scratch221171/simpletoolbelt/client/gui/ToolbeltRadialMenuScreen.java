@@ -319,7 +319,7 @@ public class ToolbeltRadialMenuScreen extends Screen {
         if (pageIndex >= totalPages) {
             pageIndex = Math.max(0, totalPages - 1);
         }
-        boolean showUnused = !ClientConfig.Appearance.Screen.ToolbeltRadialMenu.HIDE_UNUSED_SLOTS.getAsBoolean();
+        boolean showUnused = ClientConfig.Appearance.Screen.ToolbeltRadialMenu.SHOW_UNUSED_SLOTS.getAsBoolean();
         int[] buf = new int[pageSize];
         int n = 0;
         for (int i = 0; i < pageSize; i++) {

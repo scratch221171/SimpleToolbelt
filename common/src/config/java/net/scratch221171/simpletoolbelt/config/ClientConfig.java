@@ -51,9 +51,9 @@ public class ClientConfig {
                 public static final ConfigEntry.BooleanEntry SHOW_KEY_BINDINGS =
                         BUILDER.define(ConfigID.Client.SHOW_KEY_BINDINGS, true);
 
-                public static final ConfigEntry.BooleanEntry HIDE_UNUSED_SLOTS = BUILDER.comment(
-                                "Eliminate the space occupied by empty slots and allocate a larger area to the occupied slots.")
-                        .define(ConfigID.Client.SHOW_UNUSED_SLOTS, false);
+                public static final ConfigEntry.BooleanEntry SHOW_UNUSED_SLOTS = BUILDER.comment(
+                                "Disable this to eliminate the space occupied by empty slots and allocate a larger area to the occupied slots.")
+                        .define(ConfigID.Client.SHOW_UNUSED_SLOTS, true);
 
                 public static final ConfigEntries ENTRIES = BUILDER.build();
             }
