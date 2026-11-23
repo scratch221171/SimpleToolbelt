@@ -4,9 +4,11 @@ import java.util.List;
 import java.util.UUID;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -37,6 +39,7 @@ import net.scratch221171.simpletoolbelt.common.storage.ToolbeltContents;
 import net.scratch221171.simpletoolbelt.common.storage.ToolbeltStorage;
 import net.scratch221171.simpletoolbelt.config.ServerConfig;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 public class ToolbeltItem extends Item {
 
@@ -172,80 +175,13 @@ public class ToolbeltItem extends Item {
             ToolbeltContents stored = ToolbeltStorage.get(player.server).resolve(player, beltId, belt);
 
             if (requestedSlot == SelectBeltSlotPayload.STOW_INDEX) {
-                for (int i = 0; i < stored.totalSize(); i++) {
-                    if (!stored.getInitial(i).isEmpty() && stored.getCurrent(i).isEmpty()) {
-                        stored = findAndStow(player, stored, i);
-                        player.playNotifySound(SoundEvents.BUNDLE_INSERT, SoundSource.PLAYERS, 1, 1);
-                    }
-                }
+                stored = stowAll(player, stored);
             } else {
                 if (requestedSlot < 0 || requestedSlot >= stored.totalSize()) return;
 
-                ItemStack curStack = stored.getCurrent(requestedSlot);
-                ItemStack initStack = stored.getInitial(requestedSlot);
-                ItemStack mainHandStack = player.getMainHandItem();
-
-                if (curStack.isEmpty()) {
-                    if (initStack.isEmpty()) return;
-
-                    switch (SyncedClientSettings.AlreadyTakenOutSettings.get(player)
-                            .getMode()) {
-                        case DO_NOTHING -> {}
-                        case FIND_AND_STOW -> {
-                            stored = findAndStow(player, stored, requestedSlot);
-                            player.playNotifySound(SoundEvents.BUNDLE_INSERT, SoundSource.PLAYERS, 1, 1);
-                        }
-                        case FIND_AND_EQUIP -> {
-                            if (!STUtils.isSameItem(initStack, mainHandStack)) {
-                                for (int i = 0; i < Inventory.INVENTORY_SIZE; i++) {
-                                    ItemStack stack = player.getInventory().getItem(i);
-                                    if (STUtils.isSameItem(initStack, stack)) {
-                                        player.setItemInHand(InteractionHand.MAIN_HAND, stack);
-                                        player.getInventory().setItem(i, ItemStack.EMPTY);
-                                        player.addItem(mainHandStack);
-                                        player.playNotifySound(
-                                                SoundEvents.BUNDLE_REMOVE_ONE, SoundSource.PLAYERS, 1, 1);
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    if (curStack.getItem() instanceof MenuOpenerItem) {
-                        MenuOpenerItem.use((ServerLevel) player.level(), player, curStack);
-                    } else {
-                        SyncedClientSettings.ForcedHotbarSlotSettings.get(player)
-                                .apply(player);
-                        if (!mainHandStack.isEmpty()) {
-                            int origin = -1;
-                            for (int i = 0; i < stored.totalSize(); i++) {
-                                if (STUtils.isSameItem(stored.getInitial(i), mainHandStack)
-                                        && stored.getCurrent(i).isEmpty()) {
-                                    origin = i;
-                                    break;
-                                }
-                            }
-                            if (origin >= 0) {
-                                stored = stored.withCurrent(origin, mainHandStack.copy());
-                            } else {
-                                Inventory inv = player.getInventory();
-                                IItemHandler target =
-                                        new ExcludeSlotHandler(new PlayerMainInvWrapper(inv), inv.selected);
-                                ItemStack moving = mainHandStack.copy();
-                                if (!ItemHandlerHelper.insertItemStacked(target, moving, true)
-                                        .isEmpty()) {
-                                    player.displayClientMessage(failed, true);
-                                    return;
-                                }
-                                ItemHandlerHelper.insertItemStacked(target, moving, false);
-                            }
-                        }
-                        player.setItemInHand(InteractionHand.MAIN_HAND, curStack.copy());
-                        player.playNotifySound(SoundEvents.BUNDLE_REMOVE_ONE, SoundSource.PLAYERS, 1, 1);
-                        stored = stored.withCurrent(requestedSlot, ItemStack.EMPTY);
-                    }
-                }
+                ToolbeltContents result = selectSlot(player, stored, requestedSlot, failed);
+                if (result == null) return;
+                stored = result;
             }
 
             ToolbeltStorage.update(player, beltId, stored);
@@ -253,15 +189,143 @@ public class ToolbeltItem extends Item {
         });
     }
 
-    private static ToolbeltContents findAndStow(Player player, ToolbeltContents stored, int requestedSlot) {
-        for (int i = 0; i < Inventory.INVENTORY_SIZE; i++) {
-            if (STUtils.isSameItem(
-                    stored.getInitial(requestedSlot), player.getInventory().getItem(i))) {
-                stored = stored.withCurrent(requestedSlot, player.getInventory().getItem(i));
-                player.getInventory().setItem(i, ItemStack.EMPTY);
-                break;
+    /** 「取り出し済みだが戻していない」スロットを全てインベントリから回収する */
+    private static ToolbeltContents stowAll(ServerPlayer player, ToolbeltContents stored) {
+        boolean stowedAny = false;
+        for (int i = 0; i < stored.totalSize(); i++) {
+            if (!stored.getInitial(i).isEmpty() && stored.getCurrent(i).isEmpty()) {
+                stored = findAndStow(player, stored, i);
+                if (!stored.getCurrent(i).isEmpty()) stowedAny = true;
             }
         }
+        if (stowedAny) playSound(player, SoundEvents.BUNDLE_INSERT);
+
         return stored;
+    }
+
+    /** 通常のスロット選択 */
+    @Nullable private static ToolbeltContents selectSlot(
+            ServerPlayer player, ToolbeltContents stored, int slot, Component failed) {
+        ItemStack current = stored.getCurrent(slot);
+        if (!current.isEmpty()) {
+            return takeOut(player, stored, slot, current, failed);
+        }
+
+        ItemStack initial = stored.getInitial(slot);
+        if (initial.isEmpty()) return null;
+
+        return switch (SyncedClientSettings.AlreadyTakenOutSettings.get(player).getMode()) {
+            case DO_NOTHING -> stored;
+            case FIND_AND_STOW -> {
+                stored = findAndStow(player, stored, slot);
+                playSound(player, SoundEvents.BUNDLE_INSERT);
+                yield stored;
+            }
+            case FIND_AND_EQUIP -> findAndEquip(player, stored, initial, failed);
+        };
+    }
+
+    /** 取り出し */
+    @Nullable private static ToolbeltContents takeOut(
+            ServerPlayer player, ToolbeltContents stored, int slot, ItemStack current, Component failed) {
+        if (current.getItem() instanceof MenuOpenerItem) {
+            MenuOpenerItem.use((ServerLevel) player.level(), player, current);
+            return stored;
+        }
+
+        int originalSelected = player.getInventory().selected;
+        applyForcedHotbarSlot(player);
+
+        ToolbeltContents next = stashMainHand(player, stored);
+        if (next == null) {
+            player.getInventory().selected = originalSelected;
+            player.connection.send(new ClientboundSetCarriedItemPacket(originalSelected));
+            player.displayClientMessage(failed, true);
+            return null;
+        }
+
+        player.setItemInHand(InteractionHand.MAIN_HAND, current.copy());
+        playSound(player, SoundEvents.BUNDLE_REMOVE_ONE);
+        return next.withCurrent(slot, ItemStack.EMPTY);
+    }
+
+    @Nullable private static ToolbeltContents findAndEquip(
+            ServerPlayer player, ToolbeltContents stored, ItemStack initial, Component failed) {
+        // すでに持っているなら何もしない
+        if (STUtils.isSameItem(initial, player.getMainHandItem())) return stored;
+
+        Inventory inv = player.getInventory();
+        int found = findInInventory(inv, initial);
+        if (found < 0) return stored;
+
+        // メインハンドが変わる
+        applyForcedHotbarSlot(player);
+
+        // 移動先に既に目的のアイテムがあるなら完了
+        if (STUtils.isSameItem(initial, player.getMainHandItem())) return stored;
+
+        ItemStack foundStack = inv.getItem(found);
+        inv.setItem(found, ItemStack.EMPTY);
+
+        ToolbeltContents next = stashMainHand(player, stored);
+        // 理論上は起きないが念のため
+        if (next == null) {
+            inv.setItem(found, foundStack);
+            player.displayClientMessage(failed, true);
+            return null;
+        }
+
+        player.setItemInHand(InteractionHand.MAIN_HAND, foundStack);
+        playSound(player, SoundEvents.BUNDLE_REMOVE_ONE);
+        return next;
+    }
+
+    /**
+     * メインハンドを退避する
+     * ベルトに該当するinitialがあれば戻し、なければインベントリへ挿入
+     * 挿入に失敗するとnull
+     */
+    @Nullable private static ToolbeltContents stashMainHand(ServerPlayer player, ToolbeltContents stored) {
+        ItemStack hand = player.getMainHandItem();
+        if (hand.isEmpty()) return stored;
+
+        for (int i = 0; i < stored.totalSize(); i++) {
+            if (STUtils.isSameItem(stored.getInitial(i), hand)
+                    && stored.getCurrent(i).isEmpty()) {
+                return stored.withCurrent(i, hand.copy());
+            }
+        }
+
+        Inventory inv = player.getInventory();
+        IItemHandler target = new ExcludeSlotHandler(new PlayerMainInvWrapper(inv), inv.selected);
+        ItemStack moving = hand.copy();
+        if (!ItemHandlerHelper.insertItemStacked(target, moving, true).isEmpty()) return null;
+        ItemHandlerHelper.insertItemStacked(target, moving, false);
+        return stored;
+    }
+
+    private static ToolbeltContents findAndStow(Player player, ToolbeltContents stored, int slot) {
+        Inventory inv = player.getInventory();
+        int found = findInInventory(inv, stored.getInitial(slot));
+        if (found < 0) return stored;
+
+        ToolbeltContents next = stored.withCurrent(slot, inv.getItem(found));
+        inv.setItem(found, ItemStack.EMPTY);
+        return next;
+    }
+
+    private static int findInInventory(Inventory inv, ItemStack target) {
+        for (int i = 0; i < Inventory.INVENTORY_SIZE; i++) {
+            if (STUtils.isSameItem(target, inv.getItem(i))) return i;
+        }
+        return -1;
+    }
+
+    private static void applyForcedHotbarSlot(ServerPlayer player) {
+        SyncedClientSettings.ForcedHotbarSlotSettings.get(player).apply(player);
+    }
+
+    private static void playSound(ServerPlayer player, SoundEvent sound) {
+        player.playNotifySound(sound, SoundSource.PLAYERS, 1, 1);
     }
 }
